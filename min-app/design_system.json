@@ -1,0 +1,184 @@
+{
+    "name": "FU App Design System",
+    "version": "1.1.0",
+    "colors": {
+        "primary": {
+            "default": "#1E3A5F",
+            "dark": "#102A43",
+            "light": "#2C5282"
+        },
+        "accent": "#F59E0B",
+        "neutral": {
+            "background": "#F5F5F5",
+            "surface": "#FFFFFF",
+            "surfaceAlt": "#F8FAFC",
+            "border": "#E5E7EB",
+            "borderLight": "#F1F5F9"
+        },
+        "text": {
+            "primary": "#1E293B",
+            "secondary": "#64748B",
+            "light": "#94A3B8",
+            "inverse": "#FFFFFF"
+        },
+        "semantic": {
+            "error": "#EF4444",
+            "success": "#22C55E",
+            "warning": "#F59E0B",
+            "info": "#3B82F6"
+        }
+    },
+    "typography": {
+        "fontFamily": {
+            "primary": "Cairo",
+            "weights": {
+                "regular": "Cairo_400Regular",
+                "medium": "Cairo_500Medium",
+                "bold": "Cairo_700Bold"
+            },
+            "tailwind": {
+                "regular": "font-cairo",
+                "medium": "font-cairo-medium",
+                "bold": "font-cairo-bold"
+            }
+        },
+        "fontSize": {
+            "xs": {
+                "size": 12,
+                "tailwind": "text-xs"
+            },
+            "sm": {
+                "size": 14,
+                "tailwind": "text-sm"
+            },
+            "base": {
+                "size": 16,
+                "tailwind": "text-base"
+            },
+            "lg": {
+                "size": 18,
+                "tailwind": "text-lg"
+            },
+            "xl": {
+                "size": 20,
+                "tailwind": "text-xl"
+            },
+            "2xl": {
+                "size": 24,
+                "tailwind": "text-2xl"
+            },
+            "3xl": {
+                "size": 30,
+                "tailwind": "text-3xl"
+            }
+        },
+        "textStyles": {
+            "pageTitle": {
+                "size": "text-2xl or text-3xl",
+                "weight": "font-cairo-bold"
+            },
+            "subtitle": {
+                "size": "text-base",
+                "weight": "font-cairo-medium",
+                "color": "text-slate-400"
+            },
+            "input": {
+                "size": "text-lg",
+                "weight": "font-cairo-medium",
+                "textAlign": "text-center"
+            },
+            "button": {
+                "size": "text-base",
+                "weight": "font-cairo-bold"
+            }
+        }
+    },
+    "badges": {
+        "base": "px-3 py-1 rounded-full flex-row items-center gap-1 self-start",
+        "text": "text-xs font-cairo-bold",
+        "variants": {
+            "success": {
+                "background": "bg-green-100",
+                "text": "text-green-700",
+                "icon": "green"
+            },
+            "warning": {
+                "background": "bg-amber-100",
+                "text": "text-amber-700",
+                "icon": "amber"
+            },
+            "info": {
+                "background": "bg-blue-100",
+                "text": "text-blue-700",
+                "icon": "blue"
+            },
+            "neutral": {
+                "background": "bg-slate-100",
+                "text": "text-slate-600",
+                "icon": "slate"
+            }
+        }
+    },
+    "forms": {
+        "input": {
+            "base": "bg-slate-50 border border-slate-100 rounded-2xl px-6 py-4 text-right font-cairo-medium text-slate-800 w-full",
+            "states": {
+                "focus": "border-primary bg-white",
+                "error": "border-red-500 bg-red-50 text-red-700",
+                "disabled": "opacity-50 bg-slate-100"
+            },
+            "otp": {
+                "slot": {
+                    "base": "w-14 h-16 rounded-2xl border-2 items-center justify-center transition-all",
+                    "default": "border-slate-100 bg-slate-50",
+                    "active": "border-primary bg-primary/5 scale-110",
+                    "filled": "border-slate-200 bg-white"
+                },
+                "text": "font-cairo-bold text-2xl text-slate-800"
+            }
+        }
+    },
+    "components": {
+        "cards": {
+            "product": {
+                "container": "bg-white rounded-2xl border border-slate-100 p-3 shadow-sm",
+                "image": "w-full aspect-square rounded-xl bg-slate-50 mb-3",
+                "title": "text-right font-cairo-bold text-slate-800 text-sm mb-1",
+                "price": "text-right font-cairo-bold text-primary text-base"
+            },
+            "order": {
+                "container": "bg-white rounded-2xl border border-slate-100 p-4 mb-3",
+                "header": "flex-row-reverse justify-between items-center mb-3",
+                "id": "text-sm font-cairo-bold text-slate-800",
+                "date": "text-xs font-cairo-medium text-slate-400"
+            }
+        },
+        "auth": {
+            "header": {
+                "container": "items-center mb-12 h-40 justify-end",
+                "iconData": {
+                    "size": 32,
+                    "color": "primary"
+                },
+                "iconContainer": "w-20 h-20 bg-primary/10 rounded-full items-center justify-center mb-6 shadow-sm",
+                "title": "font-cairo-bold text-slate-800 text-2xl mb-2 text-center",
+                "subtitle": "font-cairo-medium text-slate-400 text-base text-center"
+            },
+            "socialButton": {
+                "height": 56,
+                "borderRadius": "rounded-2xl",
+                "iconGap": "gap-3"
+            }
+        },
+        "button": {
+            "primary": "bg-primary w-full py-4 rounded-2xl flex-row items-center justify-center gap-3",
+            "secondary": "bg-white border border-slate-200 w-full py-4 rounded-2xl flex-row items-center justify-center gap-2",
+            "black": "bg-black w-full py-4 rounded-2xl flex-row items-center justify-center gap-2"
+        }
+    },
+    "rtl": {
+        "enabled": true,
+        "flexRow": "flex-row-reverse",
+        "textAlign": "text-right"
+    }
+}
