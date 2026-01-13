@@ -1,5 +1,5 @@
 // File: src/screens/ai/AIResultsScreen.tsx
-// Purpose: AI Results with Photo Background Loading
+// Purpose: Modern and clean AI Results screen matching UI system
 
 import { Feather } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
@@ -24,7 +24,6 @@ const LOADING_TEXTS = [
 ];
 
 const AIResultsScreen = () => {
-    // Get photo from route params (immediate) or storage (fallback)
     const { photo: photoParam } = useLocalSearchParams<{ photo?: string }>();
 
     const [isLoading, setIsLoading] = useState(true);
@@ -34,20 +33,15 @@ const AIResultsScreen = () => {
     const [selectedPin, setSelectedPin] = useState<string | null>(null);
     const [originalPhoto, setOriginalPhoto] = useState<string | undefined>(photoParam);
 
-    // Load photo from storage if not in params
     useEffect(() => {
         if (!originalPhoto) {
             const storedPhoto = getLastAIDesignPhoto();
-            console.log('🖼️ Photo from storage:', storedPhoto);
             if (storedPhoto) {
                 setOriginalPhoto(storedPhoto);
             }
-        } else {
-            console.log('🖼️ Photo from params:', originalPhoto);
         }
     }, []);
 
-    // Animate dots
     useEffect(() => {
         const dotsInterval = setInterval(() => {
             setDots(prev => prev.length >= 3 ? '' : prev + '.');
@@ -55,7 +49,6 @@ const AIResultsScreen = () => {
         return () => clearInterval(dotsInterval);
     }, []);
 
-    // Loading steps
     useEffect(() => {
         const interval = setInterval(() => {
             setLoadingStep(prev => {
@@ -78,13 +71,10 @@ const AIResultsScreen = () => {
         return sum + finalPrice;
     }, 0);
 
-    // Loading Screen with captured photo as background
     if (isLoading) {
         return (
             <View className="flex-1 bg-black">
                 <StatusBar barStyle="light-content" />
-
-                {/* Blurred Background - YOUR CAPTURED PHOTO */}
                 {originalPhoto && (
                     <Image
                         source={{ uri: originalPhoto }}
@@ -94,7 +84,6 @@ const AIResultsScreen = () => {
                     />
                 )}
                 <View className="absolute inset-0 bg-black/60" />
-
                 <SafeAreaView className="flex-1 items-center justify-center">
                     <Text className="text-white text-3xl font-cairo-bold text-center">
                         {LOADING_TEXTS[loadingStep]}{dots}
@@ -106,17 +95,23 @@ const AIResultsScreen = () => {
 
     return (
         <View className="flex-1 bg-white">
-            <StatusBar barStyle="light-content" />
+            <StatusBar barStyle="dark-content" />
 
-            <ScrollView className="flex-1" showsVerticalScrollIndicator={false} bounces={false}>
-                {/* Hero Image with Pins */}
-                <View className="relative h-[450px]">
+            <ScrollView 
+                className="flex-1" 
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={{ paddingBottom: 20 }}
+            >
+                {/* Hero Image */}
+                <View className="relative h-[400px] bg-slate-100">
                     <Image
                         source={{ uri: viewMode === 'after' ? GENERATED_IMAGE : (originalPhoto || GENERATED_IMAGE) }}
                         className="w-full h-full"
                         resizeMode="cover"
                     />
-                    <View className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/20" />
+                    
+                    {/* Simple overlay */}
+                    <View className="absolute inset-0 bg-black/20" />
 
                     {/* Interactive Pins */}
                     {viewMode === 'after' && DETECTED_ITEMS.map((item) => (
@@ -130,23 +125,24 @@ const AIResultsScreen = () => {
                                 transform: [{ translateX: -16 }, { translateY: -16 }]
                             }}
                         >
-                            <View className={`w-8 h-8 rounded-full items-center justify-center border-2 ${selectedPin === item.id
-                                    ? 'bg-primary border-white'
-                                    : 'bg-white/90 border-primary'
-                                }`}>
-                                <View className={`w-3 h-3 rounded-full ${selectedPin === item.id ? 'bg-white' : 'bg-primary'
-                                    }`} />
+                            <View className={`w-8 h-8 rounded-full items-center justify-center ${
+                                selectedPin === item.id
+                                    ? 'bg-primary'
+                                    : 'bg-white'
+                            }`}>
+                                <View className={`w-3 h-3 rounded-full ${
+                                    selectedPin === item.id ? 'bg-white' : 'bg-primary'
+                                }`} />
                             </View>
 
                             {selectedPin === item.id && (
-                                <View className="absolute -top-16 left-1/2 -ml-16 w-32 bg-white rounded-xl p-3 shadow-lg">
+                                <View className="absolute -top-16 left-1/2 -ml-16 w-32 bg-white rounded-2xl p-3">
                                     <Text className="text-xs font-cairo-bold text-slate-800 text-center mb-1">
                                         {item.name}
                                     </Text>
                                     <Text className="text-xs font-cairo-bold text-center" style={{ color: COLORS.primary }}>
                                         {item.price} ر.س
                                     </Text>
-                                    <View className="absolute -bottom-1 left-1/2 -ml-1.5 w-3 h-3 bg-white rotate-45" />
                                 </View>
                             )}
                         </TouchableOpacity>
@@ -157,27 +153,37 @@ const AIResultsScreen = () => {
                         <View className="px-5 py-4 flex-row-reverse justify-between items-center">
                             <TouchableOpacity
                                 onPress={handleClose}
-                                className="w-11 h-11 rounded-full bg-black/40 items-center justify-center"
+                                className="w-12 h-12 rounded-full bg-black/40 items-center justify-center"
+                                activeOpacity={0.8}
                             >
                                 <Feather name="x" size={20} color="white" />
                             </TouchableOpacity>
 
-                            <View className="flex-row bg-black/40 rounded-full p-1">
+                            <View className="flex-row bg-black/40 rounded-2xl p-1">
                                 <TouchableOpacity
                                     onPress={() => setViewMode('before')}
-                                    className={`px-5 py-2 rounded-full ${viewMode === 'before' ? 'bg-white/20' : ''}`}
+                                    className={`px-5 py-2 rounded-2xl ${
+                                        viewMode === 'before' ? 'bg-white/20' : ''
+                                    }`}
+                                    activeOpacity={0.8}
                                 >
-                                    <Text className="text-white text-xs font-cairo-bold">قبل</Text>
+                                    <Text className="text-white text-sm font-cairo-bold">قبل</Text>
                                 </TouchableOpacity>
                                 <TouchableOpacity
                                     onPress={() => setViewMode('after')}
-                                    className={`px-5 py-2 rounded-full ${viewMode === 'after' ? 'bg-primary' : ''}`}
+                                    className={`px-5 py-2 rounded-2xl ${
+                                        viewMode === 'after' ? 'bg-primary' : ''
+                                    }`}
+                                    activeOpacity={0.8}
                                 >
-                                    <Text className="text-white text-xs font-cairo-bold">بعد</Text>
+                                    <Text className="text-white text-sm font-cairo-bold">بعد</Text>
                                 </TouchableOpacity>
                             </View>
 
-                            <TouchableOpacity className="w-11 h-11 rounded-full bg-black/40 items-center justify-center">
+                            <TouchableOpacity 
+                                className="w-12 h-12 rounded-full bg-black/40 items-center justify-center"
+                                activeOpacity={0.8}
+                            >
                                 <Feather name="share" size={18} color="white" />
                             </TouchableOpacity>
                         </View>
@@ -185,56 +191,64 @@ const AIResultsScreen = () => {
                 </View>
 
                 {/* Content */}
-                <View className="-mt-8 bg-white rounded-t-3xl px-5 pt-6 pb-10">
-                    <View className="self-center w-10 h-1 bg-slate-200 rounded-full mb-8" />
-
-                    <Text className="text-xl font-cairo-bold text-slate-800 text-right mb-3">
-                        التصميم الجديد ✨
+                <View className="bg-white px-5 pt-6">
+                    <Text className="text-xl font-cairo-bold text-slate-800 text-right mb-2">
+                        التصميم الجديد
                     </Text>
-                    <Text className="text-sm font-cairo-medium text-slate-500 text-right mb-8">
+                    <Text className="text-sm font-cairo-medium text-slate-500 text-right mb-6">
                         اضغط على النقاط في الصورة لرؤية التفاصيل
                     </Text>
 
                     {/* Products */}
-                    <View className="mb-8">
-                        {DETECTED_ITEMS.map((item, index) => (
-                            <TouchableOpacity
-                                key={item.id}
-                                onPress={() => setSelectedPin(item.id)}
-                                className={`flex-row-reverse items-center bg-slate-50 rounded-2xl p-4 ${index < DETECTED_ITEMS.length - 1 ? 'mb-4' : ''
-                                    } ${selectedPin === item.id ? 'border-2 border-primary' : ''}`}
-                                activeOpacity={0.8}
-                            >
-                                <Image
-                                    source={{ uri: item.image }}
-                                    className="w-20 h-20 rounded-xl bg-slate-200"
-                                    resizeMode="cover"
-                                />
-                                <View className="flex-1 mr-4">
-                                    <Text className="text-base font-cairo-bold text-slate-800 text-right mb-2">
-                                        {item.name}
-                                    </Text>
-                                    <View className="flex-row-reverse items-center gap-3">
-                                        <Text className="text-base font-cairo-bold" style={{ color: COLORS.primary }}>
-                                            {Math.round(item.discount ? item.price * (1 - item.discount / 100) : item.price)} ر.س
+                    <View className="mb-6">
+                        {DETECTED_ITEMS.map((item, index) => {
+                            const finalPrice = item.discount 
+                                ? Math.round(item.price * (1 - item.discount / 100))
+                                : item.price;
+                            
+                            return (
+                                <TouchableOpacity
+                                    key={item.id}
+                                    onPress={() => setSelectedPin(item.id)}
+                                    className={`flex-row-reverse items-center bg-slate-50 rounded-2xl p-4 ${
+                                        index < DETECTED_ITEMS.length - 1 ? 'mb-3' : ''
+                                    }`}
+                                    activeOpacity={0.8}
+                                >
+                                    <Image
+                                        source={{ uri: item.image }}
+                                        className="w-20 h-20 rounded-2xl bg-slate-200"
+                                        resizeMode="cover"
+                                    />
+                                    <View className="flex-1 mr-4">
+                                        <Text className="text-base font-cairo-bold text-slate-800 text-right mb-2">
+                                            {item.name}
                                         </Text>
-                                        {item.discount && (
-                                            <Text className="text-xs font-cairo-medium text-slate-400 line-through">
-                                                {item.price}
+                                        <View className="flex-row-reverse items-center gap-3">
+                                            <Text 
+                                                className="text-base font-cairo-bold"
+                                                style={{ color: COLORS.primary }}
+                                            >
+                                                {finalPrice} ر.س
                                             </Text>
-                                        )}
+                                            {item.discount && (
+                                                <Text className="text-xs font-cairo-medium text-slate-400 line-through">
+                                                    {item.price}
+                                                </Text>
+                                            )}
+                                        </View>
                                     </View>
-                                </View>
-                                <View className="w-10 h-10 rounded-full bg-primary/10 items-center justify-center">
-                                    <Feather name="plus" size={20} color={COLORS.primary} />
-                                </View>
-                            </TouchableOpacity>
-                        ))}
+                                    <View className="w-10 h-10 rounded-full bg-primary/10 items-center justify-center">
+                                        <Feather name="plus" size={20} color={COLORS.primary} />
+                                    </View>
+                                </TouchableOpacity>
+                            );
+                        })}
                     </View>
 
                     {/* Actions */}
                     <TouchableOpacity
-                        className="w-full py-5 rounded-2xl flex-row-reverse justify-center items-center gap-3 bg-primary mb-4"
+                        className="w-full py-4 rounded-2xl flex-row-reverse justify-center items-center gap-3 bg-primary mb-4"
                         activeOpacity={0.8}
                     >
                         <Text className="text-white text-base font-cairo-bold">
@@ -245,7 +259,7 @@ const AIResultsScreen = () => {
 
                     <TouchableOpacity
                         onPress={handleTryAgain}
-                        className="w-full py-5 rounded-2xl flex-row-reverse justify-center items-center gap-3 border border-slate-200"
+                        className="w-full py-4 rounded-2xl flex-row-reverse justify-center items-center gap-3 bg-slate-100"
                         activeOpacity={0.8}
                     >
                         <Text className="text-slate-700 text-base font-cairo-bold">جرب صورة أخرى</Text>

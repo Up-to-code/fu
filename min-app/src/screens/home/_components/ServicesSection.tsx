@@ -1,13 +1,17 @@
 // File: src/screens/home/_components/ServicesSection.tsx
-// Purpose: Services section for home screen - Featured Freelancers & Companies
+// Purpose: Simple and modern services section for home screen using FlashList
 
 import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React from 'react';
-import { Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { Dimensions, Image, Text, TouchableOpacity, View } from 'react-native';
+import { FlashList } from '@shopify/flash-list';
 import { COLORS } from '../../../constants/theme';
 
-// Mock Featured Providers
+const { width } = Dimensions.get('window');
+const isTablet = width >= 768;
+const ESTIMATED_ITEM_SIZE = 96; // w-24 = 96px
+
 const FEATURED_PROVIDERS = [
     {
         id: '1',
@@ -49,6 +53,37 @@ const FEATURED_PROVIDERS = [
 export const ServicesSection = () => {
     const router = useRouter();
 
+    const renderItem = ({ item }: { item: typeof FEATURED_PROVIDERS[0] }) => (
+        <View style={{ marginLeft: 16, transform: [{ scaleX: -1 }] }}>
+            <TouchableOpacity
+                onPress={() => router.push(`/services/${item.id}` as any)}
+                className="items-center w-24"
+                style={{ transform: [{ scaleX: -1 }] }}
+                activeOpacity={0.8}
+            >
+                <View className="relative mb-2">
+                    <View className="w-20 h-20 rounded-full bg-slate-100 overflow-hidden">
+                        <Image
+                            source={{ uri: item.avatar }}
+                            className="w-full h-full"
+                            resizeMode="cover"
+                        />
+                    </View>
+                    <View className="absolute bottom-0 right-0 bg-white rounded-full px-1.5 py-0.5 flex-row items-center">
+                        <Text className="font-cairo-bold text-[10px] text-slate-700 ml-0.5">{item.rating}</Text>
+                        <Feather name="star" size={8} color="#F59E0B" fill="#F59E0B" />
+                    </View>
+                </View>
+                <Text className="font-cairo-bold text-slate-900 text-sm text-center mb-0.5" numberOfLines={1}>
+                    {item.name}
+                </Text>
+                <Text className="font-cairo-medium text-slate-500 text-[10px] text-center" numberOfLines={1}>
+                    {item.category}
+                </Text>
+            </TouchableOpacity>
+        </View>
+    );
+
     return (
         <View className="mb-8">
             <View className="flex-row-reverse items-center justify-between px-5 mb-4">
@@ -57,42 +92,17 @@ export const ServicesSection = () => {
                     <Text className="font-cairo-medium text-primary text-sm">عرض الكل</Text>
                 </TouchableOpacity>
             </View>
-            <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={{ paddingHorizontal: 20, gap: 16 }}
-                style={{ transform: [{ scaleX: -1 }] }}
-            >
-                {FEATURED_PROVIDERS.map((provider) => (
-                    <TouchableOpacity
-                        key={provider.id}
-                        onPress={() => router.push(`/services/${provider.id}` as any)}
-                        className="items-center w-24"
-                        style={{ transform: [{ scaleX: -1 }] }}
-                        activeOpacity={0.8}
-                    >
-                        <View className="relative mb-2">
-                            <View className="w-20 h-20 rounded-full border-2 border-white shadow-sm bg-slate-100 overflow-hidden">
-                                <Image
-                                    source={{ uri: provider.avatar }}
-                                    className="w-full h-full"
-                                    resizeMode="cover"
-                                />
-                            </View>
-                            <View className="absolute bottom-0 right-0 bg-white rounded-full px-1.5 py-0.5 flex-row items-center shadow-sm border border-slate-100">
-                                <Text className="font-cairo-bold text-[10px] text-slate-700 ml-0.5">{provider.rating}</Text>
-                                <Feather name="star" size={8} color="#F59E0B" fill="#F59E0B" />
-                            </View>
-                        </View>
-                        <Text className="font-cairo-bold text-slate-900 text-sm text-center mb-0.5" numberOfLines={1}>
-                            {provider.name}
-                        </Text>
-                        <Text className="font-cairo-medium text-slate-500 text-[10px] text-center" numberOfLines={1}>
-                            {provider.category}
-                        </Text>
-                    </TouchableOpacity>
-                ))}
-            </ScrollView>
+            <View style={{ height: 140, transform: [{ scaleX: -1 }] }}>
+                <FlashList
+                    data={FEATURED_PROVIDERS}
+                    renderItem={renderItem}
+                    keyExtractor={(item) => item.id}
+                    horizontal
+                    estimatedItemSize={ESTIMATED_ITEM_SIZE}
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={{ paddingHorizontal: 20 }}
+                />
+            </View>
         </View>
     );
 };

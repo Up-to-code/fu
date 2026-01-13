@@ -1,12 +1,17 @@
 // File: src/components/home/ProductListSection.tsx
-// Purpose: Simplified product list section using shared components
+// Purpose: Simplified product list section using FlashList for better performance
 
 import { Feather } from '@expo/vector-icons';
 import { Link, useRouter } from 'expo-router';
 import React from 'react';
-import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { Dimensions, Text, TouchableOpacity, View } from 'react-native';
+import { FlashList } from '@shopify/flash-list';
 import { COLORS } from '../../../constants/theme';
 import { Product, ProductCard } from '../../../components/shared';
+
+const { width } = Dimensions.get('window');
+const isTablet = width >= 768;
+const ESTIMATED_ITEM_SIZE = isTablet ? 200 : 170;
 
 interface ProductListSectionProps {
     title: string;
@@ -16,6 +21,16 @@ interface ProductListSectionProps {
 
 export const ProductListSection = ({ title, products, onToggleFavorite }: ProductListSectionProps) => {
     const router = useRouter();
+
+    const renderItem = ({ item }: { item: Product }) => (
+        <View style={{ marginLeft: 12, transform: [{ scaleX: -1 }] }}>
+            <ProductCard
+                product={item}
+                variant="horizontal"
+                onPress={() => router.push(`/product/${item.id}`)}
+            />
+        </View>
+    );
 
     return (
         <View className="mb-6">
@@ -31,22 +46,17 @@ export const ProductListSection = ({ title, products, onToggleFavorite }: Produc
             </View>
 
             {/* Products */}
-            <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={{ paddingHorizontal: 20 }}
-                style={{ transform: [{ scaleX: -1 }] }}
-            >
-                {products.map((product) => (
-                    <View key={product.id} style={{ transform: [{ scaleX: -1 }], marginLeft: 12 }}>
-                        <ProductCard
-                            product={product}
-                            variant="horizontal"
-                            onPress={() => router.push(`/product/${product.id}`)}
-                        />
-                    </View>
-                ))}
-            </ScrollView>
+            <View style={{ height: isTablet ? 280 : 240, transform: [{ scaleX: -1 }] }}>
+                <FlashList
+                    data={products}
+                    renderItem={renderItem}
+                    keyExtractor={(item) => item.id}
+                    horizontal
+                    estimatedItemSize={ESTIMATED_ITEM_SIZE}
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={{ paddingHorizontal: 20 }}
+                />
+            </View>
         </View>
     );
 };

@@ -1,474 +1,188 @@
 // File: src/screens/services/ServiceDetailScreen.tsx
-// Purpose: Freelancer/Company Profile Detail Screen - Modern Clean UI
+// Purpose: Service Provider Detail Screen with modern UI and 8px spacing
 
 import { Feather } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import React, { useState } from 'react';
-import { Dimensions, Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { Dimensions, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { COLORS } from '../../constants/theme';
 
-const { width } = Dimensions.get('window');
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
-interface Review {
-    id: string;
-    userName: string;
-    userAvatar: string;
-    rating: number;
-    date: string;
-    comment: string;
-}
-
-interface ProviderData {
-    name: string;
-    type: 'freelancer' | 'company';
-    category: string;
-    avatar: string;
-    coverImage: string;
-    rating: number;
-    reviews: number;
-    price: string;
-    location: string;
-    verified: boolean;
-    description: string;
-    services: string[];
-    portfolio: string[];
-    responseTime: string;
-    completedProjects: number;
-    yearsExperience: number;
-    languages: string[];
-    availability: 'available' | 'busy' | 'offline';
-    contactMethods: ('whatsapp' | 'phone' | 'chat')[];
-    reviewsList: Review[];
-    ratingBreakdown: { stars: number; count: number }[];
-}
-
-const PROVIDER_DATA: Record<string, ProviderData> = {
-    '1': {
-        name: 'أحمد المصمم',
-        type: 'freelancer',
-        category: 'تصميم داخلي',
-        avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80',
-        coverImage: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&q=80',
-        rating: 4.9,
-        reviews: 127,
-        price: 'من 500 ر.س',
-        location: 'الرياض',
-        verified: true,
-        description: 'مصمم داخلي محترف مع أكثر من 8 سنوات من الخبرة في تصميم الديكورات الداخلية للشقق والمنازل والمكاتب. أقدم حلول تصميمية عصرية وعملية تناسب جميع الأذواق والميزانيات.',
-        services: [
-            'تصميم ديكورات كاملة',
-            'اختيار الألوان والمواد',
-            'رسوم هندسية',
-            'متابعة التنفيذ',
-        ],
-        portfolio: [
-            'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400&q=80',
-            'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=400&q=80',
-            'https://images.unsplash.com/photo-1505693416388-b0346ef38604?w=400&q=80',
-        ],
-        responseTime: 'يرد خلال ساعة',
-        completedProjects: 156,
-        yearsExperience: 8,
-        languages: ['العربية', 'الإنجليزية'],
-        availability: 'available',
-        contactMethods: ['whatsapp', 'phone', 'chat'],
-        ratingBreakdown: [
-            { stars: 5, count: 98 },
-            { stars: 4, count: 20 },
-            { stars: 3, count: 6 },
-            { stars: 2, count: 2 },
-            { stars: 1, count: 1 },
-        ],
-        reviewsList: [
-            {
-                id: '1',
-                userName: 'محمد العتيبي',
-                userAvatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&q=80',
-                rating: 5,
-                date: 'قبل أسبوع',
-                comment: 'تجربة رائعة! التصميم تجاوز توقعاتي. أحمد مصمم محترف ومتعاون جداً.',
-            },
-            {
-                id: '2',
-                userName: 'فاطمة السعيد',
-                userAvatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&q=80',
-                rating: 5,
-                date: 'قبل أسبوعين',
-                comment: 'صمم لي غرفة معيشة أنيقة جداً. التواصل كان سلس والتسليم في الموعد.',
-            },
-            {
-                id: '3',
-                userName: 'خالد الدوسري',
-                userAvatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&q=80',
-                rating: 4,
-                date: 'قبل شهر',
-                comment: 'عمل جيد بشكل عام. بعض التعديلات الصغيرة احتاجت وقت إضافي لكن النتيجة النهائية ممتازة.',
-            },
-        ],
-    },
-    '2': {
-        name: 'شركة التطوير الحديث',
+// Mock provider data (in real app, this would come from API/context)
+const PROVIDERS = [
+    {
+        id: '1',
+        name: 'شركة النظافة المتكاملة',
         type: 'company',
-        category: 'تجديد وتطوير',
-        avatar: 'https://images.unsplash.com/photo-1560179707-f14e90ef3623?w=400&q=80',
-        coverImage: 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=800&q=80',
-        rating: 4.8,
-        reviews: 89,
-        price: 'من 1000 ر.س',
-        location: 'جدة',
+        category: 'التنظيف',
+        categoryId: 'cleaning',
+        avatar: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=200&q=80',
+        rating: 4.9,
+        reviews: 234,
+        price: 150,
+        priceLabel: 'من 150 ر.س',
+        location: 'الرياض',
+        locationId: 'riyadh',
         verified: true,
-        description: 'شركة متخصصة في أعمال التجديد والتطوير للمنازل والمكاتب. نقدم حلول شاملة من التصميم حتى التنفيذ مع ضمان الجودة.',
-        services: [
-            'تجديد المطابخ',
-            'تجديد الحمامات',
-            'أعمال الدهان',
-            'تركيب الأرضيات',
-        ],
-        portfolio: [
-            'https://images.unsplash.com/photo-1497366216548-37526070297c?w=400&q=80',
-            'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&q=80',
-        ],
-        responseTime: 'يرد خلال ساعتين',
-        completedProjects: 230,
-        yearsExperience: 12,
-        languages: ['العربية'],
-        availability: 'busy',
-        contactMethods: ['phone', 'chat'],
-        ratingBreakdown: [
-            { stars: 5, count: 65 },
-            { stars: 4, count: 18 },
-            { stars: 3, count: 4 },
-            { stars: 2, count: 2 },
-            { stars: 1, count: 0 },
-        ],
-        reviewsList: [
-            {
-                id: '1',
-                userName: 'سارة القحطاني',
-                userAvatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&q=80',
-                rating: 5,
-                date: 'قبل 3 أيام',
-                comment: 'جددوا لي المطبخ بالكامل. العمل احترافي والأسعار معقولة.',
-            },
+        description: 'نقدم خدمات تنظيف متكاملة وشاملة لجميع أنواع المساحات. فريق محترف ومجرب مع استخدام أفضل المواد والأدوات. نضمن جودة عالية ونتائج ممتازة.',
+        gallery: [
+            'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=600&q=80',
+            'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80',
+            'https://images.unsplash.com/photo-1628177142898-93e36e4e3a50?w=600&q=80',
         ],
     },
+    {
+        id: '2',
+        name: 'أحمد - مصمم داخلي',
+        type: 'freelancer',
+        category: 'التصميم الداخلي',
+        categoryId: 'interior',
+        avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&q=80',
+        rating: 4.8,
+        reviews: 127,
+        price: 500,
+        priceLabel: 'من 500 ر.س',
+        location: 'الرياض',
+        locationId: 'riyadh',
+        verified: true,
+        description: 'مصمم داخلي محترف بخبرة أكثر من 10 سنوات في تصميم وتنسيق المساحات الداخلية. أقدم حلول تصميم مبتكرة وعملية تناسب احتياجاتك وميزانيتك.',
+        gallery: [
+            'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=600&q=80',
+            'https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=600&q=80',
+            'https://images.unsplash.com/photo-1628177142898-93e36e4e3a50?w=600&q=80',
+        ],
+    },
+    {
+        id: '3',
+        name: 'فريق الصيانة السريع',
+        type: 'company',
+        category: 'الصيانة المنزلية',
+        categoryId: 'handyman',
+        avatar: 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=200&q=80',
+        rating: 4.7,
+        reviews: 189,
+        price: 100,
+        priceLabel: 'من 100 ر.س',
+        location: 'جدة',
+        locationId: 'jeddah',
+        verified: true,
+        description: 'فريق صيانة منزلية سريع وموثوق. نقدم خدمات صيانة شاملة لجميع أعمال السباكة والكهرباء والنجارة. استجابة سريعة وخدمة على مدار الساعة.',
+        gallery: [
+            'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=600&q=80',
+            'https://images.unsplash.com/photo-1504148455328-c376907d081c?w=600&q=80',
+            'https://images.unsplash.com/photo-1628177142898-93e36e4e3a50?w=600&q=80',
+        ],
+    },
+];
+
+type Provider = typeof PROVIDERS[0];
+
+const getProviderById = (id: string): Provider | undefined => {
+    return PROVIDERS.find(p => p.id === id);
 };
 
-const DEFAULT_PROVIDER = PROVIDER_DATA['1'];
-
 export default function ServiceDetailScreen() {
-    const router = useRouter();
     const { id } = useLocalSearchParams<{ id: string }>();
-    const provider = PROVIDER_DATA[id || '1'] || DEFAULT_PROVIDER;
     const [isSaved, setIsSaved] = useState(false);
-    const [showAllReviews, setShowAllReviews] = useState(false);
+
+    const provider = getProviderById(id || '');
+
+    if (!provider) {
+        return (
+            <SafeAreaView style={styles.container} edges={['top']}>
+                <View style={styles.errorContainer}>
+                    <Text style={styles.errorText}>الخدمة غير موجودة</Text>
+                    <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+                        <Text style={styles.backButtonText}>العودة</Text>
+                    </TouchableOpacity>
+                </View>
+            </SafeAreaView>
+        );
+    }
 
     const toggleSave = () => {
-        setIsSaved(prev => !prev);
-    };
-
-    const getAvailabilityLabel = () => {
-        switch (provider.availability) {
-            case 'available': return { label: 'متاح الآن', color: '#10B981' };
-            case 'busy': return { label: 'مشغول حالياً', color: '#F59E0B' };
-            case 'offline': return { label: 'غير متصل', color: '#94a3b8' };
-        }
-    };
-
-    const getContactMethodIcon = (method: string) => {
-        switch (method) {
-            case 'whatsapp': return 'message-circle';
-            case 'phone': return 'phone';
-            case 'chat': return 'message-square';
-            default: return 'mail';
-        }
-    };
-
-    const getContactMethodLabel = (method: string) => {
-        switch (method) {
-            case 'whatsapp': return 'واتساب';
-            case 'phone': return 'اتصال';
-            case 'chat': return 'محادثة';
-            default: return 'تواصل';
-        }
-    };
-
-    const availabilityStatus = getAvailabilityLabel();
-    const totalReviews = provider.ratingBreakdown.reduce((sum, item) => sum + item.count, 0);
-
-    const renderStars = (rating: number) => {
-        return Array(5).fill(0).map((_, i) => (
-            <Feather
-                key={i}
-                name="star"
-                size={12}
-                color={i < rating ? '#F59E0B' : '#e2e8f0'}
-            />
-        ));
+        setIsSaved(!isSaved);
     };
 
     return (
-        <View className="flex-1 bg-white">
-            <ScrollView
-                className="flex-1"
-                contentContainerStyle={{ paddingBottom: 140 }}
-                showsVerticalScrollIndicator={false}
-                bounces={false}
-            >
-                {/* Hero Section */}
-                <View className="relative h-[320px]">
-                    <Image
-                        source={{ uri: provider.coverImage }}
-                        className="w-full h-full"
-                        resizeMode="cover"
-                    />
-                    <LinearGradient
-                        colors={['transparent', 'rgba(0,0,0,0.7)']}
-                        className="absolute inset-0"
-                    />
-                    
-                    {/* Header Actions */}
-                    <SafeAreaView edges={['top']} className="absolute top-0 w-full flex-row justify-between px-5 pt-2">
-                        <TouchableOpacity 
-                            onPress={() => router.back()} 
-                            className="w-10 h-10 bg-black/30 rounded-full items-center justify-center"
-                        >
-                            <Feather name="arrow-right" size={22} color="white" />
-                        </TouchableOpacity>
-                        <TouchableOpacity 
-                            onPress={toggleSave}
-                            className="w-10 h-10 bg-black/30 rounded-full items-center justify-center"
-                        >
-                            <Feather
-                                name="heart"
-                                size={20}
-                                color={isSaved ? "#EF4444" : "white"}
-                            />
-                        </TouchableOpacity>
-                    </SafeAreaView>
+        <View style={styles.container}>
+            <SafeAreaView style={styles.safeArea} edges={['top']}>
+                {/* Header */}
+                <View style={styles.header}>
+                    <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+                        <Feather name="arrow-right" size={24} color={COLORS.text} />
+                    </TouchableOpacity>
+                    <View style={styles.headerSpacer} />
+                    <TouchableOpacity onPress={toggleSave} style={styles.saveButton}>
+                        <Feather
+                            name="heart"
+                            size={24}
+                            color={isSaved ? "#EF4444" : COLORS.textLight}
+                            fill={isSaved ? "#EF4444" : "none"}
+                        />
+                    </TouchableOpacity>
+                </View>
 
-                    {/* Profile Overlay */}
-                    <View className="absolute bottom-0 w-full px-5 pb-5">
-                        <View className="flex-row-reverse items-end gap-4">
-                            <View className="relative">
-                                <View className="w-20 h-20 rounded-2xl bg-white/10 backdrop-blur-sm overflow-hidden">
-                                    <Image
-                                        source={{ uri: provider.avatar }}
-                                        className="w-full h-full"
-                                        resizeMode="cover"
-                                    />
-                                </View>
+                <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+                    {/* Provider Info Card */}
+                    <View style={styles.providerCard}>
+                        <View style={styles.providerHeader}>
+                            <View style={styles.avatarContainer}>
+                                <Image
+                                    source={{ uri: provider.avatar }}
+                                    style={styles.avatar}
+                                    resizeMode="cover"
+                                />
                                 {provider.verified && (
-                                    <View className="absolute -bottom-1 -right-1 w-6 h-6 bg-blue-500 rounded-full items-center justify-center">
+                                    <View style={styles.verifiedBadge}>
                                         <Feather name="check" size={12} color="white" />
                                     </View>
                                 )}
                             </View>
-                            <View className="flex-1 pb-1">
-                                <Text className="font-cairo-bold text-xl text-white text-right mb-2">
-                                    {provider.name}
-                                </Text>
-                                <View className="flex-row-reverse items-center gap-2 flex-wrap">
-                                    <View className="bg-white/20 px-2.5 py-1 rounded-lg">
-                                        <Text className="font-cairo-medium text-white text-xs">
-                                            {provider.type === 'freelancer' ? 'مستقل' : 'شركة'}
-                                        </Text>
+                            <View style={styles.providerInfo}>
+                                <Text style={styles.providerName}>{provider.name}</Text>
+                                <Text style={styles.providerCategory}>{provider.category}</Text>
+                                <View style={styles.ratingContainer}>
+                                    <View style={styles.rating}>
+                                        <Feather name="star" size={14} color="#F59E0B" />
+                                        <Text style={styles.ratingText}>{provider.rating}</Text>
                                     </View>
-                                    <View 
-                                        className="px-2.5 py-1 rounded-lg"
-                                        style={{ backgroundColor: availabilityStatus.color + '40' }}
-                                    >
-                                        <Text className="font-cairo-medium text-xs" style={{ color: availabilityStatus.color }}>
-                                            {availabilityStatus.label}
-                                        </Text>
-                                    </View>
-                                    <Text className="font-cairo-medium text-white/90 text-xs">
-                                        {provider.category} • {provider.location}
-                                    </Text>
+                                    <Text style={styles.reviewCount}>({provider.reviews} تقييم)</Text>
                                 </View>
                             </View>
                         </View>
-                    </View>
-                </View>
-
-                {/* Stats Row */}
-                <View className="flex-row-reverse bg-white px-5 py-5 justify-around">
-                    <View className="items-center">
-                        <View className="flex-row items-center gap-1 mb-1">
-                            <Text className="font-cairo-bold text-xl text-slate-900">{provider.rating}</Text>
-                            <Feather name="star" size={16} color="#F59E0B" />
-                        </View>
-                        <Text className="font-cairo-medium text-slate-500 text-xs">التقييم</Text>
-                    </View>
-                    <View className="w-px h-10 bg-slate-100" />
-                    <View className="items-center">
-                        <Text className="font-cairo-bold text-xl text-slate-900 mb-1">{provider.completedProjects}</Text>
-                        <Text className="font-cairo-medium text-slate-500 text-xs">مشروع</Text>
-                    </View>
-                    <View className="w-px h-10 bg-slate-100" />
-                    <View className="items-center">
-                        <Text className="font-cairo-bold text-xl text-slate-900 mb-1">{provider.yearsExperience}</Text>
-                        <Text className="font-cairo-medium text-slate-500 text-xs">سنوات خبرة</Text>
-                    </View>
-                </View>
-
-                {/* Quick Info */}
-                <View className="flex-row-reverse px-5 py-4 gap-3">
-                    <View className="flex-1 flex-row-reverse items-center gap-2 bg-gray-50 px-4 py-3 rounded-2xl">
-                        <Feather name="clock" size={16} color={COLORS.primary} />
-                        <Text className="font-cairo-medium text-slate-700 text-xs">{provider.responseTime}</Text>
-                    </View>
-                    <View className="flex-1 flex-row-reverse items-center gap-2 bg-gray-50 px-4 py-3 rounded-2xl">
-                        <Feather name="globe" size={16} color={COLORS.primary} />
-                        <Text className="font-cairo-medium text-slate-700 text-xs" numberOfLines={1}>{provider.languages.join('، ')}</Text>
-                    </View>
-                </View>
-
-                {/* Content */}
-                <View className="px-5 pt-4">
-                    {/* Description */}
-                    <View className="mb-6">
-                        <Text className="font-cairo-bold text-slate-900 text-lg mb-3 text-right">نبذة</Text>
-                        <Text className="font-cairo-medium text-slate-600 leading-7 text-right">
-                            {provider.description}
-                        </Text>
-                    </View>
-
-                    {/* Services */}
-                    <View className="mb-6">
-                        <Text className="font-cairo-bold text-slate-900 text-lg mb-4 text-right">الخدمات المقدمة</Text>
-                        <View className="flex-row-reverse flex-wrap gap-3">
-                            {provider.services.map((service: string, index: number) => (
-                                <View key={index} className="flex-row-reverse items-center bg-gray-50 px-4 py-2.5 rounded-xl">
-                                    <Feather name="check" size={14} color={COLORS.primary} />
-                                    <Text className="font-cairo-medium text-slate-700 text-sm mr-2">{service}</Text>
-                                </View>
-                            ))}
+                        <View style={styles.locationContainer}>
+                            <Feather name="map-pin" size={16} color={COLORS.textLight} />
+                            <Text style={styles.locationText}>{provider.location}</Text>
                         </View>
                     </View>
 
-                    {/* Contact Methods */}
-                    <View className="mb-6">
-                        <Text className="font-cairo-bold text-slate-900 text-lg mb-4 text-right">طرق التواصل</Text>
-                        <View className="flex-row-reverse gap-3">
-                            {provider.contactMethods.map((method, index) => (
-                                <TouchableOpacity
-                                    key={index}
-                                    className="flex-1 flex-row-reverse items-center justify-center gap-2 py-3.5 rounded-2xl bg-gray-50"
-                                >
-                                    <Feather name={getContactMethodIcon(method)} size={18} color={COLORS.primary} />
-                                    <Text className="font-cairo-medium text-slate-700 text-sm">{getContactMethodLabel(method)}</Text>
-                                </TouchableOpacity>
-                            ))}
-                        </View>
+                    {/* Price Card */}
+                    <View style={styles.priceCard}>
+                        <Text style={styles.priceLabel}>السعر</Text>
+                        <Text style={styles.priceValue}>{provider.priceLabel}</Text>
                     </View>
 
-                    {/* Reviews Section */}
-                    <View className="mb-6">
-                        <View className="flex-row-reverse items-center justify-between mb-4">
-                            <Text className="font-cairo-bold text-slate-900 text-lg">التقييمات</Text>
-                            <Text className="font-cairo-medium text-slate-500 text-sm">{provider.reviews} تقييم</Text>
-                        </View>
-
-                        {/* Rating Breakdown */}
-                        <View className="bg-gray-50 rounded-3xl p-5 mb-4">
-                            <View className="flex-row-reverse items-center gap-6">
-                                {/* Overall Rating */}
-                                <View className="items-center">
-                                    <Text className="font-cairo-bold text-4xl text-slate-900">{provider.rating}</Text>
-                                    <View className="flex-row gap-0.5 mt-1">
-                                        {renderStars(Math.round(provider.rating))}
-                                    </View>
-                                    <Text className="font-cairo-medium text-slate-500 text-xs mt-1">{totalReviews} تقييم</Text>
-                                </View>
-
-                                {/* Breakdown Bars */}
-                                <View className="flex-1 gap-2">
-                                    {provider.ratingBreakdown.map((item) => {
-                                        const percentage = totalReviews > 0 ? (item.count / totalReviews) * 100 : 0;
-                                        return (
-                                            <View key={item.stars} className="flex-row-reverse items-center gap-2">
-                                                <Text className="font-cairo-medium text-slate-600 text-xs w-3">{item.stars}</Text>
-                                                <Feather name="star" size={10} color="#F59E0B" />
-                                                <View className="flex-1 h-2 bg-slate-200 rounded-full overflow-hidden">
-                                                    <View 
-                                                        className="h-full bg-amber-400 rounded-full"
-                                                        style={{ width: `${percentage}%` }}
-                                                    />
-                                                </View>
-                                                <Text className="font-cairo-medium text-slate-400 text-xs w-6">{item.count}</Text>
-                                            </View>
-                                        );
-                                    })}
-                                </View>
-                            </View>
-                        </View>
-
-                        {/* Reviews List */}
-                        <View className="gap-3">
-                            {(showAllReviews ? provider.reviewsList : provider.reviewsList.slice(0, 2)).map((review) => (
-                                <View key={review.id} className="bg-gray-50 rounded-2xl p-4">
-                                    <View className="flex-row-reverse items-center gap-3 mb-3">
-                                        <View className="w-12 h-12 rounded-full overflow-hidden bg-slate-200">
-                                            <Image
-                                                source={{ uri: review.userAvatar }}
-                                                className="w-full h-full"
-                                                resizeMode="cover"
-                                            />
-                                        </View>
-                                        <View className="flex-1">
-                                            <Text className="font-cairo-bold text-slate-900 text-sm text-right mb-1">{review.userName}</Text>
-                                            <View className="flex-row-reverse items-center gap-2">
-                                                <View className="flex-row gap-0.5">
-                                                    {renderStars(review.rating)}
-                                                </View>
-                                                <Text className="font-cairo-medium text-slate-400 text-xs">{review.date}</Text>
-                                            </View>
-                                        </View>
-                                    </View>
-                                    <Text className="font-cairo-medium text-slate-600 text-sm text-right leading-6">
-                                        {review.comment}
-                                    </Text>
-                                </View>
-                            ))}
-                        </View>
-
-                        {provider.reviewsList.length > 2 && (
-                            <TouchableOpacity
-                                onPress={() => setShowAllReviews(!showAllReviews)}
-                                className="mt-4 py-3.5 bg-gray-50 rounded-2xl items-center"
-                            >
-                                <Text className="font-cairo-bold text-sm" style={{ color: COLORS.primary }}>
-                                    {showAllReviews ? 'عرض أقل' : `عرض جميع التقييمات (${provider.reviewsList.length})`}
-                                </Text>
-                            </TouchableOpacity>
-                        )}
-                    </View>
-
-                    {/* Portfolio */}
-                    {provider.portfolio && provider.portfolio.length > 0 && (
-                        <View className="mb-6">
-                            <View className="flex-row-reverse items-center justify-between mb-4">
-                                <Text className="font-cairo-bold text-slate-900 text-lg">معرض الأعمال</Text>
-                                <Text className="font-cairo-medium text-sm" style={{ color: COLORS.primary }}>عرض الكل</Text>
-                            </View>
+                    {/* Gallery */}
+                    {provider.gallery && provider.gallery.length > 0 && (
+                        <View style={styles.section}>
+                            <Text style={styles.sectionTitle}>معرض الأعمال</Text>
                             <ScrollView
                                 horizontal
                                 showsHorizontalScrollIndicator={false}
-                                contentContainerStyle={{ gap: 12, paddingHorizontal: 0 }}
-                                style={{ transform: [{ scaleX: -1 }], marginHorizontal: -20 }}
+                                contentContainerStyle={styles.galleryContainer}
+                                style={{ transform: [{ scaleX: -1 }] }}
                             >
-                                {provider.portfolio.map((image: string, index: number) => (
+                                {provider.gallery.map((image, index) => (
                                     <View
                                         key={index}
-                                        className="w-40 h-40 rounded-2xl overflow-hidden bg-slate-100"
-                                        style={{ transform: [{ scaleX: -1 }] }}
+                                        style={[styles.galleryItem, { transform: [{ scaleX: -1 }] }]}
                                     >
                                         <Image
                                             source={{ uri: image }}
-                                            className="w-full h-full"
+                                            style={styles.galleryImage}
                                             resizeMode="cover"
                                         />
                                     </View>
@@ -476,26 +190,245 @@ export default function ServiceDetailScreen() {
                             </ScrollView>
                         </View>
                     )}
-                </View>
-            </ScrollView>
 
-            {/* Sticky CTA */}
-            <SafeAreaView edges={['bottom']} className="absolute bottom-0 w-full bg-white">
-                <View className="px-5 py-4 flex-row-reverse gap-3">
-                    <View className="flex-1 justify-center">
-                        <Text className="font-cairo-medium text-slate-500 text-xs text-right">يبدأ من</Text>
-                        <Text className="font-cairo-bold text-lg text-right" style={{ color: COLORS.primary }}>{provider.price}</Text>
+                    {/* Description */}
+                    <View style={styles.section}>
+                        <Text style={styles.sectionTitle}>عن الخدمة</Text>
+                        <Text style={styles.description}>{provider.description}</Text>
                     </View>
+
+                    {/* Spacer for bottom button */}
+                    <View style={styles.bottomSpacer} />
+                </ScrollView>
+
+                {/* Booking Button */}
+                <SafeAreaView edges={['bottom']} style={styles.bottomContainer}>
                     <TouchableOpacity
-                        onPress={() => router.push(`/services/book/${id || '1'}` as any)}
-                        className="flex-[2] py-4 rounded-2xl flex-row-reverse items-center justify-center gap-2"
-                        style={{ backgroundColor: COLORS.primary }}
+                        style={styles.bookingButton}
+                        onPress={() => router.push(`/services/book/${provider.id}` as any)}
+                        activeOpacity={0.8}
                     >
-                        <Feather name="calendar" size={20} color="white" />
-                        <Text className="font-cairo-bold text-white text-base">احجز الآن</Text>
+                        <Text style={styles.bookingButtonText}>احجز الآن</Text>
+                        <Feather name="arrow-left" size={20} color="white" />
                     </TouchableOpacity>
-                </View>
+                </SafeAreaView>
             </SafeAreaView>
         </View>
     );
 }
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: '#f8fafc',
+    },
+    safeArea: {
+        flex: 1,
+    },
+    header: {
+        flexDirection: 'row-reverse',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingHorizontal: 16,
+        paddingVertical: 12,
+        backgroundColor: 'white',
+        borderBottomWidth: 1,
+        borderBottomColor: '#f1f5f9',
+    },
+    backButton: {
+        padding: 8,
+    },
+    headerSpacer: {
+        flex: 1,
+    },
+    saveButton: {
+        padding: 8,
+    },
+    scrollView: {
+        flex: 1,
+    },
+    errorContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 32,
+    },
+    errorText: {
+        fontFamily: 'Cairo_700Bold',
+        fontSize: 18,
+        color: COLORS.text,
+        marginBottom: 16,
+        textAlign: 'center',
+    },
+    backButtonText: {
+        fontFamily: 'Cairo_500Medium',
+        fontSize: 16,
+        color: COLORS.primary,
+    },
+    providerCard: {
+        backgroundColor: 'white',
+        margin: 16,
+        padding: 16,
+        borderRadius: 16,
+        borderWidth: 1,
+        borderColor: '#f1f5f9',
+    },
+    providerHeader: {
+        flexDirection: 'row-reverse',
+        gap: 16,
+        marginBottom: 16,
+    },
+    avatarContainer: {
+        position: 'relative',
+    },
+    avatar: {
+        width: 80,
+        height: 80,
+        borderRadius: 16,
+        backgroundColor: '#f1f5f9',
+    },
+    verifiedBadge: {
+        position: 'absolute',
+        bottom: -4,
+        right: -4,
+        width: 24,
+        height: 24,
+        backgroundColor: '#3b82f6',
+        borderRadius: 12,
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderWidth: 2,
+        borderColor: 'white',
+    },
+    providerInfo: {
+        flex: 1,
+    },
+    providerName: {
+        fontFamily: 'Cairo_700Bold',
+        fontSize: 20,
+        color: '#1e293b',
+        textAlign: 'right',
+        marginBottom: 4,
+    },
+    providerCategory: {
+        fontFamily: 'Cairo_500Medium',
+        fontSize: 14,
+        color: '#64748b',
+        textAlign: 'right',
+        marginBottom: 8,
+    },
+    ratingContainer: {
+        flexDirection: 'row-reverse',
+        alignItems: 'center',
+        gap: 8,
+    },
+    rating: {
+        flexDirection: 'row-reverse',
+        alignItems: 'center',
+        gap: 4,
+    },
+    ratingText: {
+        fontFamily: 'Cairo_700Bold',
+        fontSize: 16,
+        color: '#1e293b',
+    },
+    reviewCount: {
+        fontFamily: 'Cairo_500Medium',
+        fontSize: 14,
+        color: '#94a3b8',
+    },
+    locationContainer: {
+        flexDirection: 'row-reverse',
+        alignItems: 'center',
+        gap: 8,
+        paddingTop: 16,
+        borderTopWidth: 1,
+        borderTopColor: '#f1f5f9',
+    },
+    locationText: {
+        fontFamily: 'Cairo_500Medium',
+        fontSize: 14,
+        color: COLORS.textLight,
+    },
+    priceCard: {
+        backgroundColor: 'white',
+        marginHorizontal: 16,
+        marginBottom: 16,
+        padding: 16,
+        borderRadius: 16,
+        borderWidth: 1,
+        borderColor: '#f1f5f9',
+        flexDirection: 'row-reverse',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
+    priceLabel: {
+        fontFamily: 'Cairo_500Medium',
+        fontSize: 14,
+        color: COLORS.textLight,
+    },
+    priceValue: {
+        fontFamily: 'Cairo_700Bold',
+        fontSize: 20,
+        color: COLORS.primary,
+    },
+    section: {
+        marginBottom: 16,
+    },
+    sectionTitle: {
+        fontFamily: 'Cairo_700Bold',
+        fontSize: 18,
+        color: '#1e293b',
+        textAlign: 'right',
+        marginBottom: 12,
+        paddingHorizontal: 16,
+    },
+    galleryContainer: {
+        paddingHorizontal: 16,
+        gap: 12,
+    },
+    galleryItem: {
+        width: SCREEN_WIDTH * 0.7,
+        height: 200,
+        borderRadius: 16,
+        overflow: 'hidden',
+        backgroundColor: '#f1f5f9',
+    },
+    galleryImage: {
+        width: '100%',
+        height: '100%',
+    },
+    description: {
+        fontFamily: 'Cairo_500Medium',
+        fontSize: 16,
+        color: '#475569',
+        lineHeight: 24,
+        textAlign: 'right',
+        paddingHorizontal: 16,
+    },
+    bottomSpacer: {
+        height: 100,
+    },
+    bottomContainer: {
+        backgroundColor: 'white',
+        borderTopWidth: 1,
+        borderTopColor: '#f1f5f9',
+        paddingHorizontal: 16,
+        paddingTop: 16,
+        paddingBottom: 8,
+    },
+    bookingButton: {
+        backgroundColor: COLORS.primary,
+        flexDirection: 'row-reverse',
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: 16,
+        borderRadius: 16,
+        gap: 8,
+    },
+    bookingButtonText: {
+        fontFamily: 'Cairo_700Bold',
+        fontSize: 18,
+        color: 'white',
+    },
+});

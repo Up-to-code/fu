@@ -1,12 +1,14 @@
 // File: src/screens/services/ServicesScreen.tsx
-// Purpose: Freelancers & Companies Marketplace Screen - Modern Clean UI
+// Purpose: Freelancer Services Marketplace with bottom sheet filter
 
 import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
-import { Dimensions, Image, Modal, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import React, { useCallback, useRef, useState } from 'react';
+import { Dimensions, Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { FlashList } from '@shopify/flash-list';
 import { COLORS } from '../../constants/theme';
+import { FilterBottomSheet, FilterBottomSheetRef } from './_components/FilterBottomSheet';
 
 const { width } = Dimensions.get('window');
 
@@ -17,20 +19,20 @@ const TYPE_FILTERS = [
 ];
 
 const CATEGORIES = [
-    { id: 'all', label: 'جميع التصنيفات' },
-    { id: 'interior', label: 'تصميم داخلي' },
-    { id: 'renovation', label: 'تجديد وتطوير' },
-    { id: 'furniture', label: 'تركيب أثاث' },
-    { id: 'kitchen', label: 'تصميم مطابخ' },
-    { id: 'bedroom', label: 'تصميم غرف نوم' },
-    { id: 'consultation', label: 'استشارات ديكور' },
+    { id: 'all', label: 'جميع الخدمات' },
+    { id: 'cleaning', label: 'التنظيف' },
+    { id: 'interior', label: 'التصميم الداخلي' },
+    { id: 'handyman', label: 'الصيانة المنزلية' },
+    { id: 'moving', label: 'النقل والتوصيل' },
+    { id: 'furniture', label: 'تركيب الأثاث' },
+    { id: 'electrical', label: 'الكهرباء والسباكة' },
 ];
 
 const PRICE_RANGES = [
     { id: 'all', label: 'جميع الأسعار', min: 0, max: Infinity },
-    { id: 'budget', label: 'اقتصادي (أقل من 300)', min: 0, max: 300 },
-    { id: 'mid', label: 'متوسط (300-700)', min: 300, max: 700 },
-    { id: 'premium', label: 'مميز (أكثر من 700)', min: 700, max: Infinity },
+    { id: 'budget', label: 'اقتصادي (أقل من 200)', min: 0, max: 200 },
+    { id: 'mid', label: 'متوسط (200-500)', min: 200, max: 500 },
+    { id: 'premium', label: 'مميز (أكثر من 500)', min: 500, max: Infinity },
 ];
 
 const LOCATIONS = [
@@ -38,17 +40,34 @@ const LOCATIONS = [
     { id: 'riyadh', label: 'الرياض' },
     { id: 'jeddah', label: 'جدة' },
     { id: 'dammam', label: 'الدمام' },
+    { id: 'makkah', label: 'مكة' },
+    { id: 'madinah', label: 'المدينة' },
 ];
 
 const PROVIDERS = [
     {
         id: '1',
-        name: 'أحمد المصمم',
+        name: 'شركة النظافة المتكاملة',
+        type: 'company',
+        category: 'التنظيف',
+        categoryId: 'cleaning',
+        avatar: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=200&q=80',
+        rating: 4.9,
+        reviews: 234,
+        price: 150,
+        priceLabel: 'من 150 ر.س',
+        location: 'الرياض',
+        locationId: 'riyadh',
+        verified: true,
+    },
+    {
+        id: '2',
+        name: 'أحمد - مصمم داخلي',
         type: 'freelancer',
-        category: 'تصميم داخلي',
+        category: 'التصميم الداخلي',
         categoryId: 'interior',
         avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&q=80',
-        rating: 4.9,
+        rating: 4.8,
         reviews: 127,
         price: 500,
         priceLabel: 'من 500 ر.س',
@@ -57,91 +76,34 @@ const PROVIDERS = [
         verified: true,
     },
     {
-        id: '2',
-        name: 'شركة التطوير الحديث',
-        type: 'company',
-        category: 'تجديد وتطوير',
-        categoryId: 'renovation',
-        avatar: 'https://images.unsplash.com/photo-1560179707-f14e90ef3623?w=200&q=80',
-        rating: 4.8,
-        reviews: 89,
-        price: 1000,
-        priceLabel: 'من 1000 ر.س',
-        location: 'جدة',
-        locationId: 'jeddah',
-        verified: true,
-    },
-    {
         id: '3',
-        name: 'سارة للديكور',
-        type: 'freelancer',
-        category: 'استشارات ديكور',
-        categoryId: 'consultation',
-        avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&q=80',
+        name: 'فريق الصيانة السريع',
+        type: 'company',
+        category: 'الصيانة المنزلية',
+        categoryId: 'handyman',
+        avatar: 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=200&q=80',
         rating: 4.7,
-        reviews: 156,
-        price: 200,
-        priceLabel: 'من 200 ر.س',
-        location: 'الدمام',
-        locationId: 'dammam',
-        verified: true,
-    },
-    {
-        id: '4',
-        name: 'فريق التركيب السريع',
-        type: 'company',
-        category: 'تركيب أثاث',
-        categoryId: 'furniture',
-        avatar: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=200&q=80',
-        rating: 4.9,
-        reviews: 203,
-        price: 150,
-        priceLabel: 'من 150 ر.س',
-        location: 'الرياض',
-        locationId: 'riyadh',
-        verified: true,
-    },
-    {
-        id: '5',
-        name: 'مصمم المطابخ',
-        type: 'freelancer',
-        category: 'تصميم مطابخ',
-        categoryId: 'kitchen',
-        avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200&q=80',
-        rating: 4.8,
-        reviews: 94,
-        price: 800,
-        priceLabel: 'من 800 ر.س',
-        location: 'الرياض',
-        locationId: 'riyadh',
-        verified: false,
-    },
-    {
-        id: '6',
-        name: 'استوديو التصميم',
-        type: 'company',
-        category: 'تصميم غرف نوم',
-        categoryId: 'bedroom',
-        avatar: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=200&q=80',
-        rating: 4.9,
-        reviews: 112,
-        price: 600,
-        priceLabel: 'من 600 ر.س',
+        reviews: 189,
+        price: 100,
+        priceLabel: 'من 100 ر.س',
         location: 'جدة',
         locationId: 'jeddah',
         verified: true,
     },
 ];
 
+type Provider = typeof PROVIDERS[0];
+
 export default function ServicesScreen() {
     const router = useRouter();
+    const bottomSheetRef = useRef<FilterBottomSheetRef>(null);
+
     const [savedProviders, setSavedProviders] = useState<Set<string>>(new Set());
     const [activeTypeFilter, setActiveTypeFilter] = useState('all');
     const [activeCategory, setActiveCategory] = useState('all');
     const [activePriceRange, setActivePriceRange] = useState('all');
     const [activeLocation, setActiveLocation] = useState('all');
     const [searchQuery, setSearchQuery] = useState('');
-    const [showFilterModal, setShowFilterModal] = useState(false);
 
     const toggleSave = (id: string) => {
         setSavedProviders(prev => {
@@ -169,6 +131,10 @@ export default function ServicesScreen() {
         setActiveLocation('all');
     };
 
+    const openFilterSheet = useCallback(() => {
+        bottomSheetRef.current?.expand();
+    }, []);
+
     const selectedPriceRange = PRICE_RANGES.find(p => p.id === activePriceRange) || PRICE_RANGES[0];
 
     const filteredProviders = PROVIDERS.filter(p => {
@@ -180,255 +146,217 @@ export default function ServicesScreen() {
         return matchesType && matchesCategory && matchesPrice && matchesLocation && matchesSearch;
     });
 
-    const FilterChip = ({ label, isActive, onPress }: { label: string; isActive: boolean; onPress: () => void }) => (
+    const renderProvider = ({ item: provider }: { item: Provider }) => (
         <TouchableOpacity
-            onPress={onPress}
-            className={`px-4 py-2.5 rounded-xl mr-2 mb-2 ${
-                isActive ? 'bg-primary' : 'bg-slate-100'
-            }`}
-            style={isActive ? { backgroundColor: COLORS.primary } : {}}
+            onPress={() => router.push(`/services/${provider.id}` as any)}
+            activeOpacity={0.9}
+            style={styles.providerCard}
         >
-            <Text className={`font-cairo-medium text-sm ${isActive ? 'text-white' : 'text-slate-700'}`}>
-                {label}
-            </Text>
+            <View style={styles.providerContent}>
+                <View style={styles.avatarContainer}>
+                    <View style={styles.avatar}>
+                        <Image
+                            source={{ uri: provider.avatar }}
+                            style={styles.avatarImage}
+                            resizeMode="cover"
+                        />
+                    </View>
+                    {provider.verified && (
+                        <View style={styles.verifiedBadge}>
+                            <Feather name="check" size={12} color="white" />
+                        </View>
+                    )}
+                </View>
+
+                <View style={styles.providerInfo}>
+                    <View style={styles.providerHeader}>
+                        <View style={styles.providerNameContainer}>
+                            <Text style={styles.providerName}>{provider.name}</Text>
+                            <Text style={styles.providerCategory}>
+                                {provider.category} • {provider.location}
+                            </Text>
+                        </View>
+                        <TouchableOpacity
+                            onPress={(e) => {
+                                e.stopPropagation();
+                                toggleSave(provider.id);
+                            }}
+                            style={styles.saveButton}
+                        >
+                            <Feather
+                                name="heart"
+                                size={20}
+                                color={savedProviders.has(provider.id) ? "#EF4444" : COLORS.textLight}
+                            />
+                        </TouchableOpacity>
+                    </View>
+
+                    <View style={styles.providerFooter}>
+                        <View style={styles.ratingContainer}>
+                            <View style={styles.rating}>
+                                <Feather name="star" size={14} color="#F59E0B" />
+                                <Text style={styles.ratingText}>{provider.rating}</Text>
+                            </View>
+                            <Text style={styles.reviewCount}>({provider.reviews})</Text>
+                        </View>
+                        <Text style={[styles.price, { color: COLORS.primary }]}>{provider.priceLabel}</Text>
+                    </View>
+                </View>
+            </View>
         </TouchableOpacity>
     );
 
     return (
-        <SafeAreaView className="flex-1 bg-white" edges={['top']}>
-            {/* Header */}
-            <View className="flex-row-reverse items-center justify-between px-5 py-3 border-b border-slate-100">
-                <TouchableOpacity onPress={() => router.back()}>
-                    <Feather name="arrow-right" size={24} color={COLORS.text} />
-                </TouchableOpacity>
-                <Text className="font-cairo-bold text-lg text-slate-800">المصممون والشركات</Text>
-                <View className="w-6" />
-            </View>
+        <View style={styles.container}>
+            <SafeAreaView style={styles.safeArea} edges={['top']}>
+                <View style={styles.header}>
+                    <TouchableOpacity onPress={() => router.back()}>
+                        <Feather name="arrow-right" size={24} color={COLORS.text} />
+                    </TouchableOpacity>
+                    <Text style={styles.headerTitle}>خدمات المستقلين</Text>
+                    <View style={{ width: 24 }} />
+                </View>
 
-            <ScrollView className="flex-1" contentContainerStyle={{ padding: 20 }}>
-                {/* Search Bar */}
-                <View className="flex-row-reverse items-center gap-3 mb-4">
-                    <View className="flex-1 flex-row-reverse items-center bg-gray-50 rounded-2xl px-4 py-3.5">
+                <View style={styles.searchContainer}>
+                    <View style={styles.searchInputContainer}>
                         <Feather name="search" size={20} color={COLORS.textLight} />
                         <TextInput
-                            placeholder="ابحث عن مصمم، شركة، أو خدمة..."
+                            placeholder="ابحث عن خدمة أو مقدم خدمة..."
                             value={searchQuery}
                             onChangeText={setSearchQuery}
-                            className="flex-1 text-right font-cairo-medium text-slate-800 mr-3"
+                            style={styles.searchInput}
                             placeholderTextColor={COLORS.textLight}
                         />
                     </View>
                     <TouchableOpacity
-                        onPress={() => setShowFilterModal(true)}
-                        className="relative w-12 h-12 bg-gray-50 rounded-2xl items-center justify-center"
+                        onPress={openFilterSheet}
+                        style={styles.filterButton}
                     >
                         <Feather name="sliders" size={20} color={COLORS.text} />
                         {getActiveFiltersCount() > 0 && (
-                            <View className="absolute -top-1 -right-1 w-5 h-5 rounded-full items-center justify-center" style={{ backgroundColor: COLORS.primary }}>
-                                <Text className="text-white text-xs font-cairo-bold">{getActiveFiltersCount()}</Text>
+                            <View style={[styles.filterBadge, { backgroundColor: COLORS.primary }]}>
+                                <Text style={styles.filterBadgeText}>{getActiveFiltersCount()}</Text>
                             </View>
                         )}
                     </TouchableOpacity>
                 </View>
 
-                {/* Type Filters */}
-                <ScrollView 
-                    horizontal 
-                    showsHorizontalScrollIndicator={false}
-                    contentContainerStyle={{ gap: 10, paddingHorizontal: 0 }}
-                    style={{ transform: [{ scaleX: -1 }], marginHorizontal: -20 }}
-                >
-                    {TYPE_FILTERS.map(filter => (
-                        <TouchableOpacity
-                            key={filter.id}
-                            onPress={() => setActiveTypeFilter(filter.id)}
-                            className={`px-5 py-2.5 rounded-xl ${
-                                activeTypeFilter === filter.id ? 'bg-primary' : 'bg-gray-50'
-                            }`}
-                            style={{ 
-                                transform: [{ scaleX: -1 }],
-                                backgroundColor: activeTypeFilter === filter.id ? COLORS.primary : undefined
-                            }}
-                        >
-                            <Text className={`font-cairo-bold text-sm ${
-                                activeTypeFilter === filter.id ? 'text-white' : 'text-slate-700'
-                            }`}>
-                                {filter.label}
-                            </Text>
-                        </TouchableOpacity>
-                    ))}
-                </ScrollView>
+                <View style={styles.typeFiltersContainer}>
+                    <ScrollView
+                        horizontal
+                        showsHorizontalScrollIndicator={false}
+                        contentContainerStyle={{ gap: 8, paddingHorizontal: 16 }}
+                        style={{ transform: [{ scaleX: -1 }] }}
+                    >
+                        {TYPE_FILTERS.map(filter => (
+                            <TouchableOpacity
+                                key={filter.id}
+                                onPress={() => setActiveTypeFilter(filter.id)}
+                                style={[
+                                    styles.typeFilterChip,
+                                    {
+                                        transform: [{ scaleX: -1 }],
+                                        backgroundColor: activeTypeFilter === filter.id ? COLORS.primary : '#f1f5f9'
+                                    }
+                                ]}
+                                activeOpacity={0.8}
+                            >
+                                <Text style={[
+                                    styles.typeFilterText,
+                                    { color: activeTypeFilter === filter.id ? 'white' : '#475569' }
+                                ]}>
+                                    {filter.label}
+                                </Text>
+                            </TouchableOpacity>
+                        ))}
+                    </ScrollView>
+                </View>
 
-                {/* Results Count */}
                 {getActiveFiltersCount() > 0 && (
-                    <View className="flex-row-reverse justify-between items-center py-3 mb-4">
-                        <Text className="font-cairo-medium text-slate-600 text-sm">
+                    <View style={styles.resultsBar}>
+                        <Text style={styles.resultsText}>
                             {filteredProviders.length} نتيجة
                         </Text>
                         <TouchableOpacity onPress={clearAllFilters}>
-                            <Text className="font-cairo-medium text-sm" style={{ color: COLORS.primary }}>
+                            <Text style={[styles.clearText, { color: COLORS.primary }]}>
                                 مسح الفلاتر
                             </Text>
                         </TouchableOpacity>
                     </View>
                 )}
-                <View className="gap-3">
-                    {filteredProviders.map((provider) => (
-                        <TouchableOpacity
-                            key={provider.id}
-                            onPress={() => router.push(`/services/${provider.id}` as any)}
-                            activeOpacity={0.9}
-                            className="bg-white rounded-3xl p-5"
-                        >
-                            <View className="flex-row-reverse gap-4">
-                                {/* Avatar */}
-                                <View className="relative">
-                                    <View className="w-20 h-20 rounded-2xl bg-slate-100 overflow-hidden">
-                                        <Image
-                                            source={{ uri: provider.avatar }}
-                                            className="w-full h-full"
-                                            resizeMode="cover"
-                                        />
-                                    </View>
-                                    {provider.verified && (
-                                        <View className="absolute -bottom-1 -right-1 w-6 h-6 bg-blue-500 rounded-full items-center justify-center">
-                                            <Feather name="check" size={12} color="white" />
-                                        </View>
-                                    )}
-                                </View>
 
-                                {/* Info */}
-                                <View className="flex-1 justify-between">
-                                    <View className="flex-row-reverse justify-between items-start mb-2">
-                                        <View className="flex-1">
-                                            <Text className="font-cairo-bold text-slate-900 text-base text-right mb-1">
-                                                {provider.name}
-                                            </Text>
-                                            <Text className="font-cairo-medium text-slate-500 text-xs text-right">
-                                                {provider.category} • {provider.location}
-                                            </Text>
-                                        </View>
-                                        <TouchableOpacity
-                                            onPress={(e) => {
-                                                e.stopPropagation();
-                                                toggleSave(provider.id);
-                                            }}
-                                            className="p-1.5"
-                                        >
-                                            <Feather
-                                                name="heart"
-                                                size={20}
-                                                color={savedProviders.has(provider.id) ? "#EF4444" : COLORS.textLight}
-                                            />
-                                        </TouchableOpacity>
-                                    </View>
-
-                                    <View className="flex-row-reverse items-center justify-between">
-                                        <View className="flex-row-reverse items-center gap-2">
-                                            <View className="flex-row-reverse items-center gap-1">
-                                                <Feather name="star" size={14} color="#F59E0B" />
-                                                <Text className="font-cairo-bold text-slate-900 text-sm">{provider.rating}</Text>
-                                            </View>
-                                            <Text className="font-cairo-medium text-slate-400 text-xs">({provider.reviews})</Text>
-                                        </View>
-                                        <Text className="font-cairo-bold text-base" style={{ color: COLORS.primary }}>{provider.priceLabel}</Text>
-                                    </View>
-                                </View>
+                <View style={styles.listContainer}>
+                    <FlashList
+                        data={filteredProviders}
+                        renderItem={renderProvider}
+                        keyExtractor={(item) => item.id}
+                        contentContainerStyle={{ padding: 16, paddingTop: 0 }}
+                        ListEmptyComponent={
+                            <View style={styles.emptyState}>
+                                <Feather name="search" size={48} color="#cbd5e1" />
+                                <Text style={styles.emptyTitle}>لا توجد نتائج</Text>
+                                <Text style={styles.emptySubtitle}>جرب تغيير معايير البحث</Text>
                             </View>
-                        </TouchableOpacity>
-                    ))}
-
-                    {filteredProviders.length === 0 && (
-                        <View className="items-center justify-center py-20">
-                            <Feather name="search" size={48} color="#cbd5e1" />
-                            <Text className="font-cairo-bold text-slate-400 text-lg mt-4">لا توجد نتائج</Text>
-                            <Text className="font-cairo-medium text-slate-400 text-sm mt-2">جرب تغيير معايير البحث</Text>
-                        </View>
-                    )}
+                        }
+                    />
                 </View>
-            </ScrollView>
+            </SafeAreaView>
 
-            {/* Filter Modal */}
-            <Modal
-                visible={showFilterModal}
-                animationType="slide"
-                transparent
-                onRequestClose={() => setShowFilterModal(false)}
-            >
-                <View className="flex-1 bg-black/50 justify-end">
-                    <View className="bg-white rounded-t-3xl max-h-[80%]">
-                        <SafeAreaView edges={['bottom']}>
-                            {/* Modal Header */}
-                            <View className="flex-row-reverse items-center justify-between px-5 py-4">
-                                <Text className="font-cairo-bold text-xl text-slate-900">الفلاتر</Text>
-                                <TouchableOpacity onPress={() => setShowFilterModal(false)}>
-                                    <Feather name="x" size={24} color={COLORS.text} />
-                                </TouchableOpacity>
-                            </View>
-
-                            <ScrollView className="px-5 py-4">
-                                {/* Category Filter */}
-                                <View className="mb-6">
-                                    <Text className="font-cairo-bold text-slate-900 text-base mb-3 text-right">التصنيف</Text>
-                                    <View className="flex-row-reverse flex-wrap">
-                                        {CATEGORIES.map(cat => (
-                                            <FilterChip
-                                                key={cat.id}
-                                                label={cat.label}
-                                                isActive={activeCategory === cat.id}
-                                                onPress={() => setActiveCategory(cat.id)}
-                                            />
-                                        ))}
-                                    </View>
-                                </View>
-
-                                {/* Price Range Filter */}
-                                <View className="mb-6">
-                                    <Text className="font-cairo-bold text-slate-900 text-base mb-3 text-right">نطاق السعر</Text>
-                                    <View className="flex-row-reverse flex-wrap">
-                                        {PRICE_RANGES.map(price => (
-                                            <FilterChip
-                                                key={price.id}
-                                                label={price.label}
-                                                isActive={activePriceRange === price.id}
-                                                onPress={() => setActivePriceRange(price.id)}
-                                            />
-                                        ))}
-                                    </View>
-                                </View>
-
-                                {/* Location Filter */}
-                                <View className="mb-6">
-                                    <Text className="font-cairo-bold text-slate-900 text-base mb-3 text-right">المدينة</Text>
-                                    <View className="flex-row-reverse flex-wrap">
-                                        {LOCATIONS.map(loc => (
-                                            <FilterChip
-                                                key={loc.id}
-                                                label={loc.label}
-                                                isActive={activeLocation === loc.id}
-                                                onPress={() => setActiveLocation(loc.id)}
-                                            />
-                                        ))}
-                                    </View>
-                                </View>
-                            </ScrollView>
-
-                            {/* Apply Button */}
-                            <View className="px-5 py-4">
-                                <TouchableOpacity
-                                    onPress={() => setShowFilterModal(false)}
-                                    className="py-4 rounded-2xl items-center"
-                                    style={{ backgroundColor: COLORS.primary }}
-                                >
-                                    <Text className="font-cairo-bold text-white text-base">
-                                        عرض {filteredProviders.length} نتيجة
-                                    </Text>
-                                </TouchableOpacity>
-                            </View>
-                        </SafeAreaView>
-                    </View>
-                </View>
-            </Modal>
-        </SafeAreaView>
+            <FilterBottomSheet
+                ref={bottomSheetRef}
+                categories={CATEGORIES}
+                priceRanges={PRICE_RANGES}
+                locations={LOCATIONS}
+                activeCategory={activeCategory}
+                activePriceRange={activePriceRange}
+                activeLocation={activeLocation}
+                onCategoryChange={setActiveCategory}
+                onPriceRangeChange={setActivePriceRange}
+                onLocationChange={setActiveLocation}
+                onClearAll={clearAllFilters}
+                resultsCount={filteredProviders.length}
+            />
+        </View>
     );
 }
+
+const styles = StyleSheet.create({
+    container: { flex: 1, backgroundColor: 'white' },
+    safeArea: { flex: 1, backgroundColor: 'white' },
+    header: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: '#f1f5f9' },
+    headerTitle: { fontFamily: 'Cairo_700Bold', fontSize: 18, color: '#1e293b' },
+    searchContainer: { flexDirection: 'row-reverse', alignItems: 'center', gap: 12, paddingHorizontal: 16, paddingTop: 16, paddingBottom: 12 },
+    searchInputContainer: { flex: 1, flexDirection: 'row-reverse', alignItems: 'center', backgroundColor: '#f8fafc', borderRadius: 16, paddingHorizontal: 16, paddingVertical: 12 },
+    searchInput: { flex: 1, textAlign: 'right', fontFamily: 'Cairo_500Medium', color: '#1e293b', marginRight: 12, fontSize: 14 },
+    filterButton: { position: 'relative', width: 48, height: 48, backgroundColor: '#f8fafc', borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
+    filterBadge: { position: 'absolute', top: -4, right: -4, width: 20, height: 20, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
+    filterBadgeText: { color: 'white', fontSize: 12, fontFamily: 'Cairo_700Bold' },
+    typeFiltersContainer: { marginBottom: 16 },
+    typeFilterChip: { paddingHorizontal: 16, paddingVertical: 12, borderRadius: 16 },
+    typeFilterText: { fontFamily: 'Cairo_700Bold', fontSize: 14 },
+    resultsBar: { flexDirection: 'row-reverse', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 12, marginBottom: 8 },
+    resultsText: { fontFamily: 'Cairo_500Medium', color: '#64748b', fontSize: 14 },
+    clearText: { fontFamily: 'Cairo_500Medium', fontSize: 14 },
+    listContainer: { flex: 1 },
+    providerCard: { backgroundColor: 'white', borderRadius: 16, padding: 16, marginBottom: 16, borderWidth: 1, borderColor: '#f1f5f9', shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 2, elevation: 1 },
+    providerContent: { flexDirection: 'row-reverse', gap: 16 },
+    avatarContainer: { position: 'relative' },
+    avatar: { width: 80, height: 80, borderRadius: 16, backgroundColor: '#f1f5f9', overflow: 'hidden' },
+    avatarImage: { width: '100%', height: '100%' },
+    verifiedBadge: { position: 'absolute', bottom: -4, right: -4, width: 24, height: 24, backgroundColor: '#3b82f6', borderRadius: 12, alignItems: 'center', justifyContent: 'center' },
+    providerInfo: { flex: 1, justifyContent: 'space-between' },
+    providerHeader: { flexDirection: 'row-reverse', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 },
+    providerNameContainer: { flex: 1 },
+    providerName: { fontFamily: 'Cairo_700Bold', color: '#1e293b', fontSize: 16, textAlign: 'right', marginBottom: 4 },
+    providerCategory: { fontFamily: 'Cairo_500Medium', color: '#64748b', fontSize: 12, textAlign: 'right' },
+    saveButton: { padding: 8 },
+    providerFooter: { flexDirection: 'row-reverse', alignItems: 'center', justifyContent: 'space-between' },
+    ratingContainer: { flexDirection: 'row-reverse', alignItems: 'center', gap: 8 },
+    rating: { flexDirection: 'row-reverse', alignItems: 'center', gap: 4 },
+    ratingText: { fontFamily: 'Cairo_700Bold', color: '#1e293b', fontSize: 14 },
+    reviewCount: { fontFamily: 'Cairo_500Medium', color: '#94a3b8', fontSize: 12 },
+    price: { fontFamily: 'Cairo_700Bold', fontSize: 16 },
+    emptyState: { alignItems: 'center', justifyContent: 'center', paddingVertical: 80 },
+    emptyTitle: { fontFamily: 'Cairo_700Bold', color: '#94a3b8', fontSize: 18, marginTop: 16 },
+    emptySubtitle: { fontFamily: 'Cairo_500Medium', color: '#94a3b8', fontSize: 14, marginTop: 8 },
+});

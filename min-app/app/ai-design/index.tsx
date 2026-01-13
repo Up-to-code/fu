@@ -1,5 +1,5 @@
 // File: app/ai-design/index.tsx
-// Purpose: AI Room Design Configuration - Scrollable Types
+// Purpose: Modern and accessible AI Room Design Configuration
 
 import { Feather } from '@expo/vector-icons';
 import { router } from 'expo-router';
@@ -8,6 +8,7 @@ import { Image, ScrollView, StatusBar, Text, TouchableOpacity, View } from 'reac
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { COLORS } from '../../src/constants/theme';
 import { saveAISession } from '../../src/utils/storage';
+import { SavePreferencesView } from '../../src/screens/ai/_components';
 
 const ROOM_TYPES = [
     { id: 'living', name: 'مجلس', icon: 'home' },
@@ -44,61 +45,74 @@ export default function AIConfigurationScreen() {
         }
     };
 
+    const handleSelectPreferences = (roomType: string, roomStyle: string) => {
+        setSelectedType(roomType);
+        setSelectedStyle(roomStyle);
+    };
+
     const isReady = selectedType && selectedStyle;
 
     return (
-        <SafeAreaView className="flex-1 bg-white" edges={['top']}>
+        <SafeAreaView className="flex-1 bg-gray-50/50" edges={['top']}>
             <StatusBar barStyle="dark-content" />
 
             {/* Header */}
-            <View className="px-5 py-4 flex-row-reverse justify-between items-center">
+            <View className="px-5 py-4 flex-row-reverse justify-between items-center bg-white">
                 <TouchableOpacity
                     onPress={handleBack}
                     className="w-12 h-12 rounded-full bg-slate-100 items-center justify-center"
+                    activeOpacity={0.8}
                 >
                     <Feather name="x" size={22} color={COLORS.text} />
                 </TouchableOpacity>
-                <Text className="text-lg font-cairo-bold text-slate-800">صمّم غرفتك</Text>
+                <Text className="text-xl font-cairo-bold text-slate-800">صمّم غرفتك</Text>
                 <View className="w-12" />
             </View>
 
             <ScrollView
                 className="flex-1"
                 showsVerticalScrollIndicator={false}
-                contentContainerStyle={{ paddingBottom: 140 }}
+                contentContainerStyle={{ paddingBottom: 100 }}
             >
-                {/* Step 1: Room Type - Horizontal Scroll */}
-                <View className="mb-10">
-                    <Text className="text-base font-cairo-bold text-slate-800 text-right mb-6 px-5">
+                {/* Save Preferences View */}
+                <SavePreferencesView
+                    onSelectPreferences={handleSelectPreferences}
+                    currentRoomType={selectedType}
+                    currentRoomStyle={selectedStyle}
+                />
+
+                {/* Step 1: Room Type */}
+                <View className="mb-8">
+                    <Text className="text-lg font-cairo-bold text-slate-800 text-right mb-4 px-5">
                         ١. اختر نوع الغرفة
                     </Text>
                     <ScrollView
                         horizontal
                         showsHorizontalScrollIndicator={false}
-                        contentContainerStyle={{ paddingHorizontal: 20 }}
+                        contentContainerStyle={{ paddingHorizontal: 20, gap: 12 }}
                         style={{ transform: [{ scaleX: -1 }] }}
                     >
-                        {ROOM_TYPES.map((type, index) => (
+                        {ROOM_TYPES.map((type) => (
                             <TouchableOpacity
                                 key={type.id}
                                 onPress={() => setSelectedType(type.id)}
-                                className={`items-center py-5 px-6 rounded-2xl border-2 ${selectedType === type.id
-                                        ? 'bg-primary border-primary'
-                                        : 'bg-white border-slate-200'
-                                    }`}
-                                style={{
-                                    transform: [{ scaleX: -1 }],
-                                    marginLeft: index === ROOM_TYPES.length - 1 ? 0 : 12
-                                }}
+                                className={`items-center justify-center py-4 px-5 rounded-2xl min-w-[100px] ${
+                                    selectedType === type.id
+                                        ? 'bg-primary'
+                                        : 'bg-white'
+                                }`}
+                                style={{ transform: [{ scaleX: -1 }] }}
+                                activeOpacity={0.8}
                             >
                                 <Feather
                                     name={type.icon as any}
-                                    size={28}
+                                    size={24}
                                     color={selectedType === type.id ? 'white' : COLORS.text}
                                 />
                                 <Text
-                                    className={`text-sm font-cairo-bold mt-4 ${selectedType === type.id ? 'text-white' : 'text-slate-600'
-                                        }`}
+                                    className={`text-sm font-cairo-bold mt-3 ${
+                                        selectedType === type.id ? 'text-white' : 'text-slate-700'
+                                    }`}
                                 >
                                     {type.name}
                                 </Text>
@@ -108,8 +122,8 @@ export default function AIConfigurationScreen() {
                 </View>
 
                 {/* Step 2: Room Style */}
-                <View className="px-5">
-                    <Text className="text-base font-cairo-bold text-slate-800 text-right mb-6">
+                <View className="px-5 mb-6">
+                    <Text className="text-lg font-cairo-bold text-slate-800 text-right mb-4">
                         ٢. اختر الستايل
                     </Text>
                     <View className="flex-row-reverse flex-wrap justify-between">
@@ -117,30 +131,30 @@ export default function AIConfigurationScreen() {
                             <TouchableOpacity
                                 key={style.id}
                                 onPress={() => setSelectedStyle(style.id)}
-                                className={`w-[48%] mb-5 rounded-2xl overflow-hidden border-2 ${selectedStyle === style.id
-                                        ? 'border-primary'
-                                        : 'border-transparent'
-                                    }`}
+                                className="w-[48%] mb-4 rounded-2xl overflow-hidden bg-white"
                                 activeOpacity={0.9}
                             >
-                                <View className="h-36 bg-slate-100">
+                                <View className="h-36 bg-slate-100 relative">
                                     <Image
                                         source={{ uri: style.image }}
                                         className="w-full h-full"
                                         resizeMode="cover"
                                     />
                                     {selectedStyle === style.id && (
-                                        <View className="absolute inset-0 bg-primary/30" />
+                                        <View className="absolute inset-0 bg-primary/20" />
                                     )}
                                     {selectedStyle === style.id && (
-                                        <View className="absolute top-3 right-3 w-7 h-7 bg-primary rounded-full items-center justify-center">
-                                            <Feather name="check" size={16} color="white" />
+                                        <View className="absolute top-3 right-3 w-8 h-8 bg-primary rounded-full items-center justify-center">
+                                            <Feather name="check" size={18} color="white" />
                                         </View>
                                     )}
                                 </View>
-                                <View className="bg-white py-4">
-                                    <Text className={`text-center font-cairo-bold text-base ${selectedStyle === style.id ? 'text-primary' : 'text-slate-700'
-                                        }`}>
+                                <View className="py-4 px-3">
+                                    <Text
+                                        className={`text-center font-cairo-bold text-base ${
+                                            selectedStyle === style.id ? 'text-primary' : 'text-slate-800'
+                                        }`}
+                                    >
                                         {style.name}
                                     </Text>
                                 </View>
@@ -151,23 +165,31 @@ export default function AIConfigurationScreen() {
             </ScrollView>
 
             {/* Bottom Action */}
-            <View className="absolute bottom-0 left-0 right-0 p-5 bg-white border-t border-slate-100">
-                <TouchableOpacity
-                    onPress={handleContinue}
-                    disabled={!isReady}
-                    className={`w-full py-5 rounded-2xl flex-row-reverse justify-center items-center gap-3 ${isReady ? 'bg-primary' : 'bg-slate-200'
+            <SafeAreaView className="bg-white border-t border-slate-100" edges={['bottom']}>
+                <View className="px-5 py-4">
+                    <TouchableOpacity
+                        onPress={handleContinue}
+                        disabled={!isReady}
+                        className={`w-full py-4 rounded-2xl flex-row-reverse justify-center items-center gap-3 ${
+                            isReady ? 'bg-primary' : 'bg-slate-200'
                         }`}
-                >
-                    <Text className={`text-lg font-cairo-bold ${isReady ? 'text-white' : 'text-slate-400'}`}>
-                        التقط صورة الغرفة
-                    </Text>
-                    <Feather
-                        name="camera"
-                        size={22}
-                        color={isReady ? 'white' : '#94a3b8'}
-                    />
-                </TouchableOpacity>
-            </View>
+                        activeOpacity={0.8}
+                    >
+                        <Text
+                            className={`text-lg font-cairo-bold ${
+                                isReady ? 'text-white' : 'text-slate-400'
+                            }`}
+                        >
+                            التقط صورة الغرفة
+                        </Text>
+                        <Feather
+                            name="camera"
+                            size={22}
+                            color={isReady ? 'white' : '#94a3b8'}
+                        />
+                    </TouchableOpacity>
+                </View>
+            </SafeAreaView>
         </SafeAreaView>
     );
 }

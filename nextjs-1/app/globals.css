@@ -1,0 +1,375 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+
+@layer base {
+    :root {
+        --background: 0 0% 99%;
+        /* #FDFDFD */
+        --foreground: 240 10% 11%;
+        /* #1B1B1F */
+        --card: 0 0% 100%;
+        /* #FFFFFF */
+        --card-foreground: 240 10% 11%;
+        /* #1B1B1F */
+        --popover: 0 0% 100%;
+        /* #FFFFFF */
+        --popover-foreground: 240 10% 11%;
+        /* #1B1B1F */
+        --primary: 231 43% 25%;
+        /* #242C5A */
+        --primary-foreground: 0 0% 100%;
+        /* #ffffff */
+        --secondary: 220 14% 96%;
+        /* #F4F5F7 */
+        --secondary-foreground: 240 10% 11%;
+        /* #1B1B1F */
+        --muted: 220 14% 96%;
+        /* #F4F5F7 */
+        --muted-foreground: 215 16% 47%;
+        /* #64748B */
+        --accent: 220 14% 96%;
+        /* #F4F5F7 */
+        --accent-foreground: 240 10% 11%;
+        /* #1B1B1F */
+        --destructive: 0 84% 60%;
+        /* #EF4444 */
+        --destructive-foreground: 0 0% 100%;
+        /* #ffffff */
+        --border: 214 32% 91%;
+        /* #E2E8F0 */
+        --input: 214 32% 91%;
+        /* #E2E8F0 */
+        --ring: 231 43% 25%;
+        /* #242C5A */
+        --radius: 1.25rem;
+        --chart-1: 231 43% 25%;
+        /* #242C5A */
+        --chart-2: 232 31% 34%;
+        /* #3B4270 */
+        --chart-3: 232 24% 47%;
+        /* #5B6395 */
+        --chart-4: 232 23% 62%;
+        /* #838AB9 */
+        --chart-5: 231 35% 78%;
+        /* #B2B8DB */
+        --sidebar: 240 20% 15%;
+        /* #1E1E2D - Approx */
+        --sidebar-foreground: 0 0% 100%;
+        /* #FFFFFF */
+        --sidebar-primary: 0 0% 100%;
+        /* #FFFFFF */
+        --sidebar-primary-foreground: 240 20% 15%;
+        /* #1E1E2D */
+        --sidebar-accent: 0 0% 100%;
+        /* using white for accent base, alpha handled in usage? Original was rgba(255, 255, 255, 0.08) */
+        --sidebar-accent-foreground: 0 0% 100%;
+        /* #FFFFFF */
+        --sidebar-border: 0 0% 100%;
+        /* rgba(255, 255, 255, 0.05) */
+        --sidebar-ring: 0 0% 100%;
+        /* #FFFFFF */
+    }
+
+    .dark {
+        --background: 240 10% 11%;
+        /* #1B1B1F */
+        --foreground: 252 4% 89%;
+        /* #E3E2E6 */
+        --card: 240 6% 15%;
+        /* #232328 */
+        --card-foreground: 252 4% 89%;
+        /* #E3E2E6 */
+        --popover: 240 6% 15%;
+        /* #232328 */
+        --popover-foreground: 252 4% 89%;
+        /* #E3E2E6 */
+        --primary: 240 23% 81%;
+        /* #C3C3D9 */
+        --primary-foreground: 240 10% 20%;
+        /* #2E2E38 */
+        --secondary: 240 10% 20%;
+        /* #2E2E38 */
+        --secondary-foreground: 252 4% 89%;
+        /* #E3E2E6 */
+        --muted: 240 10% 20%;
+        /* #2E2E38 */
+        --muted-foreground: 226 5% 58%;
+        /* #8E9199 */
+        --accent: 240 10% 20%;
+        /* #2E2E38 */
+        --accent-foreground: 252 4% 89%;
+        /* #E3E2E6 */
+        --destructive: 5 100% 84%;
+        /* #FFB4AB */
+        --destructive-foreground: 240 10% 20%;
+        /* #2E2E38 */
+        --border: 224 8% 29%;
+        /* #44474F */
+        --input: 224 8% 29%;
+        /* #44474F */
+        --ring: 240 23% 81%;
+        /* #C3C3D9 */
+        --chart-1: 240 23% 81%;
+        /* #C3C3D9 */
+        --chart-2: 226 5% 58%;
+        /* #8E9199 */
+        --chart-3: 228 5% 38%;
+        /* #5C5E66 */
+        --chart-4: 224 8% 29%;
+        /* #44474F */
+        --chart-5: 240 10% 20%;
+        /* #2E2E38 */
+        --sidebar: 240 10% 11%;
+        /* #1B1B1F */
+        --sidebar-foreground: 252 4% 89%;
+        /* #E3E2E6 */
+        --sidebar-primary: 240 23% 81%;
+        /* #C3C3D9 */
+        --sidebar-primary-foreground: 240 10% 11%;
+        /* #1B1B1F */
+        --sidebar-accent: 240 10% 20%;
+        /* #2E2E38 */
+        --sidebar-accent-foreground: 252 4% 89%;
+        /* #E3E2E6 */
+        --sidebar-border: 240 10% 20%;
+        /* #2E2E38 */
+        --sidebar-ring: 240 23% 81%;
+        /* #C3C3D9 */
+    }
+}
+
+@layer base {
+    * {
+        @apply border-border;
+    }
+
+    body {
+        @apply bg-background text-foreground;
+    }
+}
+
+.premium-card {
+    @apply bg-card border border-border/60 rounded-3xl transition-all duration-300 hover:border-primary/20 hover:bg-muted/30;
+}
+
+.premium-input {
+    @apply h-12 rounded-xl bg-muted border border-border px-6 focus:bg-white focus:ring-1 focus:ring-primary/20 transition-all duration-200;
+}
+
+@keyframes spin-line {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.animate-spin-line {
+    animation: spin-line 8s linear infinite;
+}
+
+@keyframes fade-in {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slide-in-from-bottom {
+    from {
+        transform: translateY(1rem);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes spring {
+    0% {
+        transform: scale(0.95) translateY(10px);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.02) translateY(-2px);
+    }
+    70% {
+        transform: scale(0.98) translateY(1px);
+    }
+    100% {
+        transform: scale(1) translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0px) translateX(0px);
+    }
+    33% {
+        transform: translateY(-20px) translateX(10px);
+    }
+    66% {
+        transform: translateY(10px) translateX(-10px);
+    }
+}
+
+@keyframes float-delayed {
+    0%, 100% {
+        transform: translateY(0px) translateX(0px);
+    }
+    33% {
+        transform: translateY(15px) translateX(-15px);
+    }
+    66% {
+        transform: translateY(-10px) translateX(15px);
+    }
+}
+
+.animate-in {
+    animation: fade-in 0.7s ease-in-out forwards;
+}
+
+.fade-in {
+    animation: fade-in 0.7s ease-in-out forwards;
+}
+
+.slide-in-from-bottom {
+    animation: slide-in-from-bottom 0.7s ease-in-out forwards;
+}
+
+.animate-spring {
+    animation: spring 1.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+}
+
+.animate-float {
+    animation: float 6s ease-in-out infinite;
+}
+
+.animate-float-delayed {
+    animation: float-delayed 8s ease-in-out infinite;
+}
+
+.delay-300 {
+    animation-delay: 300ms;
+}
+
+.duration-700 {
+    animation-duration: 700ms;
+}
+
+/* Custom Scrollbar Styles */
+@layer utilities {
+    .custom-scrollbar::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: #242C5A;
+        border-radius: 10px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: #1a2144;
+    }
+
+    /* For Firefox */
+    .custom-scrollbar {
+        scrollbar-width: thin;
+        scrollbar-color: #242C5A #f1f1f1;
+    }
+}
+
+/* Dialog custom scrollbar */
+[data-slot="dialog-content"] .custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: #242C5A #f1f1f1;
+}
+
+[data-slot="dialog-content"] .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+}
+
+[data-slot="dialog-content"] .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+[data-slot="dialog-content"] .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #242C5A;
+    border-radius: 10px;
+}
+
+[data-slot="dialog-content"] .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #1a2144;
+}
+
+/* Blog Content Styling */
+.blog-content {
+    direction: rtl;
+}
+
+.blog-content h2 {
+    font-size: 1.875rem;
+    font-weight: 700;
+    color: #242C5A;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    line-height: 1.4;
+}
+
+.blog-content h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #242C5A;
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+    line-height: 1.4;
+}
+
+.blog-content p {
+    margin-bottom: 1.5rem;
+    line-height: 1.8;
+    color: #374151;
+}
+
+.blog-content ul,
+.blog-content ol {
+    padding-right: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.blog-content li {
+    margin-bottom: 0.5rem;
+    line-height: 1.8;
+}
+
+.blog-content a {
+    color: #242C5A;
+    text-decoration: underline;
+    text-decoration-color: rgba(36, 44, 90, 0.3);
+    transition: all 0.2s;
+}
+
+.blog-content a:hover {
+    text-decoration-color: #242C5A;
+    color: #1a2144;
+}
+
+.blog-content strong {
+    font-weight: 700;
+    color: #242C5A;
+}

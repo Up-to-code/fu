@@ -1,0 +1,124 @@
+"use client";
+
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Plus } from "lucide-react";
+import { styleTypes, emojiIcons, type Category } from "@/data";
+
+interface CategoryFormDialogProps {
+    onAdd: (category: Omit<Category, "id">) => void;
+}
+
+export function CategoryFormDialog({ onAdd }: CategoryFormDialogProps) {
+    const [isOpen, setIsOpen] = useState(false);
+    const [name, setName] = useState("");
+    const [description, setDescription] = useState("");
+    const [style, setStyle] = useState("modern");
+    const [selectedIcon, setSelectedIcon] = useState("📦");
+
+    const handleSubmit = () => {
+        if (name.trim()) {
+            onAdd({
+                name: name.trim(),
+                nameEn: name.trim(),
+                description: description.trim() || "منتجات متنوعة",
+                products: 0,
+                icon: selectedIcon,
+                image: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=400",
+                style: style,
+            });
+            setName("");
+            setDescription("");
+            setStyle("modern");
+            setSelectedIcon("📦");
+            setIsOpen(false);
+        }
+    };
+
+    return (
+        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+            <DialogTrigger asChild>
+                <Button className="bg-[#242C5A] hover:bg-[#1a2144] rounded-xl">
+                    <Plus className="h-4 w-4 ml-2" />
+                    إضافة تصنيف
+                </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-md rounded-2xl" dir="rtl">
+                <DialogHeader>
+                    <DialogTitle className="text-xl font-black text-[#242C5A]">إضافة تصنيف جديد</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                    <div className="space-y-2">
+                        <Label>اختر أيقونة</Label>
+                        <div className="grid grid-cols-5 gap-2">
+                            {emojiIcons.map((icon) => (
+                                <button
+                                    key={icon}
+                                    onClick={() => setSelectedIcon(icon)}
+                                    className={`aspect-square rounded-lg flex items-center justify-center text-xl transition-all ${selectedIcon === icon
+                                        ? 'bg-[#242C5A]/10 border-2 border-[#242C5A]'
+                                        : 'bg-gray-50 border-2 border-transparent hover:bg-gray-100'
+                                        }`}
+                                >
+                                    {icon}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                    <div className="space-y-2">
+                        <Label>اسم التصنيف</Label>
+                        <Input
+                            placeholder="مثال: غرف نوم"
+                            className="rounded-xl"
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
+                        />
+                    </div>
+                    <div className="space-y-2">
+                        <Label>نوع الستايل</Label>
+                        <Select value={style} onValueChange={setStyle}>
+                            <SelectTrigger className="rounded-xl">
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {styleTypes.map((styleType) => (
+                                    <SelectItem key={styleType.id} value={styleType.id}>
+                                        <span className={`inline-block px-2 py-0.5 rounded-full text-xs ${styleType.color} ml-2`}>{styleType.name}</span>
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    <div className="space-y-2">
+                        <Label>ماذا يشمل هذا التصنيف؟</Label>
+                        <Textarea
+                            placeholder="مثال: أسرّة، خزائن، كومودينو..."
+                            className="rounded-xl min-h-[80px]"
+                            value={description}
+                            onChange={(e) => setDescription(e.target.value)}
+                        />
+                    </div>
+                    <Button
+                        onClick={handleSubmit}
+                        className="w-full bg-[#242C5A] hover:bg-[#1a2144] rounded-xl"
+                        disabled={!name.trim()}
+                    >
+                        <Plus className="h-4 w-4 ml-2" />
+                        إضافة
+                    </Button>
+                </div>
+            </DialogContent>
+        </Dialog>
+    );
+}

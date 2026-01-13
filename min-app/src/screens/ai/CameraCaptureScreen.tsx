@@ -1,5 +1,5 @@
 // File: src/screens/ai/CameraCaptureScreen.tsx
-// Purpose: Camera UI with Photo Saving
+// Purpose: Modern and accessible camera UI
 
 import { Feather } from '@expo/vector-icons';
 import { CameraView, useCameraPermissions } from 'expo-camera';
@@ -23,7 +23,7 @@ const CameraCaptureScreen = () => {
 
     if (!permission.granted) {
         return (
-            <SafeAreaView className="flex-1 bg-slate-900 items-center justify-center px-8">
+            <SafeAreaView className="flex-1 bg-slate-900 items-center justify-center px-5" edges={['top', 'bottom']}>
                 <StatusBar barStyle="light-content" />
 
                 <View className="w-20 h-20 rounded-full bg-slate-800 items-center justify-center mb-8">
@@ -34,13 +34,14 @@ const CameraCaptureScreen = () => {
                     نحتاج إذن الكاميرا
                 </Text>
 
-                <Text className="text-slate-400 text-center mb-10 font-cairo-medium text-sm leading-6">
+                <Text className="text-slate-400 text-center mb-10 font-cairo-medium text-base leading-6 px-4">
                     للتصوير وتصميم غرفتك بالذكاء الاصطناعي
                 </Text>
 
                 <TouchableOpacity
                     onPress={requestPermission}
-                    className="bg-primary px-10 py-4 rounded-full flex-row items-center gap-3"
+                    className="bg-primary px-10 py-4 rounded-2xl flex-row-reverse items-center gap-3"
+                    activeOpacity={0.8}
                 >
                     <Text className="text-white font-cairo-bold text-base">السماح</Text>
                     <Feather name="unlock" size={18} color="white" />
@@ -67,10 +68,7 @@ const CameraCaptureScreen = () => {
                 const photoUri = photo?.uri;
 
                 if (photoUri) {
-                    console.log('📸 Photo captured:', photoUri);
-                    // Save to storage
                     saveAISession({ originalPhotoUri: photoUri });
-                    // Navigate with photo param for immediate access
                     router.push({
                         pathname: '/ai-design/results',
                         params: { photo: photoUri }
@@ -93,7 +91,6 @@ const CameraCaptureScreen = () => {
 
             if (!result.canceled && result.assets[0]) {
                 const photoUri = result.assets[0].uri;
-                console.log('🖼️ Gallery photo:', photoUri);
                 saveAISession({ originalPhotoUri: photoUri });
                 router.push({
                     pathname: '/ai-design/results',
@@ -128,11 +125,12 @@ const CameraCaptureScreen = () => {
                     <TouchableOpacity
                         onPress={handleBack}
                         className="w-12 h-12 rounded-full bg-black/50 items-center justify-center"
+                        activeOpacity={0.8}
                     >
                         <Feather name="x" size={22} color="white" />
                     </TouchableOpacity>
 
-                    <View className="bg-black/50 px-5 py-2.5 rounded-full">
+                    <View className="bg-black/50 px-5 py-2.5 rounded-2xl">
                         <Text className="text-white text-sm font-cairo-bold">صوّر الغرفة</Text>
                     </View>
 
@@ -142,14 +140,14 @@ const CameraCaptureScreen = () => {
 
             {/* Guide Frame */}
             <View className="absolute inset-0 items-center justify-center pointer-events-none">
-                <View className="w-[85%] h-[55%] border-2 border-white/30 rounded-3xl" />
+                <View className="w-[85%] h-[55%] border-2 border-white/40 rounded-3xl" />
             </View>
 
-            {/* Bottom */}
+            {/* Bottom Controls */}
             <SafeAreaView className="absolute bottom-0 left-0 right-0" edges={['bottom']}>
-                <View className="pb-6 pt-8">
+                <View className="pb-6 pt-6">
                     {/* Hint */}
-                    <Text className="text-white/70 text-xs font-cairo-medium text-center mb-8">
+                    <Text className="text-white/80 text-sm font-cairo-medium text-center mb-8 px-5">
                         حاول تصوير الغرفة كاملة
                     </Text>
 
@@ -159,6 +157,7 @@ const CameraCaptureScreen = () => {
                         <TouchableOpacity
                             onPress={handleGalleryPick}
                             className="w-14 h-14 rounded-full bg-white/20 items-center justify-center"
+                            activeOpacity={0.8}
                         >
                             <Feather name="image" size={24} color="white" />
                         </TouchableOpacity>
@@ -169,14 +168,16 @@ const CameraCaptureScreen = () => {
                             className="w-20 h-20 rounded-full border-4 border-white items-center justify-center mx-8"
                             activeOpacity={0.8}
                         >
-                            <View className="w-16 h-16 rounded-full" style={{ backgroundColor: COLORS.primary }} />
+                            <View className="w-16 h-16 rounded-full bg-primary" />
                         </TouchableOpacity>
 
                         {/* Flash Toggle */}
                         <TouchableOpacity
                             onPress={toggleFlash}
-                            className={`w-14 h-14 rounded-full items-center justify-center ${flashMode === 'on' ? 'bg-yellow-500' : 'bg-white/20'
-                                }`}
+                            className={`w-14 h-14 rounded-full items-center justify-center ${
+                                flashMode === 'on' ? 'bg-yellow-500' : 'bg-white/20'
+                            }`}
+                            activeOpacity={0.8}
                         >
                             <Feather
                                 name={flashMode === 'on' ? 'zap' : 'zap-off'}

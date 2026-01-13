@@ -4,7 +4,7 @@
 import { Feather } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import React, { useEffect, useRef, useState } from 'react';
-import { Animated, Dimensions, Easing, PanResponder, Text, View } from 'react-native';
+import { Animated, Dimensions, Easing, PanResponder, StyleSheet, Text, View } from 'react-native';
 import { COLORS } from '../../constants/theme';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
@@ -20,9 +20,10 @@ export const SwipeToConfirm: React.FC<SwipeToConfirmProps> = ({
     label = 'اسحب لتأكيد الطلب',
     disabled = false,
 }) => {
-    const BUTTON_WIDTH = SCREEN_WIDTH - 40; // Full width minus padding
+    const BUTTON_WIDTH = SCREEN_WIDTH - 40;
     const THUMB_SIZE = 56;
-    const MAX_TRANSLATE = BUTTON_WIDTH - THUMB_SIZE - 8; // 8 for padding
+    const PADDING = 4;
+    const MAX_TRANSLATE = BUTTON_WIDTH - THUMB_SIZE - PADDING * 2;
 
     const translateX = useRef(new Animated.Value(0)).current;
     const shimmerAnim = useRef(new Animated.Value(0)).current;
@@ -71,7 +72,10 @@ export const SwipeToConfirm: React.FC<SwipeToConfirmProps> = ({
     const panResponder = useRef(
         PanResponder.create({
             onStartShouldSetPanResponder: () => !disabled && !isConfirmed,
-            onMoveShouldSetPanResponder: () => !disabled && !isConfirmed,
+            onMoveShouldSetPanResponder: (_, gestureState) => {
+                // Only capture horizontal swipes to avoid conflicts with ScrollView
+                return !disabled && !isConfirmed && Math.abs(gestureState.dx) > Math.abs(gestureState.dy);
+            },
             onPanResponderGrant: () => {
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
             },
@@ -82,7 +86,7 @@ export const SwipeToConfirm: React.FC<SwipeToConfirmProps> = ({
             },
             onPanResponderRelease: (_, gestureState) => {
                 const swipeDistance = -gestureState.dx;
-                
+
                 if (swipeDistance > MAX_TRANSLATE * 0.7) {
                     // Complete the swipe
                     Animated.spring(translateX, {
@@ -105,6 +109,7 @@ export const SwipeToConfirm: React.FC<SwipeToConfirmProps> = ({
                     }).start();
                 }
             },
+            onPanResponderTerminationRequest: () => false, // Don't allow parent to steal gesture
         })
     ).current;
 
@@ -134,37 +139,32 @@ export const SwipeToConfirm: React.FC<SwipeToConfirmProps> = ({
         outputRange: [0, -8],
     });
 
+    const containerBackgroundColor = disabled
+        ? '#e2e8f0'
+        : isConfirmed
+            ? '#10B981'
+            : COLORS.primary;
+
     return (
         <View
-            className="rounded-2xl overflow-hidden"
-            style={{
-                backgroundColor: disabled ? '#e2e8f0' : isConfirmed ? '#10B981' : COLORS.primary,
-                height: THUMB_SIZE + 8,
-            }}
+            style={[
+                styles.container,
+                { backgroundColor: containerBackgroundColor, height: THUMB_SIZE + PADDING * 2 },
+            ]}
         >
             {/* Shimmer Effect */}
             {!disabled && !isConfirmed && (
                 <Animated.View
-                    style={{
-                        position: 'absolute',
-                        top: 0,
-                        bottom: 0,
-                        width: 60,
-                        backgroundColor: 'rgba(255,255,255,0.2)',
-                        transform: [{ translateX: shimmerTranslate }, { skewX: '-20deg' }],
-                    }}
+                    style={[
+                        styles.shimmer,
+                        { transform: [{ translateX: shimmerTranslate }, { skewX: '-20deg' }] },
+                    ]}
                 />
             )}
 
             {/* Background Text */}
-            <Animated.View
-                className="absolute inset-0 items-center justify-center flex-row-reverse gap-2"
-                style={{ opacity: textOpacity }}
-            >
-                <Text
-                    className="font-cairo-bold text-base"
-                    style={{ color: disabled ? '#94a3b8' : 'white' }}
-                >
+            <Animated.View style={[styles.textContainer, { opacity: textOpacity }]}>
+                <Text style={[styles.label, { color: disabled ? '#94a3b8' : 'white' }]}>
                     {isConfirmed ? 'تم التأكيد ✓' : label}
                 </Text>
                 {!isConfirmed && (
@@ -178,19 +178,16 @@ export const SwipeToConfirm: React.FC<SwipeToConfirmProps> = ({
             {!isConfirmed && (
                 <Animated.View
                     {...panResponder.panHandlers}
-                    className="absolute items-center justify-center bg-white rounded-xl"
-                    style={{
-                        width: THUMB_SIZE,
-                        height: THUMB_SIZE,
-                        top: 4,
-                        right: 4,
-                        transform: [{ translateX: thumbTransform }],
-                        shadowColor: '#000',
-                        shadowOffset: { width: 0, height: 2 },
-                        shadowOpacity: 0.1,
-                        shadowRadius: 4,
-                        elevation: 3,
-                    }}
+                    style={[
+                        styles.thumb,
+                        {
+                            width: THUMB_SIZE,
+                            height: THUMB_SIZE,
+                            top: PADDING,
+                            right: PADDING,
+                            transform: [{ translateX: thumbTransform }],
+                        },
+                    ]}
                 >
                     <Feather
                         name="arrow-left"
@@ -202,5 +199,47 @@ export const SwipeToConfirm: React.FC<SwipeToConfirmProps> = ({
         </View>
     );
 };
+
+const styles = StyleSheet.create({
+    container: {
+        borderRadius: 16,
+        overflow: 'hidden',
+        position: 'relative',
+    },
+    shimmer: {
+        position: 'absolute',
+        top: 0,
+        bottom: 0,
+        width: 60,
+        backgroundColor: 'rgba(255,255,255,0.2)',
+    },
+    textContainer: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        flexDirection: 'row-reverse',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 8,
+    },
+    label: {
+        fontFamily: 'Cairo_700Bold',
+        fontSize: 16,
+    },
+    thumb: {
+        position: 'absolute',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'white',
+        borderRadius: 12,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 3,
+    },
+});
 
 export default SwipeToConfirm;

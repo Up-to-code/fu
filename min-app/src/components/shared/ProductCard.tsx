@@ -75,12 +75,14 @@ export const ProductCard: React.FC<ProductCardProps> = ({
                 </View>
 
                 <View className="p-3">
-                    <Text
-                        className="text-slate-800 font-cairo-medium text-xs text-right mb-1.5"
-                        numberOfLines={2}
-                    >
-                        {product.name}
-                    </Text>
+                    <View className="mb-1.5" style={{ minHeight: 32 }}>
+                        <Text
+                            className="text-slate-800 font-cairo-medium text-xs text-right"
+                            numberOfLines={2}
+                        >
+                            {product.name}
+                        </Text>
+                    </View>
 
                     <View className="flex-row-reverse items-center justify-between">
                         <Text
@@ -137,12 +139,14 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             </View>
 
             <View className="p-3">
-                <Text
-                    className={`text-slate-800 font-cairo-bold text-right mb-2 ${isTablet ? 'text-base' : 'text-sm'}`}
-                    numberOfLines={1}
-                >
-                    {product.name}
-                </Text>
+                <View className="mb-2" style={{ minHeight: isTablet ? 44 : 40 }}>
+                    <Text
+                        className={`text-slate-800 font-cairo-bold text-right ${isTablet ? 'text-base' : 'text-sm'}`}
+                        numberOfLines={2}
+                    >
+                        {product.name}
+                    </Text>
+                </View>
 
                 <View className="flex-row-reverse items-center justify-between">
                     <View className="flex-row-reverse items-baseline gap-1">
