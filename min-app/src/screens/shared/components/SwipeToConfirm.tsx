@@ -1,21 +1,17 @@
-// File: src/components/shared/SwipeToConfirm.tsx
+// File: src/screens/shared/components/SwipeToConfirm.tsx
 // Purpose: Swipe-to-confirm button component (RTL - swipe from right to left)
 
 import { Feather } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import React, { useEffect, useRef, useState } from 'react';
-import { Animated, Dimensions, Easing, PanResponder, StyleSheet, Text, View } from 'react-native';
-import { COLORS } from '../../constants/theme';
+import { Animated, Dimensions, Easing, PanResponder, Text, View } from 'react-native';
+import { COLORS } from '../../../constants/theme';
+import { SwipeToConfirmProps } from '../types/ui';
+import { styles } from '../StyleSheets/SwipeToConfirm.styles';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 
-interface SwipeToConfirmProps {
-    onConfirm: () => void;
-    label?: string;
-    disabled?: boolean;
-}
-
-export const SwipeToConfirm: React.FC<SwipeToConfirmProps> = ({
+const SwipeToConfirmComponent: React.FC<SwipeToConfirmProps> = ({
     onConfirm,
     label = 'اسحب لتأكيد الطلب',
     disabled = false,
@@ -67,7 +63,7 @@ export const SwipeToConfirm: React.FC<SwipeToConfirmProps> = ({
                 arrowLoop.stop();
             };
         }
-    }, [disabled, isConfirmed]);
+    }, [disabled, isConfirmed, shimmerAnim, arrowAnim]);
 
     const panResponder = useRef(
         PanResponder.create({
@@ -200,43 +196,7 @@ export const SwipeToConfirm: React.FC<SwipeToConfirmProps> = ({
     );
 };
 
-const styles = StyleSheet.create({
-    container: {
-        borderRadius: 16,
-        overflow: 'hidden',
-        position: 'relative',
-    },
-    shimmer: {
-        position: 'absolute',
-        top: 0,
-        bottom: 0,
-        width: 60,
-        backgroundColor: 'rgba(255,255,255,0.2)',
-    },
-    textContainer: {
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        flexDirection: 'row-reverse',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: 8,
-    },
-    label: {
-        fontFamily: 'Cairo_700Bold',
-        fontSize: 16,
-    },
-    thumb: {
-        position: 'absolute',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: 'white',
-        borderRadius: 12,
-        borderWidth: 1,
-        borderColor: '#f1f5f9',
-    },
-});
+// Memoize SwipeToConfirm to prevent unnecessary re-renders
+export const SwipeToConfirm = React.memo(SwipeToConfirmComponent);
 
 export default SwipeToConfirm;

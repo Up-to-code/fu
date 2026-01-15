@@ -3,12 +3,17 @@
 
 import { Feather } from '@expo/vector-icons';
 import { Link, useRouter } from 'expo-router';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 import { styles } from './StyleSheets/HomeHeader.styles';
 
-export const HomeHeader = () => {
+const HomeHeaderComponent = () => {
     const router = useRouter();
+
+    const handleCameraPress = useCallback((e: any) => {
+        e.stopPropagation();
+        router.push('/search/image' as any);
+    }, [router]);
 
     return (
         <View style={styles.container}>
@@ -18,12 +23,7 @@ export const HomeHeader = () => {
                     <Text style={styles.searchText}>
                         أنت بتدور على آيه؟
                     </Text>
-                    <TouchableOpacity
-                        onPress={(e) => {
-                            e.stopPropagation();
-                            router.push('/search/image' as any);
-                        }}
-                    >
+                    <TouchableOpacity onPress={handleCameraPress}>
                         <Feather name="camera" size={18} color="#9CA3AF" />
                     </TouchableOpacity>
                 </TouchableOpacity>
@@ -31,3 +31,6 @@ export const HomeHeader = () => {
         </View>
     );
 };
+
+// Memoize HomeHeader to prevent unnecessary re-renders
+export const HomeHeader = React.memo(HomeHeaderComponent);

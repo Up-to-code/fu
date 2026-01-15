@@ -2,7 +2,7 @@
 // Purpose: Categories section as 2x3 grid with larger cards for beginner-friendly navigation
 
 import { useRouter } from 'expo-router';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { Image, Text, TouchableOpacity, View } from 'react-native';
 import { Category } from './types/home';
 import { styles } from './StyleSheets/CategoriesSection.styles';
@@ -16,8 +16,12 @@ const CATEGORIES: Category[] = [
     { id: '6', name: 'جلسات خارجية', image: 'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?w=200&q=80' },
 ];
 
-export const CategoriesSection = () => {
+const CategoriesSectionComponent = () => {
     const router = useRouter();
+
+    const handleCategoryPress = useCallback((categoryId: string) => {
+        router.push(`/category/${categoryId}`);
+    }, [router]);
 
     return (
         <View style={styles.container}>
@@ -27,7 +31,7 @@ export const CategoriesSection = () => {
                     <TouchableOpacity
                         key={category.id}
                         style={styles.categoryCard}
-                        onPress={() => router.push(`/category/${category.id}`)}
+                        onPress={() => handleCategoryPress(category.id)}
                         activeOpacity={0.9}
                     >
                         <View style={styles.categoryImage}>
@@ -46,3 +50,6 @@ export const CategoriesSection = () => {
         </View>
     );
 };
+
+// Memoize CategoriesSection to prevent unnecessary re-renders
+export const CategoriesSection = React.memo(CategoriesSectionComponent);

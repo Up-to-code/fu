@@ -6,7 +6,7 @@ import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { Dimensions, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { EmptyState } from '../../components/shared';
+import { EmptyState } from '../shared';
 import { Header, TabBar, ProductGrid } from '../shared';
 import { useFavorites, useFavoriteProducts, useFavoriteServices } from './_hooks';
 import { COLORS } from '../../constants/theme';

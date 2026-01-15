@@ -6,7 +6,7 @@ import { useRouter } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
 import { Alert, Animated, Image, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { SwipeToConfirm } from '../../components/shared';
+import { SwipeToConfirm } from '../shared';
 import { Header } from '../shared';
 import { useCheckout, usePaymentMethods } from './_hooks';
 import { useCart } from '../cart/_hooks';

@@ -7,7 +7,7 @@ import { Image, Text, TouchableOpacity, View } from 'react-native';
 import { OrderCardData, OrderCardProps } from '../types/card';
 import { styles } from '../StyleSheets/OrderCard.styles';
 
-export const OrderCard: React.FC<OrderCardProps> = ({
+const OrderCardComponent: React.FC<OrderCardProps> = ({
     order,
     onPress,
 }) => {
@@ -64,3 +64,14 @@ export const OrderCard: React.FC<OrderCardProps> = ({
         </TouchableOpacity>
     );
 };
+
+// Memoize OrderCard to prevent unnecessary re-renders in lists
+export const OrderCard = React.memo(OrderCardComponent, (prevProps, nextProps) => {
+    return (
+        prevProps.order.number === nextProps.order.number &&
+        prevProps.order.statusLabel === nextProps.order.statusLabel &&
+        prevProps.order.total === nextProps.order.total &&
+        prevProps.order.date.getTime() === nextProps.order.date.getTime() &&
+        prevProps.onPress === nextProps.onPress
+    );
+});

@@ -4,9 +4,9 @@
 import { Feather, Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { Image, ScrollView, Share, Text, TouchableOpacity, View } from 'react-native';
+import { Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ActionButton, BottomBar, FloatingHeader, PriceTable, StarRating } from '../../components/shared';
+import { ActionButton, BottomBar, FloatingHeader, PriceTable, StarRating } from '../shared';
 import { ReviewCard, Review } from '../shared';
 import { ProductCard, IProductCardProps } from '../shared';
 import { useProductDetails, useProductReviews, useSimilarProducts } from './_hooks';
@@ -105,14 +105,6 @@ export default function ProductDetailsScreen() {
     const subtotal = product.price * quantity;
     const shipping = subtotal >= 2000 ? 0 : 50;
     const total = subtotal + shipping;
-
-    const handleShare = async () => {
-        try {
-            await Share.share({ message: `${product.name} - ${product.price} ر.س` });
-        } catch (error) {
-            console.error(error);
-        }
-    };
 
     // Section Header Component
     const SectionHeader: React.FC<SectionHeaderProps> = ({ title, actionLabel, onAction }) => (
@@ -407,7 +399,9 @@ export default function ProductDetailsScreen() {
                         <SectionHeader
                             title={`التقييمات (${reviews.length})`}
                             actionLabel="عرض الكل"
-                            onAction={() => console.log('View all reviews')}
+                            onAction={() => {
+                                // Navigate to reviews screen
+                            }}
                         />
                         {reviews.slice(0, 2).map((review) => (
                             <ReviewCard key={review.id} review={review} />
@@ -446,9 +440,7 @@ export default function ProductDetailsScreen() {
             {/* Floating Header */}
             <FloatingHeader
                 showBack
-                showShare
                 showFavorite
-                onShare={handleShare}
                 onFavorite={() => setIsFavorite(!isFavorite)}
                 isFavorite={isFavorite}
             />
@@ -458,7 +450,9 @@ export default function ProductDetailsScreen() {
                 <ActionButton
                     label="إضافة للسلة"
                     icon="shopping-cart"
-                    onPress={() => console.log('Add to cart', { quantity, color: selectedColor, size: selectedSize })}
+                    onPress={() => {
+                        // Add to cart functionality
+                    }}
                 />
             </BottomBar>
         </SafeAreaView>

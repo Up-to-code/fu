@@ -7,7 +7,7 @@ import React from 'react';
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { COLORS } from '../../constants/theme';
-import { EmptyState } from '../../components/shared';
+import { EmptyState } from '../shared';
 import { Header, LoadingSpinner } from '../shared';
 import { useChats } from './_hooks';
 

@@ -16,7 +16,7 @@ const FEATURES: Feature[] = [
     { id: '4', name: 'طلبات خاصة', icon: 'tool', link: '/custom-orders' }
 ];
 
-export const FeaturesSection = () => (
+const FeaturesSectionComponent = () => (
     <View style={styles.container}>
         <ScrollView
             horizontal
@@ -39,3 +39,6 @@ export const FeaturesSection = () => (
         </ScrollView>
     </View>
 );
+
+// Memoize FeaturesSection to prevent unnecessary re-renders
+export const FeaturesSection = React.memo(FeaturesSectionComponent);

@@ -1,7 +1,7 @@
 // File: convex/crons.ts
 // Purpose: Cron jobs for scheduled tasks
 
-import { cronJobs } from "@convex-dev/crons";
+import { cronJobs } from "convex/server";
 import { internal } from "./_generated/api";
 
 const crons = cronJobs();

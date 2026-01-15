@@ -6,7 +6,7 @@ import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { Dimensions, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { EmptyState } from '../../components/shared';
+import { EmptyState } from '../shared';
 import { Header, TabBar, OrderCard } from '../shared';
 import { useOrders } from './_hooks';
 import { COLORS } from '../../constants/theme';
@@ -32,7 +32,6 @@ const CURRENT_USER = {
 };
 
 // Mock product orders
-// Note: OrderType and UnifiedOrder are now imported from ./types/orders
 const PRODUCT_ORDERS: ProductOrder[] = [
     {
         id: 'po1',

@@ -5,7 +5,7 @@ import { useRouter } from 'expo-router';
 import React from 'react';
 import { Text, View } from 'react-native';
 import { useAuth } from '../../hooks/useAuth';
-import { ActionButton } from '../shared';
+import { ActionButton } from '../../screens/shared';
 
 interface AuthGuardProps {
     children: React.ReactNode;

@@ -2,7 +2,7 @@
 // Purpose: Modern and simple service promotions banner with accessibility focus
 
 import { Link } from 'expo-router';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { ServiceBanner } from './types/home';
 import { styles, BANNER_WIDTH } from './StyleSheets/AIDesignBanner.styles';
@@ -38,7 +38,7 @@ const SERVICE_BANNERS: ServiceBanner[] = [
     }
 ];
 
-export const AIDesignBanner = () => {
+const AIDesignBannerComponent = () => {
     const scrollViewRef = useRef<ScrollView>(null);
     const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -58,11 +58,11 @@ export const AIDesignBanner = () => {
         return () => clearInterval(interval);
     }, []);
 
-    const handleScroll = (event: any) => {
+    const handleScroll = useCallback((event: any) => {
         const contentOffsetX = event.nativeEvent.contentOffset.x;
         const index = SERVICE_BANNERS.length - 1 - Math.round(contentOffsetX / BANNER_WIDTH);
         setCurrentIndex(index);
-    };
+    }, []);
 
     return (
         <View style={styles.container}>
@@ -109,3 +109,6 @@ export const AIDesignBanner = () => {
         </View>
     );
 };
+
+// Memoize AIDesignBanner to prevent unnecessary re-renders
+export const AIDesignBanner = React.memo(AIDesignBannerComponent);

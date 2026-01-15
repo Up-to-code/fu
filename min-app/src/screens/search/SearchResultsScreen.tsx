@@ -4,7 +4,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useCallback, useRef } from 'react';
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { EmptyState } from '../../components/shared';
+import { EmptyState } from '../shared';
 import { SearchBar, ProductGrid, LoadingSpinner, FilterBottomSheet, FilterBottomSheetRef, FilterOption } from '../shared';
 import { useSearch } from './_hooks';
 import { COLORS } from '../../constants/theme';

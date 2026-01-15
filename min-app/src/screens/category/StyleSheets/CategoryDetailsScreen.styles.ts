@@ -11,6 +11,6 @@ export const styles = StyleSheet.create({
     scrollContent: {
         paddingBottom: 20,
         paddingHorizontal: 20,
-        paddingTop: 16,
+        paddingTop: 80, // Space for floating header
     },
 });

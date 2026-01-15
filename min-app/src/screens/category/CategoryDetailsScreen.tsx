@@ -2,10 +2,11 @@
 // Purpose: Category Products Screen
 
 import { useRouter } from 'expo-router';
-import React from 'react';
+import React, { useState } from 'react';
 import { ScrollView, Text, View } from 'react-native';
-import { EmptyState } from '../../components/shared';
-import { Header, ProductGrid, IProductCardProps, LoadingSpinner } from '../shared';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { EmptyState } from '../shared';
+import { FloatingHeader, ProductGrid, IProductCardProps, LoadingSpinner } from '../shared';
 import { useCategoryProducts } from './_hooks';
 import { CategoryDetailsScreenProps } from './types/category';
 import { styles } from './StyleSheets/CategoryDetailsScreen.styles';
@@ -43,24 +44,14 @@ export default function CategoryDetailsScreen({ id, name }: CategoryDetailsScree
     const { products, isLoading } = useCategoryProducts(id);
     // Fallback to mock data if hook returns empty
     const displayProducts = products.length > 0 ? products : (MOCK_PRODUCTS[id] || []);
+    const [isFavorite, setIsFavorite] = useState(false);
 
     return (
-        <View style={styles.container}>
-            <Header
-                title={name || 'التصنيف'}
-                rightAction={
-                    <View>
-                        <Text style={{ fontFamily: 'Cairo_500Medium', fontSize: 13, color: '#64748b' }}>
-                            {displayProducts.length} منتج
-                        </Text>
-                    </View>
-                }
-                showBack
-            />
-
+        <SafeAreaView style={styles.container} edges={['left', 'right']}>
             <ScrollView
                 style={{ flex: 1 }}
                 contentContainerStyle={styles.scrollContent}
+                showsVerticalScrollIndicator={false}
             >
                 {isLoading ? (
                     <LoadingSpinner message="جاري التحميل..." />
@@ -79,6 +70,14 @@ export default function CategoryDetailsScreen({ id, name }: CategoryDetailsScree
                     />
                 )}
             </ScrollView>
-        </View>
+
+            {/* Floating Header */}
+            <FloatingHeader
+                showBack
+                showFavorite
+                onFavorite={() => setIsFavorite(!isFavorite)}
+                isFavorite={isFavorite}
+            />
+        </SafeAreaView>
     );
 }

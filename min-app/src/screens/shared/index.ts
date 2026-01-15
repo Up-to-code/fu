@@ -3,6 +3,15 @@
 
 export * from './components';
 
+// Export migrated components explicitly
+export { EmptyState } from './components/EmptyState';
+export { SwipeToConfirm } from './components/SwipeToConfirm';
+export { ActionButton } from './components/ActionButton';
+export { BottomBar } from './components/BottomBar';
+export { FloatingHeader } from './components/FloatingHeader';
+export { PriceTable } from './components/PriceTable';
+export { StarRating } from './components/StarRating';
+
 // Export all types
 export type { HeaderProps } from './types/interfaces';
 export type { CameraMode } from './types/types';
@@ -12,3 +21,5 @@ export type { IProductCardProps, ProductCardProps, ProductGridProps, ProductHori
 export type { TypeOption, TypeSelectorProps, Tab, TabBarProps, FilterChipProps } from './types/navigation';
 export type { SearchBarProps, LoadingSpinnerProps, EmptyCartStateProps, ScreenHeaderProps, SimpleModalProps, RoleBadgeProps, FilterBottomSheetRef, FilterOption, FilterBottomSheetProps, QuickViewModalProps, RatingsBreakdownProps, CountryCodePickerProps, SectionHeaderProps } from './types/ui';
 export type { Review, ServiceReview, RatingDistribution } from './types/review';
+export type { EmptyStateProps, SwipeToConfirmProps, BottomBarProps, FloatingHeaderProps, PriceTableProps, StarRatingProps } from './types/ui';
+export type { ActionButtonProps } from './types/button';

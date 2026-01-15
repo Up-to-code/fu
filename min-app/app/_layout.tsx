@@ -1,7 +1,8 @@
 import { StrictMode, useEffect, useState, useCallback } from "react";
 import { Cairo_400Regular, Cairo_500Medium, Cairo_700Bold, useFonts } from "@expo-google-fonts/cairo";
-import { Slot, useRouter, useSegments, useFocusEffect } from "expo-router";
+import { Stack, useRouter, useSegments, useFocusEffect } from "expo-router";
 import { ActivityIndicator, I18nManager, StatusBar, View } from "react-native";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 import {
   ConvexReactClient,
   ConvexProvider,
@@ -129,18 +130,29 @@ function InitialLayout() {
     );
   }
 
-  return <Slot />;
+  return (
+    <Stack
+      screenOptions={{
+        headerShown: false,
+        animation: 'fade',
+        animationDuration: 300,
+        contentStyle: { backgroundColor: '#FFFFFF' },
+      }}
+    />
+  );
 }
 
 export default function RootLayout() {
   return (
     <StrictMode>
-      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
-      <ConvexProvider client={convex}>
-        <ConvexBetterAuthProvider client={convex} authClient={authClient}>
-          <InitialLayout />
-        </ConvexBetterAuthProvider>
-      </ConvexProvider>
+      <SafeAreaProvider>
+        <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
+        <ConvexProvider client={convex}>
+          <ConvexBetterAuthProvider client={convex} authClient={authClient}>
+            <InitialLayout />
+          </ConvexBetterAuthProvider>
+        </ConvexProvider>
+      </SafeAreaProvider>
     </StrictMode>
   );
 }

@@ -3,7 +3,7 @@
 
 import { Feather } from '@expo/vector-icons';
 import { Link, useRouter } from 'expo-router';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { Dimensions, Text, TouchableOpacity, View } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 import { COLORS } from '../../../constants/theme';
@@ -15,18 +15,23 @@ const { width } = Dimensions.get('window');
 const isTablet = width >= 768;
 const ESTIMATED_ITEM_SIZE = isTablet ? 200 : 170;
 
-export const ProductListSection: React.FC<ProductListSectionProps> = ({ title, products, onToggleFavorite }) => {
+const ProductListSectionComponent: React.FC<ProductListSectionProps> = ({ title, products, onToggleFavorite }) => {
     const router = useRouter();
 
-    const renderItem = ({ item }: { item: IProductCardProps }) => (
+    const handleProductPress = useCallback((productId: string) => {
+        router.push(`/product/${productId}`);
+    }, [router]);
+
+    const renderItem = useCallback(({ item }: { item: IProductCardProps }) => (
         <View style={styles.itemWrapper}>
             <ProductCard
                 product={item}
                 variant="horizontal"
-                onPress={() => router.push(`/product/${item.id}`)}
+                onPress={() => handleProductPress(item.id)}
+                onFavorite={onToggleFavorite ? () => onToggleFavorite(item.id) : undefined}
             />
         </View>
-    );
+    ), [handleProductPress, onToggleFavorite]);
 
     return (
         <View style={styles.container}>
@@ -56,3 +61,16 @@ export const ProductListSection: React.FC<ProductListSectionProps> = ({ title, p
         </View>
     );
 };
+
+// Memoize ProductListSection to prevent unnecessary re-renders
+export const ProductListSection = React.memo(ProductListSectionComponent, (prevProps, nextProps) => {
+    return (
+        prevProps.title === nextProps.title &&
+        prevProps.products.length === nextProps.products.length &&
+        prevProps.products.every((product, index) => 
+            product.id === nextProps.products[index]?.id &&
+            product.isFavorite === nextProps.products[index]?.isFavorite
+        ) &&
+        prevProps.onToggleFavorite === nextProps.onToggleFavorite
+    );
+});

@@ -87,3 +87,51 @@ export interface SectionHeaderProps {
     viewAllLink?: string;
     onViewAllPress?: () => void;
 }
+
+export interface EmptyStateProps {
+    icon: keyof typeof import('@expo/vector-icons').Feather.glyphMap;
+    title: string;
+    description?: string;
+    actionLabel?: string;
+    onAction?: () => void;
+    iconColor?: string;
+}
+
+export interface SwipeToConfirmProps {
+    onConfirm: () => void;
+    label?: string;
+    disabled?: boolean;
+}
+
+export interface BottomBarProps {
+    children: React.ReactNode;
+    maxWidth?: number;
+    inTabs?: boolean;
+}
+
+export interface FloatingHeaderProps {
+    onBack?: () => void;
+    onFavorite?: () => void;
+    isFavorite?: boolean;
+    showBack?: boolean;
+    showFavorite?: boolean;
+    transparent?: boolean;
+}
+
+export interface PriceTableProps {
+    items: Array<{
+        label: string;
+        value: number;
+        isDiscount?: boolean;
+        isFree?: boolean;
+    }>;
+    total: number;
+    currency?: string;
+}
+
+export interface StarRatingProps {
+    rating: number;
+    reviews?: number;
+    size?: 'sm' | 'md' | 'lg';
+    showCount?: boolean;
+}

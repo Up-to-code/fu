@@ -39,7 +39,7 @@ const QUICK_ACTIONS: QuickAction[] = [
     },
 ];
 
-export const QuickActionsSection = () => {
+const QuickActionsSectionComponent = () => {
     return (
         <View style={styles.container}>
             <ScrollView
@@ -72,3 +72,6 @@ export const QuickActionsSection = () => {
         </View>
     );
 };
+
+// Memoize QuickActionsSection to prevent unnecessary re-renders
+export const QuickActionsSection = React.memo(QuickActionsSectionComponent);

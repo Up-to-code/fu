@@ -8,6 +8,7 @@ export default function TabLayout() {
         <Tabs
             screenOptions={{
                 animation: 'shift',
+                animationDuration: 200,
                 headerShown: false,
                 tabBarActiveTintColor: COLORS.primary,
                 tabBarInactiveTintColor: '#94a3b8',

@@ -13,7 +13,7 @@ interface ReviewCardProps {
     variant?: 'product' | 'service';
 }
 
-export const ReviewCard: React.FC<ReviewCardProps> = ({ 
+const ReviewCardComponent: React.FC<ReviewCardProps> = ({ 
     review, 
     variant = 'product' 
 }) => {
@@ -93,3 +93,16 @@ export const ReviewCard: React.FC<ReviewCardProps> = ({
         </View>
     );
 };
+
+// Memoize ReviewCard to prevent unnecessary re-renders in lists
+export const ReviewCard = React.memo(ReviewCardComponent, (prevProps, nextProps) => {
+    const prevReview = prevProps.review;
+    const nextReview = nextProps.review;
+    return (
+        prevProps.variant === nextProps.variant &&
+        ('id' in prevReview ? prevReview.id : prevReview.reviewId) === ('id' in nextReview ? nextReview.id : nextReview.reviewId) &&
+        prevReview.rating === nextReview.rating &&
+        prevReview.comment === nextReview.comment &&
+        ('userName' in prevReview ? prevReview.userName : prevReview.customerName) === ('userName' in nextReview ? nextReview.userName : nextReview.customerName)
+    );
+});

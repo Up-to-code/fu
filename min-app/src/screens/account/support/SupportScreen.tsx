@@ -5,7 +5,7 @@ import React, { useState } from 'react';
 import { Dimensions, LayoutAnimation, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Header, FormTextArea, PrimaryButton } from '../../shared';
-import { ActionButton } from '../../../components/shared';
+import { ActionButton } from '../../shared';
 import { COLORS } from '../../../constants/theme';
 
 const isTablet = Dimensions.get('window').width >= 768;
@@ -88,7 +88,9 @@ export default function SupportScreen() {
                     <View style={{ marginTop: 12 }}>
                         <PrimaryButton
                             label="إرسال"
-                            onPress={() => console.log('Send', message)}
+                            onPress={() => {
+                                // Send support message
+                            }}
                             disabled={!message.trim()}
                         />
                     </View>

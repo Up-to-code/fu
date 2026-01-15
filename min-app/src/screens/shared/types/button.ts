@@ -13,3 +13,11 @@ export interface SocialButtonProps extends TouchableOpacityProps {
     provider: 'google' | 'apple';
     label: string;
 }
+
+export interface ActionButtonProps extends TouchableOpacityProps {
+    label: string;
+    icon?: keyof typeof import('@expo/vector-icons').Feather.glyphMap;
+    variant?: 'primary' | 'secondary' | 'outline' | 'danger';
+    disabled?: boolean;
+    fullWidth?: boolean;
+}

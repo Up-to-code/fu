@@ -9,7 +9,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Header, FormInput, PrimaryButton } from '../shared';
 import { useServiceBooking } from './_hooks';
 import { COLORS } from '../../constants/theme';
-import { SwipeToConfirm } from '../../components/shared';
+import { SwipeToConfirm } from '../shared';
 import { ServiceBookingStatus } from '../../types/orders';
 import { BookingLocation } from './types/services';
 
@@ -157,7 +157,7 @@ export default function BookingScreen() {
             status: ServiceBookingStatus.PENDING,
         };
 
-        console.log('Booking created:', booking);
+        // Booking created successfully
 
         Alert.alert(
             'تم إرسال الطلب',

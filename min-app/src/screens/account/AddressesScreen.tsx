@@ -7,7 +7,7 @@ import React, { useState } from 'react';
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { COLORS } from '../../constants/theme';
-import { EmptyState } from '../../components/shared';
+import { EmptyState } from '../shared';
 import { Header } from '../shared';
 import { SimpleModal } from '../shared';
 import { useAddresses, Address } from './_hooks';

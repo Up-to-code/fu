@@ -3,7 +3,7 @@
 
 export interface ProductListSectionProps {
     title: string;
-    products: import('../../shared').IProductCardProps[];
+    products: import('../../../shared/types/card').IProductCardProps[];
     onToggleFavorite?: (id: string) => void;
 }
 

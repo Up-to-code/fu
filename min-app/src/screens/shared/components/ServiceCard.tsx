@@ -7,7 +7,7 @@ import { Image, Text, TouchableOpacity, View } from 'react-native';
 import { ServiceCardProps } from '../types/card';
 import { styles } from '../StyleSheets/ServiceCard.styles';
 
-export const ServiceCard: React.FC<ServiceCardProps> = ({
+const ServiceCardComponent: React.FC<ServiceCardProps> = ({
     provider,
     onPress,
     onFavorite,
@@ -71,3 +71,15 @@ export const ServiceCard: React.FC<ServiceCardProps> = ({
         </TouchableOpacity>
     );
 };
+
+// Memoize ServiceCard to prevent unnecessary re-renders in lists
+export const ServiceCard = React.memo(ServiceCardComponent, (prevProps, nextProps) => {
+    return (
+        prevProps.provider.id === nextProps.provider.id &&
+        prevProps.provider.rating === nextProps.provider.rating &&
+        prevProps.provider.reviews === nextProps.provider.reviews &&
+        prevProps.isFavorite === nextProps.isFavorite &&
+        prevProps.onPress === nextProps.onPress &&
+        prevProps.onFavorite === nextProps.onFavorite
+    );
+});

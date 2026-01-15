@@ -52,13 +52,21 @@ const FEATURED_PROVIDERS: FeaturedProvider[] = [
     }
 ];
 
-export const ServicesSection = () => {
+const ServicesSectionComponent = () => {
     const router = useRouter();
 
-    const renderItem = ({ item }: { item: FeaturedProvider }) => (
+    const handleServicePress = React.useCallback((serviceId: string) => {
+        router.push(`/services/${serviceId}` as any);
+    }, [router]);
+
+    const handleViewAllPress = React.useCallback(() => {
+        router.push('/services' as any);
+    }, [router]);
+
+    const renderItem = React.useCallback(({ item }: { item: FeaturedProvider }) => (
         <View style={styles.itemWrapper}>
             <TouchableOpacity
-                onPress={() => router.push(`/services/${item.id}` as any)}
+                onPress={() => handleServicePress(item.id)}
                 style={styles.serviceCard}
                 activeOpacity={0.8}
             >
@@ -83,13 +91,13 @@ export const ServicesSection = () => {
                 </Text>
             </TouchableOpacity>
         </View>
-    );
+    ), [handleServicePress]);
 
     return (
         <View style={styles.container}>
             <View style={styles.header}>
                 <Text style={styles.headerTitle}>خبراء ومصممون مميزون</Text>
-                <TouchableOpacity onPress={() => router.push('/services' as any)}>
+                <TouchableOpacity onPress={handleViewAllPress}>
                     <Text style={styles.viewAllText}>عرض الكل</Text>
                 </TouchableOpacity>
             </View>
@@ -107,3 +115,6 @@ export const ServicesSection = () => {
         </View>
     );
 };
+
+// Memoize ServicesSection to prevent unnecessary re-renders
+export const ServicesSection = React.memo(ServicesSectionComponent);

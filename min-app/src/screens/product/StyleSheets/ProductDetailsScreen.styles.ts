@@ -31,7 +31,7 @@ export const styles = StyleSheet.create({
         backgroundColor: 'white',
     },
     scrollContent: {
-        paddingBottom: 140,
+        paddingBottom: 120,
         maxWidth: maxWidth,
         alignSelf: 'center',
         width: '100%',
@@ -88,11 +88,17 @@ export const styles = StyleSheet.create({
         borderTopRightRadius: 24,
         paddingHorizontal: padding,
         paddingTop: getSize(20, 24, 28, 32, 40),
+        // Shadow/Elevation for floating effect
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: -2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 8,
+        elevation: 8, // For Android
     },
     dragIndicator: {
-        width: 48,
+        width: 56,
         height: 4,
-        backgroundColor: '#e2e8f0',
+        backgroundColor: '#94a3b8',
         borderRadius: 2,
         alignSelf: 'center',
         marginBottom: 24,
@@ -264,5 +270,8 @@ export const styles = StyleSheet.create({
     similarProductItem: {
         transform: [{ scaleX: -1 }],
         marginLeft: 12,
+    },
+    addToCartContainer: {
+        marginTop: 24,
     },
 });

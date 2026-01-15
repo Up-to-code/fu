@@ -1,7 +1,7 @@
 // File: src/screens/home/HomeScreen.tsx
 // Purpose: Home screen with all sections
 
-import React, { useState } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { Platform, ScrollView, StatusBar, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AIDesignBanner, CategoriesSection, HomeHeader, ProductListSection, QuickActionsSection, ServicesSection } from './_components';
@@ -56,10 +56,11 @@ export default function HomeScreen() {
     const [products, setProducts] = useState(MOCK_PRODUCTS);
     const [bedroomProducts, setBedroomProducts] = useState(BEDROOM_PRODUCTS);
 
-    const toggleFavorite = (id: string) => {
+    // Memoize toggleFavorite handler to prevent re-renders
+    const toggleFavorite = useCallback((id: string) => {
         setProducts(prev => prev.map(p => p.id === id ? { ...p, isFavorite: !p.isFavorite } : p));
         setBedroomProducts(prev => prev.map(p => p.id === id ? { ...p, isFavorite: !p.isFavorite } : p));
-    };
+    }, []);
 
     return (
         <SafeAreaView style={screenStyles.container} edges={['top']}>
