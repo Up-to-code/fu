@@ -4,7 +4,7 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { Platform, ScrollView, StatusBar, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { AIDesignBanner, CategoriesSection, HomeHeader, ProductListSection, QuickActionsSection, ServicesSection } from './_components';
+import { CategoriesSection, HomeHeader, ProductListSection, QuickActionsSection, ServicesSection } from './_components';
 import { IProductCardProps } from '../shared';
 import { styles as screenStyles } from './StyleSheets/HomeScreen.styles';
 
@@ -75,9 +75,6 @@ export default function HomeScreen() {
                 contentContainerStyle={screenStyles.scrollContent}
             >
                 <View style={screenStyles.content}>
-                    {/* AI Design Banner - Prominent feature for new users */}
-                    <AIDesignBanner />
-                    
                     {/* Quick Actions - Easy navigation */}
                     <QuickActionsSection />
                     

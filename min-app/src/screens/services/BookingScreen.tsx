@@ -3,13 +3,13 @@
 
 import { Feather } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
-import React, { useState, useMemo } from 'react';
-import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View, Alert } from 'react-native';
+import React, { useState, useMemo, useRef } from 'react';
+import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View, Alert, Animated, PanResponder, Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import * as Haptics from 'expo-haptics';
 import { Header, FormInput, PrimaryButton } from '../shared';
 import { useServiceBooking } from './_hooks';
 import { COLORS } from '../../constants/theme';
-import { SwipeToConfirm } from '../shared';
 import { ServiceBookingStatus } from '../../types/orders';
 import { BookingLocation } from './types/services';
 
@@ -40,6 +40,181 @@ const PROVIDERS = {
             { id: 's3', label: 'استشارة تصميم', basePrice: 500 },
         ],
     },
+};
+
+// Custom Swipe to Confirm Component for Booking Screen
+const BookingSwipeButton: React.FC<{
+    onConfirm: () => void;
+    disabled: boolean;
+    label: string;
+}> = ({ onConfirm, disabled, label }) => {
+    const { width: SCREEN_WIDTH } = Dimensions.get('window');
+    const BUTTON_WIDTH = SCREEN_WIDTH - 40;
+    const THUMB_SIZE = 56;
+    const PADDING = 4;
+    const MAX_TRANSLATE = BUTTON_WIDTH - THUMB_SIZE - PADDING * 2;
+
+    const translateX = useRef(new Animated.Value(0)).current;
+    const [isConfirmed, setIsConfirmed] = useState(false);
+
+    const panResponder = useRef(
+        PanResponder.create({
+            onStartShouldSetPanResponder: () => !disabled && !isConfirmed,
+            onMoveShouldSetPanResponder: (_, gestureState) => {
+                // More aggressive gesture capture for horizontal swipes
+                const isHorizontal = Math.abs(gestureState.dx) > Math.abs(gestureState.dy);
+                const hasMovement = Math.abs(gestureState.dx) > 5 || Math.abs(gestureState.dy) > 5;
+                return !disabled && !isConfirmed && isHorizontal && hasMovement;
+            },
+            onPanResponderGrant: () => {
+                if (!disabled && !isConfirmed) {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                }
+            },
+            onPanResponderMove: (_, gestureState) => {
+                if (!disabled && !isConfirmed) {
+                    // RTL: negative dx means swiping left (forward in RTL)
+                    const newValue = Math.max(0, Math.min(-gestureState.dx, MAX_TRANSLATE));
+                    translateX.setValue(newValue);
+                }
+            },
+            onPanResponderRelease: (_, gestureState) => {
+                if (disabled || isConfirmed) return;
+
+                const swipeDistance = -gestureState.dx;
+                const threshold = MAX_TRANSLATE * 0.7;
+
+                if (swipeDistance > threshold) {
+                    // Complete the swipe
+                    Animated.spring(translateX, {
+                        toValue: MAX_TRANSLATE,
+                        useNativeDriver: true,
+                        tension: 50,
+                        friction: 8,
+                    }).start(() => {
+                        setIsConfirmed(true);
+                        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                        onConfirm();
+                    });
+                } else {
+                    // Reset
+                    Animated.spring(translateX, {
+                        toValue: 0,
+                        useNativeDriver: true,
+                        tension: 50,
+                        friction: 8,
+                    }).start();
+                }
+            },
+            onPanResponderTerminationRequest: () => false,
+            onPanResponderTerminate: () => {
+                if (!disabled && !isConfirmed) {
+                    Animated.spring(translateX, {
+                        toValue: 0,
+                        useNativeDriver: true,
+                        tension: 50,
+                        friction: 8,
+                    }).start();
+                }
+            },
+        })
+    ).current;
+
+    const textOpacity = translateX.interpolate({
+        inputRange: [0, MAX_TRANSLATE * 0.5],
+        outputRange: [1, 0],
+        extrapolate: 'clamp',
+    });
+
+    const thumbTransform = translateX.interpolate({
+        inputRange: [0, MAX_TRANSLATE],
+        outputRange: [0, -MAX_TRANSLATE],
+        extrapolate: 'clamp',
+    });
+
+    const containerBackgroundColor = disabled
+        ? '#e2e8f0'
+        : isConfirmed
+            ? '#10B981'
+            : COLORS.primary;
+
+    return (
+        <View
+            style={[
+                {
+                    width: BUTTON_WIDTH,
+                    height: THUMB_SIZE + PADDING * 2,
+                    backgroundColor: containerBackgroundColor,
+                    borderRadius: 28,
+                    overflow: 'hidden',
+                    position: 'relative',
+                },
+            ]}
+        >
+            {/* Background Text */}
+            <Animated.View
+                style={[
+                    {
+                        position: 'absolute',
+                        left: 0,
+                        right: 0,
+                        top: 0,
+                        bottom: 0,
+                        flexDirection: 'row-reverse',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: 8,
+                        opacity: textOpacity,
+                    },
+                ]}
+            >
+                <Text
+                    style={{
+                        fontFamily: 'Cairo_700Bold',
+                        fontSize: 16,
+                        color: disabled ? '#94a3b8' : 'white',
+                    }}
+                >
+                    {isConfirmed ? 'تم التأكيد ✓' : label}
+                </Text>
+                {!isConfirmed && (
+                    <Feather name="chevrons-left" size={20} color={disabled ? '#94a3b8' : 'white'} />
+                )}
+            </Animated.View>
+
+            {/* Swipeable Thumb */}
+            {!isConfirmed && (
+                <Animated.View
+                    {...panResponder.panHandlers}
+                    style={[
+                        {
+                            position: 'absolute',
+                            width: THUMB_SIZE,
+                            height: THUMB_SIZE,
+                            top: PADDING,
+                            right: PADDING,
+                            backgroundColor: 'white',
+                            borderRadius: 28,
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            shadowColor: '#000',
+                            shadowOffset: { width: 0, height: 2 },
+                            shadowOpacity: 0.2,
+                            shadowRadius: 4,
+                            elevation: 4,
+                            transform: [{ translateX: thumbTransform }],
+                        },
+                    ]}
+                >
+                    <Feather
+                        name="arrow-left"
+                        size={24}
+                        color={disabled ? '#94a3b8' : COLORS.primary}
+                    />
+                </Animated.View>
+            )}
+        </View>
+    );
 };
 
 export default function BookingScreen() {
@@ -195,6 +370,8 @@ export default function BookingScreen() {
                     style={styles.scrollView}
                     contentContainerStyle={styles.scrollContent}
                     showsVerticalScrollIndicator={false}
+                    nestedScrollEnabled={true}
+                    scrollEventThrottle={16}
                 >
                     {/* Provider Info */}
                     <View style={styles.section}>
@@ -403,18 +580,19 @@ export default function BookingScreen() {
                             </Text>
                         </View>
                     )}
-
-                    <View style={{ height: 120 }} />
                 </ScrollView>
 
-                {/* Fixed Bottom Button */}
-                <SafeAreaView edges={['bottom']} style={styles.footer}>
-                    <SwipeToConfirm
+            </SafeAreaView>
+
+            {/* Bottom - Swipe to Confirm */}
+            <SafeAreaView edges={['bottom']} style={styles.bottomContainer}>
+                <View style={styles.bottomContent}>
+                    <BookingSwipeButton
                         onConfirm={handleConfirmBooking}
                         disabled={!isFormValid()}
                         label="اسحب لتأكيد الحجز"
                     />
-                </SafeAreaView>
+                </View>
             </SafeAreaView>
         </View>
     );
@@ -435,7 +613,7 @@ const styles = StyleSheet.create({
     },
     headerTitle: { fontFamily: 'Cairo_700Bold', fontSize: 18, color: '#1e293b' },
     scrollView: { flex: 1 },
-    scrollContent: { padding: 16 },
+    scrollContent: { padding: 16, paddingBottom: 20 },
     section: {
         backgroundColor: 'white',
         borderRadius: 12,
@@ -634,11 +812,13 @@ const styles = StyleSheet.create({
         textAlign: 'right',
         lineHeight: 16,
     },
-    footer: {
+    bottomContainer: {
         backgroundColor: 'white',
-        paddingHorizontal: 16,
-        paddingTop: 12,
         borderTopWidth: 1,
         borderTopColor: '#f1f5f9',
+    },
+    bottomContent: {
+        paddingHorizontal: 20,
+        paddingVertical: 16,
     },
 });

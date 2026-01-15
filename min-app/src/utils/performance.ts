@@ -23,7 +23,7 @@ class PerformanceMonitor {
     private frameCount = 0;
     private lastFrameTime = Date.now();
     private fps = 60;
-    private fpsUpdateInterval: NodeJS.Timeout | null = null;
+    private fpsUpdateInterval: number | null = null;
 
     /**
      * Track component render time

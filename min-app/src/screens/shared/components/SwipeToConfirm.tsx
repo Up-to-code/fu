@@ -67,10 +67,15 @@ const SwipeToConfirmComponent: React.FC<SwipeToConfirmProps> = ({
 
     const panResponder = useRef(
         PanResponder.create({
-            onStartShouldSetPanResponder: () => !disabled && !isConfirmed,
+            onStartShouldSetPanResponder: (evt, gestureState) => {
+                // Always claim responder if not disabled/confirmed
+                return !disabled && !isConfirmed;
+            },
             onMoveShouldSetPanResponder: (_, gestureState) => {
-                // Only capture horizontal swipes to avoid conflicts with ScrollView
-                return !disabled && !isConfirmed && Math.abs(gestureState.dx) > Math.abs(gestureState.dy);
+                // Prioritize horizontal swipes - require significant horizontal movement
+                const isHorizontal = Math.abs(gestureState.dx) > Math.abs(gestureState.dy);
+                const hasSignificantHorizontalMovement = Math.abs(gestureState.dx) > 10;
+                return !disabled && !isConfirmed && isHorizontal && hasSignificantHorizontalMovement;
             },
             onPanResponderGrant: () => {
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -106,6 +111,15 @@ const SwipeToConfirmComponent: React.FC<SwipeToConfirmProps> = ({
                 }
             },
             onPanResponderTerminationRequest: () => false, // Don't allow parent to steal gesture
+            onPanResponderTerminate: () => {
+                // Reset if gesture is terminated
+                Animated.spring(translateX, {
+                    toValue: 0,
+                    useNativeDriver: true,
+                    tension: 50,
+                    friction: 8,
+                }).start();
+            },
         })
     ).current;
 

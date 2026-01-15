@@ -41,7 +41,8 @@
           }
         }
       ],
-      "expo-secure-store"
+      "expo-secure-store",
+      "./plugins/withFollyFix"
     ],
     "experiments": {
       "typedRoutes": true,
