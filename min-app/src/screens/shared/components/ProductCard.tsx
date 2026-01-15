@@ -3,7 +3,8 @@
 
 import { Feather } from '@expo/vector-icons';
 import React from 'react';
-import { Dimensions, Image, Text, TouchableOpacity, View } from 'react-native';
+import { Dimensions, Text, TouchableOpacity, View } from 'react-native';
+import { Image } from 'expo-image';
 import { COLORS } from '../../../constants/theme';
 import { IProductCardProps, ProductCardProps } from '../types/card';
 import { getStyles } from '../StyleSheets/ProductCard.styles';
@@ -34,7 +35,10 @@ const ProductCardComponent: React.FC<ProductCardProps> = ({
                     <Image
                         source={{ uri: product.image }}
                         style={styles.image}
-                        resizeMode="cover"
+                        contentFit="cover"
+                        transition={200}
+                        cachePolicy="memory-disk"
+                        placeholder={{ blurhash: 'L6PZfSi_.AyE_3t7t7R**0o#DgR4' }}
                     />
 
                     {onFavorite && (
@@ -97,7 +101,10 @@ const ProductCardComponent: React.FC<ProductCardProps> = ({
                 <Image
                     source={{ uri: product.image }}
                     style={styles.image}
-                    resizeMode="cover"
+                    contentFit="cover"
+                    transition={200}
+                    cachePolicy="memory-disk"
+                    placeholder={{ blurhash: 'L6PZfSi_.AyE_3t7t7R**0o#DgR4' }}
                 />
 
                 {onFavorite && (

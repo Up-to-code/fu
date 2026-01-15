@@ -20,6 +20,28 @@ config.resolver = {
     ],
 };
 
+// Performance optimizations
+config.transformer = {
+    ...config.transformer,
+    getTransformOptions: async () => ({
+        transform: {
+            experimentalImportSupport: false,
+            inlineRequires: true, // Enable inline requires for better tree-shaking and code splitting
+        },
+    }),
+    minifierConfig: {
+        // Optimize minification
+        keep_classnames: false,
+        keep_fnames: false,
+    },
+};
+
+// Optimize asset bundling
+config.serializer = {
+    ...config.serializer,
+    customSerializer: config.serializer?.customSerializer,
+};
+
 // Add parent directory to watchFolders to watch convex folder
 config.watchFolders = [
     projectRoot,

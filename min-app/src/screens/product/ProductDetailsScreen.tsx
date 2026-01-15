@@ -4,7 +4,8 @@
 import { Feather, Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { ScrollView, Text, TouchableOpacity, View, Dimensions } from 'react-native';
+import { Image } from 'expo-image';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ActionButton, BottomBar, FloatingHeader, PriceTable, StarRating } from '../shared';
 import { ReviewCard, Review } from '../shared';
@@ -13,7 +14,6 @@ import { useProductDetails, useProductReviews, useSimilarProducts } from './_hoo
 import { COLORS } from '../../constants/theme';
 import { SectionHeaderProps } from './types/product';
 import { styles, padding, imageHeight, maxWidth, getSize } from './StyleSheets/ProductDetailsScreen.styles';
-import { Dimensions } from 'react-native';
 
 const { width } = Dimensions.get('window');
 
@@ -146,7 +146,10 @@ export default function ProductDetailsScreen() {
                         <Image
                             source={{ uri: product.images[selectedImage] }}
                             style={styles.productImage}
-                            resizeMode="cover"
+                            contentFit="cover"
+                            transition={200}
+                            cachePolicy="memory-disk"
+                            priority="high"
                         />
                     )}
 
@@ -174,7 +177,13 @@ export default function ProductDetailsScreen() {
                                         selectedImage === idx ? styles.thumbnailSelected : styles.thumbnailUnselected
                                     ]}
                                 >
-                                    <Image source={{ uri: img }} style={styles.thumbnailImage} />
+                                    <Image 
+                                        source={{ uri: img }} 
+                                        style={styles.thumbnailImage}
+                                        contentFit="cover"
+                                        transition={100}
+                                        cachePolicy="memory-disk"
+                                    />
                                 </TouchableOpacity>
                             ))}
                         </View>

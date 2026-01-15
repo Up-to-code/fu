@@ -4,7 +4,8 @@
 import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React from 'react';
-import { Dimensions, Image, Text, TouchableOpacity, View } from 'react-native';
+import { Dimensions, Text, TouchableOpacity, View } from 'react-native';
+import { Image } from 'expo-image';
 import { FlashList } from '@shopify/flash-list';
 import { COLORS } from '../../../constants/theme';
 import { FeaturedProvider } from './types/home';
@@ -75,7 +76,9 @@ const ServicesSectionComponent = () => {
                         <Image
                             source={{ uri: item.avatar }}
                             style={styles.avatarImage}
-                            resizeMode="cover"
+                            contentFit="cover"
+                            transition={200}
+                            cachePolicy="memory-disk"
                         />
                     </View>
                     <View style={styles.ratingBadge}>
