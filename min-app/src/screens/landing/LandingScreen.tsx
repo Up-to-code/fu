@@ -5,22 +5,20 @@ import { Feather } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Link, useRouter } from 'expo-router';
 import React from 'react';
-import { Dimensions, ImageBackground, StatusBar, Text, TouchableOpacity, View } from 'react-native';
+import { ImageBackground, StatusBar, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-
-const { width, height } = Dimensions.get('window');
-const isTablet = width >= 768;
+import { styles } from './StyleSheets/LandingScreen.styles';
 
 const LandingScreen = () => {
     const router = useRouter();
 
     return (
-        <View className="flex-1 bg-black">
-            <StatusBar barStyle="light-content" />
+        <View style={styles.container}>
+            <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
 
             <ImageBackground
                 source={{ uri: 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?q=80&w=2000' }}
-                className="flex-1 justify-end"
+                style={styles.imageBackground}
                 resizeMode="cover"
             >
                 <LinearGradient
@@ -30,37 +28,30 @@ const LandingScreen = () => {
                 />
 
                 <SafeAreaView edges={['bottom', 'left', 'right']}>
-                    <View
-                        style={{
-                            maxWidth: isTablet ? 500 : '100%',
-                            alignSelf: 'center',
-                            width: '100%'
-                        }}
-                        className={isTablet ? 'px-12 pb-16' : 'px-8 pb-12'}
-                    >
+                    <View style={styles.contentContainer}>
                         {/* Logo */}
-                        <View className={`bg-primary rounded-2xl items-center justify-center mb-8 self-end ${isTablet ? 'w-20 h-20' : 'w-16 h-16'}`}>
-                            <Feather name="box" size={isTablet ? 40 : 32} color="white" />
+                        <View style={styles.logo}>
+                            <Feather name="box" size={40} color="white" />
                         </View>
 
                         {/* Headline */}
-                        <Text className={`text-white font-cairo-bold text-right mb-4 leading-tight ${isTablet ? 'text-5xl' : 'text-4xl'}`}>
+                        <Text style={styles.headline}>
                             صمم منزل {'\n'}
-                            <Text style={{ color: '#1E3A5F' }}>أحلامك</Text> بسهولة
+                            <Text style={styles.headlineAccent}>أحلامك</Text> بسهولة
                         </Text>
 
-                        <Text className={`text-gray-400 font-cairo-medium text-right mb-10 leading-7 ${isTablet ? 'text-lg' : 'text-base'}`}>
+                        <Text style={styles.description}>
                             اكتشف أحدث صيحات الأثاث والديكور، واستخدم الذكاء الاصطناعي لتجربة القطع في غرفتك.
                         </Text>
 
                         {/* Buttons */}
-                        <View className="gap-4">
+                        <View style={styles.buttonsContainer}>
                             <Link href="/auth/register" asChild>
                                 <TouchableOpacity
-                                    className={`w-full bg-primary rounded-2xl items-center ${isTablet ? 'py-5' : 'py-4'}`}
+                                    style={styles.primaryButton}
                                     activeOpacity={0.9}
                                 >
-                                    <Text className={`text-white font-cairo-bold ${isTablet ? 'text-xl' : 'text-lg'}`}>
+                                    <Text style={styles.primaryButtonText}>
                                         ابدأ الآن
                                     </Text>
                                 </TouchableOpacity>
@@ -68,10 +59,10 @@ const LandingScreen = () => {
 
                             <Link href="/auth/login" asChild>
                                 <TouchableOpacity
-                                    className={`w-full bg-white/10 border border-white/20 rounded-2xl items-center ${isTablet ? 'py-5' : 'py-4'}`}
+                                    style={styles.secondaryButton}
                                     activeOpacity={0.8}
                                 >
-                                    <Text className={`text-white font-cairo-bold ${isTablet ? 'text-xl' : 'text-lg'}`}>
+                                    <Text style={styles.secondaryButtonText}>
                                         لدي حساب بالفعل
                                     </Text>
                                 </TouchableOpacity>
@@ -79,9 +70,9 @@ const LandingScreen = () => {
 
                             <TouchableOpacity
                                 onPress={() => router.replace('/(tabs)/home')}
-                                className="w-full py-2 items-center"
+                                style={styles.guestButton}
                             >
-                                <Text className={`text-gray-500 font-cairo-medium underline ${isTablet ? 'text-base' : 'text-sm'}`}>
+                                <Text style={styles.guestButtonText}>
                                     تصفح كزائر
                                 </Text>
                             </TouchableOpacity>

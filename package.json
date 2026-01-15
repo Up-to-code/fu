@@ -9,7 +9,11 @@
     "lint": "tsc -p convex && eslint . --report-unused-disable-directives --max-warnings 0"
   },
   "dependencies": {
-    "convex": "^1.31.0"
+    "@better-auth/expo": "1.4.9",
+    "@convex-dev/better-auth": "^0.10.10",
+    "@convex-dev/crons": "^0.2.0",
+    "better-auth": "1.4.9",
+    "convex": "^1.31.4"
   },
   "devDependencies": {
     "@convex-dev/eslint-plugin": "^1.1.1",

@@ -2,35 +2,20 @@
 // Purpose: Complete Product Details Screen with Reviews and Similar Products
 
 import { Feather, Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { Dimensions, Image, ScrollView, Share, Text, TouchableOpacity, View } from 'react-native';
+import { Image, ScrollView, Share, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import type { Product, Review } from '../../components/shared';
-import { ActionButton, BottomBar, FloatingHeader, PriceTable, ReviewCard, StarRating } from '../../components/shared';
-import { ProductCard } from './_components';
+import { ActionButton, BottomBar, FloatingHeader, PriceTable, StarRating } from '../../components/shared';
+import { ReviewCard, Review } from '../shared';
+import { ProductCard, IProductCardProps } from '../shared';
+import { useProductDetails, useProductReviews, useSimilarProducts } from './_hooks';
 import { COLORS } from '../../constants/theme';
+import { SectionHeaderProps } from './types/product';
+import { styles, padding, imageHeight, maxWidth, getSize } from './StyleSheets/ProductDetailsScreen.styles';
+import { Dimensions } from 'react-native';
 
 const { width } = Dimensions.get('window');
-
-// Responsive breakpoints
-const isSmall = width < 375;
-const isMedium = width >= 375 && width < 428;
-const isLarge = width >= 428 && width < 768;
-const isTablet = width >= 768 && width < 1024;
-const isDesktop = width >= 1024;
-
-const getSize = (small: number, medium: number, large: number, tablet: number, desktop: number) => {
-    if (isDesktop) return desktop;
-    if (isTablet) return tablet;
-    if (isLarge) return large;
-    if (isMedium) return medium;
-    return small;
-};
-
-const padding = getSize(16, 20, 24, 32, 48);
-const imageHeight = getSize(300, 350, 400, 450, 500);
-const maxWidth = getSize(width, width, width, 700, 800);
 
 // Mock Data
 const MOCK_PRODUCT = {
@@ -93,21 +78,30 @@ const MOCK_REVIEWS: Review[] = [
     },
 ];
 
-const SIMILAR_PRODUCTS: Product[] = [
+const SIMILAR_PRODUCTS: IProductCardProps[] = [
     { id: '2', name: 'كنبة زاوية فاخرة', price: 3499, discount: 15, image: 'https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?w=500&q=80', rating: 4.5 },
     { id: '3', name: 'صوفا جلد أصلي', price: 4299, image: 'https://images.unsplash.com/photo-1567538096621-38d2284b23ff?w=500&q=80', rating: 4.9 },
     { id: '4', name: 'أريكة كلاسيكية', price: 1899, image: 'https://images.unsplash.com/photo-1506439773649-6e0eb8cfb237?w=500&q=80', rating: 4.3 },
 ];
 
-export default function ProductDetailsScreen({ id }: { id: string }) {
+export default function ProductDetailsScreen() {
     const router = useRouter();
+    const { id } = useLocalSearchParams<{ id: string }>();
+    const { product: hookProduct, isLoading: productLoading } = useProductDetails(id || '1');
+    const { reviews: hookReviews, isLoading: reviewsLoading, addReview } = useProductReviews(id || '1');
+    const { similarProducts: hookSimilar, isLoading: similarLoading } = useSimilarProducts(id || '1', undefined);
+    
+    // Fallback to mock data if hooks return empty
+    const product = hookProduct || MOCK_PRODUCT;
+    const reviews = hookReviews.length > 0 ? hookReviews : MOCK_REVIEWS;
+    const similarProducts = hookSimilar.length > 0 ? hookSimilar : SIMILAR_PRODUCTS;
+    
     const [quantity, setQuantity] = useState(1);
     const [selectedColor, setSelectedColor] = useState(0);
     const [selectedSize, setSelectedSize] = useState(1);
     const [selectedImage, setSelectedImage] = useState(0);
     const [isFavorite, setIsFavorite] = useState(false);
 
-    const product = MOCK_PRODUCT;
     const subtotal = product.price * quantity;
     const shipping = subtotal >= 2000 ? 0 : 50;
     const total = subtotal + shipping;
@@ -121,17 +115,16 @@ export default function ProductDetailsScreen({ id }: { id: string }) {
     };
 
     // Section Header Component
-    const SectionHeader = ({ title, actionLabel, onAction }: { title: string; actionLabel?: string; onAction?: () => void }) => (
-        <View className="flex-row-reverse justify-between items-center mb-4">
+    const SectionHeader: React.FC<SectionHeaderProps> = ({ title, actionLabel, onAction }) => (
+        <View style={styles.sectionHeader}>
             <Text
-                className="font-cairo-bold text-slate-800"
-                style={{ fontSize: getSize(14, 15, 16, 18, 20) }}
+                style={[styles.sectionTitle, { fontSize: getSize(14, 15, 16, 18, 20) }]}
             >
                 {title}
             </Text>
             {actionLabel && onAction && (
-                <TouchableOpacity onPress={onAction}>
-                    <Text className="font-cairo-medium text-primary" style={{ fontSize: getSize(12, 13, 14, 15, 16) }}>
+                <TouchableOpacity onPress={onAction} style={styles.sectionAction}>
+                    <Text style={[styles.sectionActionText, { fontSize: getSize(12, 13, 14, 15, 16) }]}>
                         {actionLabel}
                     </Text>
                 </TouchableOpacity>
@@ -140,22 +133,16 @@ export default function ProductDetailsScreen({ id }: { id: string }) {
     );
 
     return (
-        <SafeAreaView className="flex-1 bg-white" edges={['left', 'right']}>
+        <SafeAreaView style={styles.container} edges={['left', 'right']}>
             <ScrollView
                 showsVerticalScrollIndicator={false}
-                contentContainerStyle={{
-                    paddingBottom: 140,
-                    maxWidth: maxWidth,
-                    alignSelf: 'center',
-                    width: '100%'
-                }}
+                contentContainerStyle={styles.scrollContent}
             >
                 {/* Image Gallery */}
                 <TouchableOpacity
-                    style={{ height: imageHeight }}
-                    className="bg-slate-100 relative"
+                    style={[styles.imageContainer, { height: imageHeight }]}
                     activeOpacity={0.95}
-                    onPress={() => router.push({
+                    onPress={() => product.images && product.images.length > 0 && router.push({
                         pathname: '/product/fullscreen',
                         params: {
                             images: JSON.stringify(product.images),
@@ -163,70 +150,74 @@ export default function ProductDetailsScreen({ id }: { id: string }) {
                         }
                     })}
                 >
-                    <Image
-                        source={{ uri: product.images[selectedImage] }}
-                        className="w-full h-full"
-                        resizeMode="cover"
-                    />
+                    {product.images && product.images.length > 0 && (
+                        <Image
+                            source={{ uri: product.images[selectedImage] }}
+                            style={styles.productImage}
+                            resizeMode="cover"
+                        />
+                    )}
 
                     {/* Expand Icon */}
-                    <View
-                        className="absolute bottom-12 right-4 w-10 h-10 bg-black/40 rounded-full items-center justify-center z-20"
-                    >
+                    <View style={styles.expandIcon}>
                         <Feather name="maximize-2" size={18} color="white" />
                     </View>
 
                     {/* Thumbnails */}
-                    <View className="absolute bottom-12 left-0 right-0 flex-row justify-center gap-2">
-                        {product.images.map((img, idx) => (
-                            <TouchableOpacity
-                                key={idx}
-                                onPress={(e) => {
-                                    e.stopPropagation();
-                                    setSelectedImage(idx);
-                                }}
-                                style={{
-                                    width: getSize(48, 56, 64, 72, 80),
-                                    height: getSize(48, 56, 64, 72, 80),
-                                }}
-                                className={`rounded-xl overflow-hidden border-2 ${selectedImage === idx ? 'border-primary' : 'border-white'
-                                    }`}
-                            >
-                                <Image source={{ uri: img }} className="w-full h-full" />
-                            </TouchableOpacity>
-                        ))}
-                    </View>
+                    {product.images && product.images.length > 1 && (
+                        <View style={styles.thumbnailsContainer}>
+                            {product.images.map((img, idx) => (
+                                <TouchableOpacity
+                                    key={idx}
+                                    onPress={(e) => {
+                                        e.stopPropagation();
+                                        setSelectedImage(idx);
+                                    }}
+                                    style={[
+                                        styles.thumbnail,
+                                        {
+                                            width: getSize(48, 56, 64, 72, 80),
+                                            height: getSize(48, 56, 64, 72, 80),
+                                        },
+                                        selectedImage === idx ? styles.thumbnailSelected : styles.thumbnailUnselected
+                                    ]}
+                                >
+                                    <Image source={{ uri: img }} style={styles.thumbnailImage} />
+                                </TouchableOpacity>
+                            ))}
+                        </View>
+                    )}
                 </TouchableOpacity>
 
                 {/* Content */}
                 <View
-                    className="-mt-6 bg-white rounded-t-3xl"
-                    style={{ paddingHorizontal: padding, paddingTop: getSize(20, 24, 28, 32, 40) }}
+                    style={[
+                        styles.contentContainer,
+                        { paddingTop: getSize(20, 24, 28, 32, 40) }
+                    ]}
                 >
-                    <View className="w-12 h-1 bg-slate-200 rounded-full self-center mb-6" />
+                    <View style={styles.dragIndicator} />
 
                     {/* Title & Rating */}
-                    <View className="mb-4">
+                    <View style={styles.titleContainer}>
                         <Text
-                            className="font-cairo-bold text-slate-800 text-right mb-2"
-                            style={{ fontSize: getSize(18, 20, 22, 26, 30) }}
+                            style={[styles.title, { fontSize: getSize(18, 20, 22, 26, 30) }]}
                         >
                             {product.name}
                         </Text>
                         <StarRating
                             rating={product.rating}
                             reviews={product.reviews}
-                            size={isTablet || isDesktop ? 'lg' : 'md'}
+                            size={(width >= 768 || width >= 1024) ? 'lg' : 'md'}
                         />
                     </View>
 
                     {/* Discount Label */}
                     {product.discount && (
-                        <View className="flex-row-reverse items-center gap-2 mb-3">
-                            <View className="bg-red-100 px-3 py-1.5 rounded-full">
+                        <View style={styles.discountContainer}>
+                            <View style={styles.discountBadge}>
                                 <Text
-                                    className="font-cairo-bold text-red-600"
-                                    style={{ fontSize: getSize(12, 13, 14, 15, 16) }}
+                                    style={[styles.discountText, { fontSize: getSize(12, 13, 14, 15, 16) }]}
                                 >
                                     خصم {product.discount}% | وفر {Math.round(product.originalPrice! - product.price)} ر.س
                                 </Text>
@@ -235,17 +226,15 @@ export default function ProductDetailsScreen({ id }: { id: string }) {
                     )}
 
                     {/* Price */}
-                    <View className="flex-row-reverse items-baseline gap-3 mb-6">
+                    <View style={styles.priceContainer}>
                         <Text
-                            className="font-cairo-bold"
-                            style={{ fontSize: getSize(24, 28, 32, 36, 42), color: COLORS.primary }}
+                            style={[styles.price, { fontSize: getSize(24, 28, 32, 36, 42) }]}
                         >
                             {product.price} ر.س
                         </Text>
                         {product.originalPrice && (
                             <Text
-                                className="font-cairo-medium text-slate-400 line-through"
-                                style={{ fontSize: getSize(14, 15, 16, 18, 20) }}
+                                style={[styles.originalPrice, { fontSize: getSize(14, 15, 16, 18, 20) }]}
                             >
                                 {product.originalPrice} ر.س
                             </Text>
@@ -253,100 +242,118 @@ export default function ProductDetailsScreen({ id }: { id: string }) {
                     </View>
 
                     {/* Colors */}
-                    <View className="mb-6">
-                        <SectionHeader title="اللون" />
-                        <View className="flex-row-reverse flex-wrap gap-3">
-                            {product.colors.map((color, idx) => (
-                                <TouchableOpacity
-                                    key={color.id}
-                                    onPress={() => setSelectedColor(idx)}
-                                    style={{
-                                        width: getSize(40, 44, 48, 56, 64),
-                                        height: getSize(40, 44, 48, 56, 64),
-                                    }}
-                                    className={`rounded-full items-center justify-center border-2 ${selectedColor === idx ? 'border-primary' : 'border-slate-200'
-                                        }`}
-                                >
-                                    <View
-                                        style={{
-                                            backgroundColor: color.code,
-                                            width: getSize(28, 32, 36, 44, 52),
-                                            height: getSize(28, 32, 36, 44, 52),
-                                        }}
-                                        className="rounded-full"
-                                    />
-                                </TouchableOpacity>
-                            ))}
+                    {product.colors && product.colors.length > 0 && (
+                        <View style={styles.sectionContainer}>
+                            <SectionHeader title="اللون" />
+                            <View style={styles.colorsContainer}>
+                                {product.colors.map((color, idx) => (
+                                    <TouchableOpacity
+                                        key={color.id}
+                                        onPress={() => setSelectedColor(idx)}
+                                        style={[
+                                            {
+                                                width: getSize(40, 44, 48, 56, 64),
+                                                height: getSize(40, 44, 48, 56, 64),
+                                            },
+                                            selectedColor === idx ? styles.colorButtonSelected : styles.colorButtonUnselected,
+                                            styles.colorButton
+                                        ]}
+                                    >
+                                        <View
+                                            style={[
+                                                {
+                                                    backgroundColor: color.code,
+                                                    width: getSize(28, 32, 36, 44, 52),
+                                                    height: getSize(28, 32, 36, 44, 52),
+                                                },
+                                                styles.colorCircle
+                                            ]}
+                                        />
+                                    </TouchableOpacity>
+                                ))}
+                            </View>
                         </View>
-                    </View>
+                    )}
 
                     {/* Sizes */}
-                    <View className="mb-6">
-                        <SectionHeader title="المقاس" />
-                        <View className="flex-row-reverse flex-wrap gap-3">
-                            {product.sizes.map((size, idx) => (
-                                <TouchableOpacity
-                                    key={size.id}
-                                    onPress={() => size.available && setSelectedSize(idx)}
-                                    disabled={!size.available}
-                                    style={{
-                                        paddingHorizontal: getSize(16, 20, 24, 28, 32),
-                                        paddingVertical: getSize(10, 12, 14, 16, 18),
-                                    }}
-                                    className={`rounded-xl border ${selectedSize === idx
-                                        ? 'bg-primary border-primary'
-                                        : size.available
-                                            ? 'bg-white border-slate-200'
-                                            : 'bg-slate-100 border-slate-100'
-                                        }`}
-                                >
-                                    <Text
-                                        className={`font-cairo-bold ${selectedSize === idx ? 'text-white' : size.available ? 'text-slate-700' : 'text-slate-400'
-                                            }`}
-                                        style={{ fontSize: getSize(13, 14, 15, 16, 18) }}
+                    {product.sizes && product.sizes.length > 0 && (
+                        <View style={styles.sectionContainer}>
+                            <SectionHeader title="المقاس" />
+                            <View style={styles.sizesContainer}>
+                                {product.sizes.map((size, idx) => (
+                                    <TouchableOpacity
+                                        key={size.id}
+                                        onPress={() => size.available && setSelectedSize(idx)}
+                                        disabled={!size.available}
+                                        style={[
+                                            {
+                                                paddingHorizontal: getSize(16, 20, 24, 28, 32),
+                                                paddingVertical: getSize(10, 12, 14, 16, 18),
+                                            },
+                                            selectedSize === idx
+                                                ? styles.sizeButtonSelected
+                                                : size.available
+                                                    ? styles.sizeButtonAvailable
+                                                    : styles.sizeButtonUnavailable,
+                                            styles.sizeButton
+                                        ]}
                                     >
-                                        {size.name}
-                                    </Text>
-                                </TouchableOpacity>
-                            ))}
+                                        <Text
+                                            style={[
+                                                styles.sizeText,
+                                                selectedSize === idx
+                                                    ? styles.sizeTextSelected
+                                                    : size.available
+                                                        ? styles.sizeTextAvailable
+                                                        : styles.sizeTextUnavailable,
+                                                { fontSize: getSize(13, 14, 15, 16, 18) }
+                                            ]}
+                                        >
+                                            {size.name}
+                                        </Text>
+                                    </TouchableOpacity>
+                                ))}
+                            </View>
                         </View>
-                    </View>
+                    )}
 
                     {/* Quantity */}
-                    <View className="mb-6">
+                    <View style={styles.sectionContainer}>
                         <SectionHeader title="الكمية" />
-                        <View className="flex-row-reverse items-center gap-4">
-                            <View className="flex-row items-center bg-slate-100 rounded-xl">
+                        <View style={styles.quantityContainer}>
+                            <View style={styles.quantityControls}>
                                 <TouchableOpacity
                                     onPress={() => setQuantity(q => Math.max(1, q - 1))}
-                                    style={{
-                                        width: getSize(40, 44, 48, 52, 56),
-                                        height: getSize(40, 44, 48, 52, 56),
-                                    }}
-                                    className="items-center justify-center"
+                                    style={[
+                                        {
+                                            width: getSize(40, 44, 48, 52, 56),
+                                            height: getSize(40, 44, 48, 52, 56),
+                                        },
+                                        styles.quantityButton
+                                    ]}
                                 >
                                     <Feather name="minus" size={getSize(16, 18, 20, 22, 24)} color={COLORS.text} />
                                 </TouchableOpacity>
                                 <Text
-                                    className="font-cairo-bold text-slate-800 px-4"
-                                    style={{ fontSize: getSize(16, 18, 20, 22, 24) }}
+                                    style={[styles.quantityText, { fontSize: getSize(16, 18, 20, 22, 24) }]}
                                 >
                                     {quantity}
                                 </Text>
                                 <TouchableOpacity
                                     onPress={() => setQuantity(q => q + 1)}
-                                    style={{
-                                        width: getSize(40, 44, 48, 52, 56),
-                                        height: getSize(40, 44, 48, 52, 56),
-                                    }}
-                                    className="items-center justify-center"
+                                    style={[
+                                        {
+                                            width: getSize(40, 44, 48, 52, 56),
+                                            height: getSize(40, 44, 48, 52, 56),
+                                        },
+                                        styles.quantityButton
+                                    ]}
                                 >
                                     <Feather name="plus" size={getSize(16, 18, 20, 22, 24)} color={COLORS.text} />
                                 </TouchableOpacity>
                             </View>
                             <Text
-                                className="font-cairo-medium text-slate-500"
-                                style={{ fontSize: getSize(12, 13, 14, 15, 16) }}
+                                style={[styles.stockText, { fontSize: getSize(12, 13, 14, 15, 16) }]}
                             >
                                 {product.stock} متوفر
                             </Text>
@@ -354,61 +361,61 @@ export default function ProductDetailsScreen({ id }: { id: string }) {
                     </View>
 
                     {/* Features */}
-                    <View className="flex-row flex-wrap gap-3 mb-6">
-                        {product.features.map((feature, idx) => (
-                            <View
-                                key={idx}
-                                className="flex-row-reverse items-center gap-2 bg-slate-50 px-4 py-3 rounded-2xl"
-                            >
-                                <Ionicons name={feature.icon as any} size={getSize(18, 20, 22, 24, 26)} color={feature.color} />
-                                <Text
-                                    className="font-cairo-bold text-slate-700"
-                                    style={{ fontSize: getSize(12, 13, 14, 15, 16) }}
+                    {product.features && product.features.length > 0 && (
+                        <View style={[styles.featuresContainer, { marginBottom: 24 }]}>
+                            {product.features.map((feature, idx) => (
+                                <View
+                                    key={idx}
+                                    style={styles.featureBadge}
                                 >
-                                    {feature.text}
-                                </Text>
-                            </View>
-                        ))}
-                    </View>
+                                    <Ionicons name={feature.icon as any} size={getSize(18, 20, 22, 24, 26)} color={feature.color} />
+                                    <Text
+                                        style={[styles.featureText, { fontSize: getSize(12, 13, 14, 15, 16) }]}
+                                    >
+                                        {feature.text}
+                                    </Text>
+                                </View>
+                            ))}
+                        </View>
+                    )}
 
                     {/* Description */}
-                    <View className="mb-6">
+                    <View style={styles.sectionContainer}>
                         <SectionHeader title="الوصف" />
                         <Text
-                            className="font-cairo-medium text-slate-500 text-right leading-6"
-                            style={{ fontSize: getSize(13, 14, 15, 16, 18) }}
+                            style={[styles.descriptionText, { fontSize: getSize(13, 14, 15, 16, 18) }]}
                         >
                             {product.description}
                         </Text>
                     </View>
 
                     {/* Price Table */}
-                    <View className="mb-8">
+                    <View style={[styles.sectionContainer, { marginBottom: 32 }]}>
                         <SectionHeader title="ملخص الطلب" />
                         <PriceTable
                             items={[
                                 { label: 'السعر', value: product.price * quantity },
-                                { label: 'الخصم', value: Math.round(product.price * quantity * (product.discount / 100)), isDiscount: true },
+                                ...(product.discount ? [{ label: 'الخصم', value: Math.round(product.price * quantity * (product.discount / 100)), isDiscount: true }] : []),
                                 { label: 'الشحن', value: shipping, isFree: shipping === 0 },
                             ]}
-                            total={total - Math.round(product.price * quantity * (product.discount / 100))}
+                            total={total - (product.discount ? Math.round(product.price * quantity * (product.discount / 100)) : 0)}
                         />
                     </View>
 
                     {/* Reviews Section */}
-                    <View className="mb-8">
+                    <View style={[styles.sectionContainer, { marginBottom: 32 }]}>
                         <SectionHeader
-                            title={`التقييمات (${MOCK_REVIEWS.length})`}
+                            title={`التقييمات (${reviews.length})`}
                             actionLabel="عرض الكل"
                             onAction={() => console.log('View all reviews')}
                         />
-                        {MOCK_REVIEWS.slice(0, 2).map((review) => (
+                        {reviews.slice(0, 2).map((review) => (
                             <ReviewCard key={review.id} review={review} />
                         ))}
                     </View>
 
                     {/* Similar Products Section */}
-                    <View className="mb-6">
+                    <View style={styles.sectionContainer}>
                         <SectionHeader
                             title="منتجات مشابهة"
                             actionLabel="عرض المزيد"
@@ -422,10 +429,10 @@ export default function ProductDetailsScreen({ id }: { id: string }) {
                     horizontal
                     showsHorizontalScrollIndicator={false}
                     contentContainerStyle={{ paddingHorizontal: padding }}
-                    style={{ transform: [{ scaleX: -1 }] }}
+                    style={styles.similarProductsScroll}
                 >
-                    {SIMILAR_PRODUCTS.map((item) => (
-                        <View key={item.id} style={{ transform: [{ scaleX: -1 }], marginLeft: 12 }}>
+                    {similarProducts.map((item) => (
+                        <View key={item.id} style={styles.similarProductItem}>
                             <ProductCard
                                 product={item}
                                 variant="horizontal"

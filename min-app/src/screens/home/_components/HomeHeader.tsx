@@ -5,17 +5,17 @@ import { Feather } from '@expo/vector-icons';
 import { Link, useRouter } from 'expo-router';
 import React from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
-import { COLORS } from '../../../constants/theme';
+import { styles } from './StyleSheets/HomeHeader.styles';
 
 export const HomeHeader = () => {
     const router = useRouter();
 
     return (
-        <View className="px-5 pt-4 pb-3 bg-white">
+        <View style={styles.container}>
             <Link href="/search" asChild>
-                <TouchableOpacity className="flex-row-reverse items-center bg-gray-50 rounded-xl px-4 py-3">
+                <TouchableOpacity style={styles.searchButton}>
                     <Feather name="search" size={18} color="#9CA3AF" />
-                    <Text className="flex-1 text-right font-cairo-medium text-gray-400 mr-3 text-sm">
+                    <Text style={styles.searchText}>
                         أنت بتدور على آيه؟
                     </Text>
                     <TouchableOpacity

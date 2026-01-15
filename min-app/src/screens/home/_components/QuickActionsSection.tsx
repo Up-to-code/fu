@@ -5,8 +5,10 @@ import { Feather } from '@expo/vector-icons';
 import { Link } from 'expo-router';
 import React from 'react';
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { QuickAction } from './types/home';
+import { styles } from './StyleSheets/QuickActionsSection.styles';
 
-const QUICK_ACTIONS = [
+const QUICK_ACTIONS: QuickAction[] = [
     {
         id: 'shop',
         label: 'تسوق',
@@ -39,27 +41,28 @@ const QUICK_ACTIONS = [
 
 export const QuickActionsSection = () => {
     return (
-        <View className="pt-4 mb-6">
+        <View style={styles.container}>
             <ScrollView
                 horizontal
                 showsHorizontalScrollIndicator={false}
-                contentContainerStyle={{ paddingHorizontal: 20, gap: 20 }}
-                style={{ transform: [{ scaleX: -1 }] }}
+                contentContainerStyle={styles.scrollContent}
+                style={styles.scrollView}
             >
                 {QUICK_ACTIONS.map((action) => (
                     <Link key={action.id} href={action.link as any} asChild>
                         <TouchableOpacity
-                            className="items-center"
-                            style={{ transform: [{ scaleX: -1 }] }}
+                            style={styles.actionCard}
                             activeOpacity={0.8}
                         >
                             <View
-                                className="w-16 h-16 rounded-full items-center justify-center mb-2"
-                                style={{ backgroundColor: `${action.color}15` }}
+                                style={[
+                                    styles.iconContainer,
+                                    { backgroundColor: `${action.color}15` }
+                                ]}
                             >
                                 <Feather name={action.icon as any} size={28} color={action.color} />
                             </View>
-                            <Text className="font-cairo-medium text-gray-700 text-xs text-center" style={{ width: 70 }}>
+                            <Text style={styles.actionLabel}>
                                 {action.label}
                             </Text>
                         </TouchableOpacity>

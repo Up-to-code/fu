@@ -3,18 +3,11 @@
 
 import { Feather } from '@expo/vector-icons';
 import React, { useEffect, useState } from 'react';
-import { Dimensions, Text, TouchableOpacity, View } from 'react-native';
+import { Text, TouchableOpacity, View } from 'react-native';
 import { COLORS } from '../../../constants/theme';
 import { getAIPreferences, saveAIPreferences } from '../../../utils/storage';
-
-const { width } = Dimensions.get('window');
-const isTablet = width >= 768;
-
-interface SavePreferencesViewProps {
-    onSelectPreferences?: (roomType: string, roomStyle: string) => void;
-    currentRoomType?: string | null;
-    currentRoomStyle?: string | null;
-}
+import { SavePreferencesViewProps } from './types/ai';
+import { styles } from './StyleSheets/SavePreferencesView.styles';
 
 export const SavePreferencesView: React.FC<SavePreferencesViewProps> = ({
     onSelectPreferences,
@@ -57,15 +50,15 @@ export const SavePreferencesView: React.FC<SavePreferencesViewProps> = ({
     }
 
     return (
-        <View className="px-5 mb-6">
+        <View style={styles.container}>
             <TouchableOpacity
                 onPress={() => setIsExpanded(!isExpanded)}
-                className="flex-row-reverse items-center justify-between bg-slate-50 rounded-2xl p-4"
+                style={styles.headerButton}
                 activeOpacity={0.8}
             >
-                <View className="flex-row-reverse items-center gap-3">
+                <View style={styles.headerLeft}>
                     <Feather name="save" size={20} color={COLORS.primary} />
-                    <Text className="text-base font-cairo-bold text-slate-800">
+                    <Text style={styles.headerText}>
                         التفضيلات المحفوظة
                     </Text>
                 </View>
@@ -77,32 +70,32 @@ export const SavePreferencesView: React.FC<SavePreferencesViewProps> = ({
             </TouchableOpacity>
 
             {isExpanded && preferences && (
-                <View className="mt-3 bg-white rounded-2xl p-4">
-                    <Text className="text-sm font-cairo-medium text-slate-600 text-right mb-3">
+                <View style={styles.contentCard}>
+                    <Text style={styles.contentText}>
                         استخدم التفضيلات السابقة
                     </Text>
                     <TouchableOpacity
                         onPress={handleUsePreferences}
-                        className="bg-primary rounded-2xl py-3 px-4 flex-row-reverse justify-center items-center gap-2"
+                        style={styles.primaryButton}
                         activeOpacity={0.8}
                     >
-                        <Text className="text-white font-cairo-bold text-base">استخدم المحفوظة</Text>
+                        <Text style={styles.primaryButtonText}>استخدم المحفوظة</Text>
                         <Feather name="check" size={18} color="white" />
                     </TouchableOpacity>
                 </View>
             )}
 
             {isExpanded && currentRoomType && currentRoomStyle && (
-                <View className="mt-3 bg-white rounded-2xl p-4">
-                    <Text className="text-sm font-cairo-medium text-slate-600 text-right mb-3">
+                <View style={styles.contentCard}>
+                    <Text style={styles.contentText}>
                         احفظ التفضيلات الحالية
                     </Text>
                     <TouchableOpacity
                         onPress={handleSavePreferences}
-                        className="bg-slate-100 rounded-2xl py-3 px-4 flex-row-reverse justify-center items-center gap-2"
+                        style={styles.secondaryButton}
                         activeOpacity={0.8}
                     >
-                        <Text className="text-slate-800 font-cairo-bold text-base">حفظ التفضيلات</Text>
+                        <Text style={styles.secondaryButtonText}>حفظ التفضيلات</Text>
                         <Feather name="save" size={18} color={COLORS.text} />
                     </TouchableOpacity>
                 </View>

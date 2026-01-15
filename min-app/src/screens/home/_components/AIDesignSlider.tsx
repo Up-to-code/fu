@@ -1,15 +1,14 @@
-// File: src/components/home/AIDesignSlider.tsx
+// File: src/screens/home/_components/AIDesignSlider.tsx
 // Purpose: Hero slider for AI design and featured content
 
 import { Link } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
-import { Dimensions, Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { COLORS } from '../../../constants/theme';
+import { Slide } from './types/home';
+import { styles, SLIDE_WIDTH } from './StyleSheets/AIDesignSlider.styles';
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const SLIDE_WIDTH = SCREEN_WIDTH - 40;
-
-const SLIDES = [
+const SLIDES: Slide[] = [
     {
         id: '1',
         title: 'صمم غرفتك بالذكاء الاصطناعي',
@@ -50,8 +49,8 @@ export const AIDesignSlider = () => {
     }, [activeSlide]);
 
     return (
-        <View className="mx-5 my-4">
-            <View className="h-[200px] rounded-2xl overflow-hidden bg-gray-100 relative">
+        <View style={styles.container}>
+            <View style={styles.sliderContainer}>
                 <ScrollView
                     ref={scrollRef}
                     horizontal
@@ -60,17 +59,17 @@ export const AIDesignSlider = () => {
                     onMomentumScrollEnd={(e) => setActiveSlide(Math.round(e.nativeEvent.contentOffset.x / SLIDE_WIDTH))}
                 >
                     {SLIDES.map((slide) => (
-                        <View key={slide.id} style={{ width: SLIDE_WIDTH }} className="h-full relative justify-center">
-                            <Image source={{ uri: slide.image }} className="absolute inset-0 w-full h-full" resizeMode="cover" />
-                            <View className="absolute inset-0 bg-black/40" />
-                            <View className="p-6 z-10 items-end">
-                                <Text className="text-white text-xl font-cairo-bold mb-2 text-right">{slide.title}</Text>
-                                <Text className="text-white/90 text-sm mb-4 text-right font-cairo-medium" numberOfLines={2}>
+                        <View key={slide.id} style={[styles.slide, { width: SLIDE_WIDTH }]}>
+                            <Image source={{ uri: slide.image }} style={styles.slideImage} resizeMode="cover" />
+                            <View style={styles.slideOverlay} />
+                            <View style={styles.slideContent}>
+                                <Text style={styles.slideTitle}>{slide.title}</Text>
+                                <Text style={styles.slideDescription} numberOfLines={2}>
                                     {slide.description}
                                 </Text>
                                 <Link href={slide.link as any} asChild>
-                                    <TouchableOpacity className="bg-white px-5 py-2.5 rounded-full self-start">
-                                        <Text className="font-cairo-bold text-sm" style={{ color: COLORS.primary }}>{slide.cta}</Text>
+                                    <TouchableOpacity style={styles.ctaButton}>
+                                        <Text style={[styles.ctaText, { color: COLORS.primary }]}>{slide.cta}</Text>
                                     </TouchableOpacity>
                                 </Link>
                             </View>
@@ -79,9 +78,15 @@ export const AIDesignSlider = () => {
                 </ScrollView>
 
                 {/* Dots */}
-                <View className="absolute bottom-4 w-full flex-row justify-center gap-1.5">
+                <View style={styles.dotsContainer}>
                     {SLIDES.map((_, i) => (
-                        <View key={i} className={`h-1.5 rounded-full ${i === activeSlide ? 'w-6 bg-white' : 'w-1.5 bg-white/50'}`} />
+                        <View
+                            key={i}
+                            style={[
+                                styles.dot,
+                                i === activeSlide ? styles.dotActive : styles.dotInactive
+                            ]}
+                        />
                     ))}
                 </View>
             </View>

@@ -7,12 +7,14 @@ import React from 'react';
 import { Dimensions, Image, Text, TouchableOpacity, View } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 import { COLORS } from '../../../constants/theme';
+import { FeaturedProvider } from './types/home';
+import { styles } from './StyleSheets/ServicesSection.styles';
 
 const { width } = Dimensions.get('window');
 const isTablet = width >= 768;
-const ESTIMATED_ITEM_SIZE = 96; // w-24 = 96px
+const ESTIMATED_ITEM_SIZE = 96;
 
-const FEATURED_PROVIDERS = [
+const FEATURED_PROVIDERS: FeaturedProvider[] = [
     {
         id: '1',
         name: 'أحمد المصمم',
@@ -53,31 +55,30 @@ const FEATURED_PROVIDERS = [
 export const ServicesSection = () => {
     const router = useRouter();
 
-    const renderItem = ({ item }: { item: typeof FEATURED_PROVIDERS[0] }) => (
-        <View style={{ marginLeft: 16, transform: [{ scaleX: -1 }] }}>
+    const renderItem = ({ item }: { item: FeaturedProvider }) => (
+        <View style={styles.itemWrapper}>
             <TouchableOpacity
                 onPress={() => router.push(`/services/${item.id}` as any)}
-                className="items-center w-24"
-                style={{ transform: [{ scaleX: -1 }] }}
+                style={styles.serviceCard}
                 activeOpacity={0.8}
             >
-                <View className="relative mb-2">
-                    <View className="w-20 h-20 rounded-full bg-slate-100 overflow-hidden">
+                <View style={styles.avatarContainer}>
+                    <View style={styles.avatar}>
                         <Image
                             source={{ uri: item.avatar }}
-                            className="w-full h-full"
+                            style={styles.avatarImage}
                             resizeMode="cover"
                         />
                     </View>
-                    <View className="absolute bottom-0 right-0 bg-white rounded-full px-1.5 py-0.5 flex-row items-center">
-                        <Text className="font-cairo-bold text-[10px] text-slate-700 ml-0.5">{item.rating}</Text>
+                    <View style={styles.ratingBadge}>
+                        <Text style={styles.ratingText}>{item.rating}</Text>
                         <Feather name="star" size={8} color="#F59E0B" fill="#F59E0B" />
                     </View>
                 </View>
-                <Text className="font-cairo-bold text-slate-900 text-sm text-center mb-0.5" numberOfLines={1}>
+                <Text style={styles.serviceName} numberOfLines={1}>
                     {item.name}
                 </Text>
-                <Text className="font-cairo-medium text-slate-500 text-[10px] text-center" numberOfLines={1}>
+                <Text style={styles.serviceCategory} numberOfLines={1}>
                     {item.category}
                 </Text>
             </TouchableOpacity>
@@ -85,14 +86,14 @@ export const ServicesSection = () => {
     );
 
     return (
-        <View className="mb-8">
-            <View className="flex-row-reverse items-center justify-between px-5 mb-4">
-                <Text className="font-cairo-bold text-xl text-slate-900">خبراء ومصممون مميزون</Text>
+        <View style={styles.container}>
+            <View style={styles.header}>
+                <Text style={styles.headerTitle}>خبراء ومصممون مميزون</Text>
                 <TouchableOpacity onPress={() => router.push('/services' as any)}>
-                    <Text className="font-cairo-medium text-primary text-sm">عرض الكل</Text>
+                    <Text style={styles.viewAllText}>عرض الكل</Text>
                 </TouchableOpacity>
             </View>
-            <View style={{ height: 140, transform: [{ scaleX: -1 }] }}>
+            <View style={styles.listContainer}>
                 <FlashList
                     data={FEATURED_PROVIDERS}
                     renderItem={renderItem}

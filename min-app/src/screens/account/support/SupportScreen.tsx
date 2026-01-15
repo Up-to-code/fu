@@ -4,6 +4,7 @@ import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { Dimensions, LayoutAnimation, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Header, FormTextArea, PrimaryButton } from '../../shared';
 import { ActionButton } from '../../../components/shared';
 import { COLORS } from '../../../constants/theme';
 
@@ -45,12 +46,7 @@ export default function SupportScreen() {
 
     return (
         <SafeAreaView className="flex-1 bg-white" edges={['top']}>
-            {/* Header */}
-            <View className="flex-row-reverse items-center justify-between px-5 py-3 border-b border-slate-100">
-                <TouchableOpacity onPress={() => router.back()}><Feather name="arrow-right" size={24} color={COLORS.text} /></TouchableOpacity>
-                <Text className="font-cairo-bold text-lg text-slate-800">المساعدة والدعم</Text>
-                <View className="w-6" />
-            </View>
+            <Header title="المساعدة والدعم" showBack />
 
             <ScrollView className="flex-1" contentContainerStyle={{ padding: 20 }}>
                 {/* Contact Options */}
@@ -82,16 +78,20 @@ export default function SupportScreen() {
                 {/* Contact Form */}
                 <Text className="font-cairo-bold text-slate-800 text-right mb-4 text-lg">إرسال رسالة</Text>
                 <View className="bg-slate-50 p-4 rounded-2xl mb-6">
-                    <TextInput
-                        className="bg-white rounded-xl px-4 py-3 text-right font-cairo-medium min-h-[120px] mb-4 text-slate-800"
-                        placeholder="كيف يمكننا مساعدتك؟"
-                        placeholderTextColor="#94a3b8"
-                        multiline
-                        textAlignVertical="top"
+                    <FormTextArea
+                        label=""
                         value={message}
                         onChangeText={setMessage}
+                        placeholder="كيف يمكننا مساعدتك؟"
+                        rows={5}
                     />
-                    <ActionButton label="إرسال" icon="send" onPress={() => console.log('Send', message)} />
+                    <View style={{ marginTop: 12 }}>
+                        <PrimaryButton
+                            label="إرسال"
+                            onPress={() => console.log('Send', message)}
+                            disabled={!message.trim()}
+                        />
+                    </View>
                 </View>
 
                 {/* Legal Links */}

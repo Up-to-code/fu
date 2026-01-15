@@ -1,0 +1,233 @@
+---
+description: Architecture rules and guidelines for code organization, component sharing, type separation, SOLID principles, and performance optimization
+globs: **/*.ts,**/*.tsx,**/*.js,**/*.jsx
+---
+
+# Architecture Development Rules
+
+## Core Architecture Principles
+
+### SOLID Principles
+- **Single Responsibility**: Each component, hook, or utility should have one clear purpose
+- **Open/Closed**: Components should be open for extension but closed for modification
+- **Liskov Substitution**: Shared components should work consistently across all use cases
+- **Interface Segregation**: Split large interfaces into smaller, focused ones
+- **Dependency Inversion**: Depend on abstractions (interfaces/types) not concrete implementations
+
+### Clean Architecture
+- **Separation of Concerns**: UI, business logic, and data access must be separated
+- **Dependency Rule**: Inner layers (business logic) should not depend on outer layers (UI)
+- **Performance First**: Optimize for performance at every level - use memoization, lazy loading, and efficient rendering
+
+## Folder Structure Rules
+
+### Screen Organization Pattern
+```
+screens/
+  {screen-name}/
+    {ScreenName}Screen.tsx          # Main screen component
+    _hooks/                          # Screen-specific custom hooks
+      use{HookName}.ts
+      index.ts                       # Barrel export
+    _components/                     # Screen-specific components (only if not shareable)
+      {ComponentName}.tsx
+      index.ts                       # Barrel export
+```
+
+### Shared Components Organization
+```
+screens/
+  shared/
+    components/                      # All shareable UI components
+      {ComponentName}.tsx
+      index.ts                       # Barrel export
+    StyleSheets/                     # All component styles (separated)
+      {ComponentName}.styles.ts
+    types/                           # All type definitions (separated)
+      interfaces.ts                  # Interface definitions
+      types.ts                       # Type aliases and unions
+      {domain}.ts                    # Domain-specific types (e.g., review.ts, card.ts)
+    index.ts                         # Main barrel export
+```
+
+### Rules for Folder Structure
+1. **Screen-specific code** stays in `{screen-name}/` directory
+2. **Shareable components** go in `screens/shared/components/`
+3. **All styles** must be in `StyleSheets/` folder, never inline
+4. **All types/interfaces** must be in `types/` folder, never in component files
+5. **Custom hooks** for screens go in `_hooks/` folder
+6. **Screen-specific components** go in `_components/` folder (only if not shareable)
+
+## Component Sharing Rules
+
+### When to Make a Component Shareable
+
+**MUST be shared if:**
+- Used in 2+ different screens
+- Represents a common UI pattern (buttons, inputs, cards, headers)
+- Has reusable business logic that multiple screens need
+- Is a generic utility component (modals, bottom sheets, pickers)
+
+**SHOULD be shared if:**
+- Similar component exists in multiple screens with minor variations
+- Can be made generic with props/variants
+- Follows a common design pattern across the app
+
+**MUST NOT be shared if:**
+- Screen-specific business logic is tightly coupled
+- Component is only used in one screen
+- Component has screen-specific dependencies that can't be abstracted
+
+### Component Sharing Decision Tree
+```
+Is component used in 2+ screens?
+├─ YES → Is it generic enough?
+│   ├─ YES → Move to shared/components/
+│   └─ NO → Can it be made generic with props?
+│       ├─ YES → Refactor and move to shared/components/
+│       └─ NO → Keep in screen _components/
+└─ NO → Keep in screen _components/ or inline
+```
+
+### Component Extraction Process
+1. **Identify** duplicate or similar components across screens
+2. **Analyze** commonalities and differences
+3. **Create** unified component with props/variants for differences
+4. **Extract** styles to `StyleSheets/{ComponentName}.styles.ts`
+5. **Extract** types to `types/{domain}.ts` or `types/ui.ts`
+6. **Move** component to `shared/components/`
+7. **Update** all imports across codebase
+8. **Delete** original component files
+9. **Update** barrel exports (`index.ts` files)
+
+## Type and Interface Separation Rules
+
+### Type Organization Rules
+
+**File Structure:**
+```
+types/
+  interfaces.ts      # All interface definitions
+  types.ts          # Type aliases, unions, primitives
+  {domain}.ts       # Domain-specific types (review.ts, card.ts, form.ts, button.ts, navigation.ts, ui.ts)
+```
+
+**Separation Rules:**
+1. **Interfaces** → `interfaces.ts` or domain-specific file
+2. **Type aliases** → `types.ts` or domain-specific file
+3. **Domain types** → Separate file by domain (e.g., `review.ts`, `card.ts`)
+4. **Component props** → Domain file or `ui.ts` for generic UI components
+5. **Never** define types/interfaces in component files
+
+### Type Naming Conventions
+- **Interfaces**: PascalCase with descriptive names (e.g., `HeaderProps`, `ProductCardProps`)
+- **Types**: PascalCase (e.g., `CameraMode`, `RatingDistribution`)
+- **Props interfaces**: `{ComponentName}Props` (e.g., `ReviewCardProps`)
+- **Domain types**: Descriptive names (e.g., `Review`, `ServiceReview`, `OrderCardData`)
+
+### Type Extraction Process
+1. **Identify** types/interfaces in component files
+2. **Categorize** by domain (UI, form, card, review, etc.)
+3. **Create** or update appropriate type file
+4. **Move** types to correct file
+5. **Update** imports in component files
+6. **Export** from `shared/types/{file}.ts`
+7. **Re-export** from `shared/index.ts` if needed
+
+## Style Separation Rules
+
+### StyleSheet Organization
+- **All styles** must be in `StyleSheets/{ComponentName}.styles.ts`
+- **Never** use inline `StyleSheet.create()` in component files
+- **Never** use Tailwind classes in production code (use StyleSheet only)
+- **One file per component** - each component has its own styles file
+
+### Style File Structure
+```typescript
+// File: src/screens/shared/StyleSheets/ComponentName.styles.ts
+// Purpose: Styles for ComponentName component
+
+import { StyleSheet } from 'react-native';
+import { COLORS } from '../../../constants/theme';
+
+export const styles = StyleSheet.create({
+  container: {
+    // styles
+  },
+});
+```
+
+### Style Import Pattern
+```typescript
+import { styles } from '../StyleSheets/ComponentName.styles';
+```
+
+### Responsive Styles
+- Use `Dimensions.get('window')` for responsive values
+- Create `getStyles()` function for dynamic styles
+- Apply responsive values directly in style definitions
+- Test on multiple screen sizes
+
+## Custom Hooks Organization
+
+### Hook Location Rules
+- **Screen-specific hooks** → `{screen}/_hooks/use{HookName}.ts`
+- **Shared business logic hooks** → `hooks/use{HookName}.ts` (app-level)
+- **One hook per file** - each hook in its own file
+- **Barrel exports** - use `_hooks/index.ts` for exports
+
+### Hook Naming Conventions
+- **Prefix**: Always use `use` prefix (e.g., `useSearch`, `useCart`)
+- **Descriptive**: Name should describe what the hook does
+- **Domain-based**: Group related hooks in same directory
+
+### Hook Structure
+```typescript
+// File: src/screens/{screen}/_hooks/use{HookName}.ts
+// Purpose: {Description of hook purpose}
+
+import { useState, useEffect } from 'react';
+
+interface Use{HookName}Return {
+  // return type interface
+}
+
+export const use{HookName} = (): Use{HookName}Return => {
+  // hook implementation
+  return {
+    // return values
+  };
+};
+```
+
+## Performance Optimization Rules
+
+### Component Performance
+1. **Memoization**: Use `React.memo()` for components that receive stable props
+2. **Callbacks**: Memoize callbacks with `useCallback()` when passing to child components
+3. **Values**: Memoize computed values with `useMemo()` for expensive calculations
+4. **Lists**: Always use `FlashList` for long lists (never `FlatList` or `ScrollView` for lists)
+5. **Images**: Optimize images, use proper `resizeMode`, implement lazy loading
+
+### Rendering Optimization
+- **Avoid** unnecessary re-renders by proper memoization
+- **Split** large components into smaller, memoized sub-components
+- **Use** `key` prop correctly for list items
+- **Avoid** inline functions and objects in render (use `useCallback`/`useMemo`)
+
+### Data Fetching Optimization
+- **Use** Convex queries efficiently (don't over-fetch)
+- **Implement** proper loading states
+- **Cache** data when appropriate
+- **Use** pagination for large datasets
+
+### Code Splitting
+- **Lazy load** screens and heavy components
+- **Split** bundle by route when possible
+- **Import** only what's needed
+
+## Code Organization Best Practices
+
+### File Naming Conventions
+- **Components**: PascalCase (e.g., `ProductCard.tsx`, `SearchBar.tsx`)
+- **Hooks**: camelCase with `use` prefix (e.g., `useSearch.ts`, 

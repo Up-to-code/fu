@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { KeyboardAvoidingView, Platform, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAuth } from '../../src/hooks/useAuth';
+import { signInWithGoogle } from '../../src/lib/auth-client';
 import { COLORS } from '../../src/constants/theme';
 
 export default function LoginScreen() {
@@ -19,6 +20,15 @@ export default function LoginScreen() {
             router.replace('/(tabs)/home');
         } catch (error: any) {
             alert(error.message || "فشل تسجيل الدخول");
+        }
+    };
+
+    const handleGoogleSignIn = async () => {
+        try {
+            await signInWithGoogle();
+            router.replace('/(tabs)/home');
+        } catch (error: any) {
+            alert(error.message || "فشل تسجيل الدخول بـ Google");
         }
     };
 
@@ -94,13 +104,14 @@ export default function LoginScreen() {
                     </View>
 
                     <View className="flex-row gap-3 mb-8">
-                        <TouchableOpacity 
+                        <TouchableOpacity
+                            onPress={handleGoogleSignIn}
                             className="flex-1 flex-row items-center justify-center gap-2 py-4 rounded-xl border border-slate-200 bg-white"
                         >
                             <Feather name="chrome" size={20} color="#4285F4" />
                             <Text className="font-cairo-bold text-slate-800">Google</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity 
+                        <TouchableOpacity
                             className="flex-1 flex-row items-center justify-center gap-2 py-4 rounded-xl border border-slate-200 bg-white"
                         >
                             <Feather name="smartphone" size={20} color="#000000" />

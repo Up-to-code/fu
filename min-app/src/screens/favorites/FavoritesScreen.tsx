@@ -1,26 +1,29 @@
 // File: src/screens/favorites/FavoritesScreen.tsx
-// Purpose: Favorites Screen with tabs for Products and Services
+// Purpose: Favorites Screen with tabs for Products and Services - StyleSheet Implementation
 
 import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { Animated, Dimensions, Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { Dimensions, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { EmptyState } from '../../components/shared';
+import { Header, TabBar, ProductGrid } from '../shared';
+import { useFavorites, useFavoriteProducts, useFavoriteServices } from './_hooks';
 import { COLORS } from '../../constants/theme';
+import { TabType } from './types/favorites';
 
 const { width } = Dimensions.get('window');
-const numColumns = 3;
-const gap = 2;
-const itemSize = (width - gap * (numColumns - 1) - 40) / numColumns;
+const numColumns = 2; // Changed from 3 to 2 for better visibility
+const gap = 12; // Increased gap
+const padding = 20;
+const itemSize = (width - (padding * 2) - (gap * (numColumns - 1))) / numColumns;
 
 const FAVORITE_PRODUCTS = [
     { id: '1', name: 'صوفا مودرن مريحة', price: 2499, image: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=500&q=80' },
     { id: '2', name: 'طاولة قهوة خشبية', price: 899, discount: 15, image: 'https://images.unsplash.com/photo-1533090481720-856c6e3c1fdc?w=500&q=80' },
-    { id: '3', name: 'مصباح أرضي ذهبي', price: 450, image: 'https://images.unsplash.com/photo-1513506003011-3b03c801e12b?w=500&q=80' },
+    { id: '3', name: 'مصباح أرضي', price: 450, image: 'https://images.unsplash.com/photo-1513506003011-3b03c801e12b?w=500&q=80' },
     { id: '4', name: 'سرير مزدوج', price: 1299, image: 'https://images.unsplash.com/photo-1505693416388-b0346ef38604?w=500&q=80' },
     { id: '5', name: 'كرسي مكتبي', price: 599, image: 'https://images.unsplash.com/photo-1506439773649-6e0eb8cfb237?w=500&q=80' },
-    { id: '6', name: 'طاولة طعام', price: 1899, image: 'https://images.unsplash.com/photo-1581539250439-c96689b516dd?w=500&q=80' },
 ];
 
 const FAVORITE_SERVICES = [
@@ -46,8 +49,6 @@ const FAVORITE_SERVICES = [
     },
 ];
 
-type TabType = 'products' | 'services';
-
 export default function FavoritesScreen() {
     const router = useRouter();
     const [activeTab, setActiveTab] = useState<TabType>('products');
@@ -55,15 +56,15 @@ export default function FavoritesScreen() {
     const TabButton = ({ tab, label, count }: { tab: TabType; label: string; count: number }) => (
         <TouchableOpacity
             onPress={() => setActiveTab(tab)}
-            className={`flex-1 py-3 items-center border-b-2 ${
-                activeTab === tab ? 'border-primary' : 'border-transparent'
-            }`}
-            style={activeTab === tab ? { borderBottomColor: COLORS.primary } : {}}
+            style={[
+                styles.tabButton,
+                activeTab === tab && styles.activeTabButton
+            ]}
         >
-            <Text 
-                className={`font-cairo-bold text-sm ${activeTab === tab ? 'text-primary' : 'text-slate-500'}`}
-                style={activeTab === tab ? { color: COLORS.primary } : {}}
-            >
+            <Text style={[
+                styles.tabText,
+                activeTab === tab && styles.activeTabText
+            ]}>
                 {label} ({count})
             </Text>
         </TouchableOpacity>
@@ -83,37 +84,41 @@ export default function FavoritesScreen() {
         }
 
         return (
-            <View className="flex-row flex-wrap" style={{ marginHorizontal: -gap / 2 }}>
+            <View style={styles.productsGrid}>
                 {FAVORITE_PRODUCTS.map((item) => (
                     <TouchableOpacity
                         key={item.id}
                         onPress={() => router.push(`/product/${item.id}` as any)}
-                        style={{
-                            width: itemSize,
-                            height: itemSize,
-                            margin: gap / 2,
-                        }}
+                        style={styles.productCard}
                         activeOpacity={0.9}
                     >
-                        <View className="relative w-full h-full rounded-lg overflow-hidden bg-slate-100">
+                        <View style={styles.imageContainer}>
                             <Image
                                 source={{ uri: item.image }}
-                                className="w-full h-full"
+                                style={styles.productImage}
                                 resizeMode="cover"
                             />
-                            <View className="absolute top-2 right-2">
-                                <View className="w-7 h-7 bg-black/40 rounded-full items-center justify-center">
-                                    <Feather name="heart" size={14} color="#EF4444" />
-                                </View>
+                            <View style={styles.favoriteBadge}>
+                                <Feather name="heart" size={14} color="#EF4444" />
                             </View>
-                            <View className="absolute bottom-0 left-0 right-0 h-20 bg-black/50" />
-                            <View className="absolute bottom-0 left-0 right-0 p-2">
-                                <Text className="text-white font-cairo-bold text-xs text-right" numberOfLines={1}>
-                                    {item.name}
-                                </Text>
-                                <Text className="text-white/90 font-cairo-medium text-[10px] text-right">
+                            {item.discount && (
+                                <View style={styles.discountBadge}>
+                                    <Text style={styles.discountText}>{item.discount}%-</Text>
+                                </View>
+                            )}
+                        </View>
+
+                        <View style={styles.productInfo}>
+                            <Text style={styles.productName} numberOfLines={1}>
+                                {item.name}
+                            </Text>
+                            <View style={styles.priceRow}>
+                                <Text style={styles.productPrice}>
                                     {item.price.toLocaleString()} ر.س
                                 </Text>
+                                <View style={styles.addToCartBtn}>
+                                    <Feather name="shopping-cart" size={14} color={COLORS.primary} />
+                                </View>
                             </View>
                         </View>
                     </TouchableOpacity>
@@ -136,55 +141,68 @@ export default function FavoritesScreen() {
         }
 
         return (
-            <View className="gap-4">
+            <View style={styles.servicesList}>
                 {FAVORITE_SERVICES.map((provider) => (
                     <TouchableOpacity
                         key={provider.id}
                         onPress={() => router.push(`/services/${provider.id}` as any)}
                         activeOpacity={0.9}
-                        className="bg-white rounded-2xl p-4 border border-slate-100"
+                        style={styles.serviceCard}
                     >
-                        <View className="flex-row-reverse gap-4">
+                        <View style={styles.serviceContent}>
                             {/* Avatar */}
-                            <View className="relative">
-                                <View className="w-16 h-16 rounded-full bg-slate-100 overflow-hidden">
-                                    <Image
-                                        source={{ uri: provider.avatar }}
-                                        className="w-full h-full"
-                                        resizeMode="cover"
-                                    />
-                                </View>
+                            <View style={styles.avatarContainer}>
+                                <Image
+                                    source={{ uri: provider.avatar }}
+                                    style={styles.avatar}
+                                    resizeMode="cover"
+                                />
                                 {provider.verified && (
-                                    <View className="absolute -bottom-1 -right-1 w-5 h-5 bg-blue-500 rounded-full items-center justify-center border-2 border-white">
-                                        <Feather name="check" size={10} color="white" />
+                                    <View style={styles.verifiedBadge}>
+                                        <Feather name="check-circle" size={16} color="#3b82f6" />
                                     </View>
                                 )}
                             </View>
 
                             {/* Info */}
-                            <View className="flex-1 justify-center">
-                                <View className="flex-row-reverse justify-between items-start">
-                                    <View className="flex-1">
-                                        <Text className="font-cairo-bold text-slate-900 text-base text-right mb-1">
-                                            {provider.name}
-                                        </Text>
-                                        <Text className="font-cairo-medium text-slate-500 text-xs text-right">
+                            <View style={styles.serviceInfo}>
+                                <View style={styles.serviceHeader}>
+                                    <View style={{ flex: 1 }}>
+                                        <Text style={styles.providerName}>{provider.name}</Text>
+                                        <Text style={styles.serviceCategory}>
                                             {provider.category} • {provider.location}
                                         </Text>
                                     </View>
-                                    {/* Heart - Always filled */}
-                                    <TouchableOpacity className="p-1">
-                                        <Feather name="heart" size={20} color="#EF4444" />
+                                    <TouchableOpacity style={styles.serviceHeartBtn}>
+                                        {provider.id === '1' ? (
+                                            <View style={{ backgroundColor: '#EF4444', width: 28, height: 28, borderRadius: 14, alignItems: 'center', justifyContent: 'center' }}>
+                                                <Feather name="heart" size={14} color="white" />
+                                            </View>
+                                        ) : (
+                                            <View style={{ width: 28, height: 28, alignItems: 'center', justifyContent: 'center' }}>
+                                                <Feather name="heart" size={20} color="#EF4444" />
+                                            </View>
+                                        )}
                                     </TouchableOpacity>
                                 </View>
 
-                                <View className="flex-row-reverse items-center justify-between mt-3 pt-3 border-t border-slate-50">
-                                    <View className="flex-row-reverse items-center gap-1.5">
+                                <View style={styles.serviceFooter}>
+                                    <View style={styles.ratingContainer}>
                                         <Feather name="star" size={14} color="#F59E0B" />
-                                        <Text className="font-cairo-bold text-slate-900 text-sm">{provider.rating}</Text>
+                                        <Text style={styles.ratingText}>{provider.rating}</Text>
                                     </View>
-                                    <Text className="font-cairo-bold text-sm" style={{ color: COLORS.primary }}>{provider.price}</Text>
+
+                                    <View style={{ flex: 1 }} />
+                                    <Text style={styles.servicePrice}>{provider.price}</Text>
                                 </View>
+                            </View>
+                        </View>
+
+                        {/* Bottom Row: Book Button Only */}
+                        <View style={styles.cardBottomRow}>
+                            <View style={styles.bookButton}>
+                                <Text style={styles.bookButtonText}>حجز موعد</Text>
+                                <Feather name="calendar" size={18} color="#0f172a" />
                             </View>
                         </View>
                     </TouchableOpacity>
@@ -194,28 +212,292 @@ export default function FavoritesScreen() {
     };
 
     return (
-        <SafeAreaView className="flex-1 bg-white" edges={['top']}>
-            {/* Header */}
-            <View className="px-5 py-4 border-b border-slate-100">
-                <Text className="font-cairo-bold text-xl text-slate-900 text-right">المفضلة</Text>
-            </View>
+        <View style={styles.container}>
+            <SafeAreaView style={styles.safeArea} edges={['top']}>
+                <Header
+                    title="المفضلة"
+                    rightAction={
+                        <View style={styles.headerBadge}>
+                            <Text style={styles.headerBadgeText}>
+                                {activeTab === 'products' ? FAVORITE_PRODUCTS.length : FAVORITE_SERVICES.length}
+                            </Text>
+                        </View>
+                    }
+                    showBack
+                />
+                
+                <TabBar
+                    tabs={[
+                        { id: 'products', label: 'المنتجات', count: FAVORITE_PRODUCTS.length },
+                        { id: 'services', label: 'الخدمات', count: FAVORITE_SERVICES.length },
+                    ]}
+                    activeTab={activeTab}
+                    onTabChange={(tabId) => setActiveTab(tabId as TabType)}
+                />
 
-            {/* Tabs */}
-            <View className="flex-row-reverse px-5 bg-white border-b border-slate-100">
-                <TabButton tab="products" label="المنتجات" count={FAVORITE_PRODUCTS.length} />
-                <TabButton tab="services" label="الخدمات" count={FAVORITE_SERVICES.length} />
-            </View>
-
-            <ScrollView
-                className="flex-1"
-                contentContainerStyle={{
-                    padding: 20,
-                    paddingBottom: 20,
-                }}
-                showsVerticalScrollIndicator={false}
-            >
-                {activeTab === 'products' ? renderProductsGrid() : renderServicesList()}
-            </ScrollView>
-        </SafeAreaView>
+                <ScrollView
+                    style={styles.scrollView}
+                    contentContainerStyle={styles.scrollContent}
+                    showsVerticalScrollIndicator={false}
+                >
+                    {activeTab === 'products' ? renderProductsGrid() : renderServicesList()}
+                </ScrollView>
+            </SafeAreaView>
+        </View>
     );
 }
+
+const styles = StyleSheet.create({
+    container: { flex: 1, backgroundColor: '#f8fafc' },
+    safeArea: { flex: 1 },
+    header: {
+        flexDirection: 'row-reverse',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingHorizontal: 20,
+        paddingVertical: 16,
+        backgroundColor: 'white',
+        borderBottomWidth: 1,
+        borderBottomColor: '#f1f5f9',
+    },
+    headerTitle: {
+        fontFamily: 'Cairo_700Bold',
+        fontSize: 20,
+        color: '#0f172a',
+    },
+    headerBadge: {
+        backgroundColor: '#f1f5f9',
+        paddingHorizontal: 10,
+        paddingVertical: 4,
+        borderRadius: 12,
+    },
+    headerBadgeText: {
+        fontFamily: 'Cairo_700Bold',
+        fontSize: 14,
+        color: '#64748b',
+    },
+    tabsContainer: {
+        flexDirection: 'row-reverse',
+        backgroundColor: 'white',
+        paddingHorizontal: 20,
+        borderBottomWidth: 1,
+        borderBottomColor: '#f1f5f9',
+    },
+    tabButton: {
+        flex: 1,
+        paddingVertical: 14,
+        alignItems: 'center',
+        borderBottomWidth: 2,
+        borderBottomColor: 'transparent',
+    },
+    activeTabButton: {
+        borderBottomColor: COLORS.primary,
+    },
+    tabText: {
+        fontFamily: 'Cairo_600SemiBold',
+        fontSize: 14,
+        color: '#64748b',
+    },
+    activeTabText: {
+        color: COLORS.primary,
+        fontFamily: 'Cairo_700Bold',
+    },
+    scrollView: { flex: 1 },
+    scrollContent: {
+        padding: 20,
+        paddingBottom: 40,
+    },
+    // Products Grid
+    productsGrid: {
+        flexDirection: 'row-reverse',
+        flexWrap: 'wrap',
+        gap: gap,
+    },
+    productCard: {
+        width: itemSize,
+        borderRadius: 12,
+        backgroundColor: 'white',
+        borderWidth: 1,
+        borderColor: '#f1f5f9',
+        overflow: 'hidden',
+        marginBottom: gap,
+    },
+    imageContainer: {
+        height: itemSize, // Square image area
+        width: '100%',
+        position: 'relative',
+        backgroundColor: '#f8fafc',
+    },
+    productImage: {
+        width: '100%',
+        height: '100%',
+    },
+    favoriteBadge: {
+        position: 'absolute',
+        top: 8,
+        right: 8,
+        width: 28,
+        height: 28,
+        backgroundColor: 'white',
+        borderRadius: 14,
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 10,
+        borderWidth: 1,
+        borderColor: '#f1f5f9',
+    },
+    discountBadge: {
+        position: 'absolute',
+        top: 8,
+        left: 8,
+        backgroundColor: '#EF4444',
+        paddingHorizontal: 6,
+        paddingVertical: 2,
+        borderRadius: 4,
+    },
+    discountText: {
+        color: 'white',
+        fontFamily: 'Cairo_700Bold',
+        fontSize: 10,
+    },
+    productInfo: {
+        padding: 10,
+    },
+    productName: {
+        fontFamily: 'Cairo_700Bold',
+        fontSize: 13,
+        color: '#1e293b',
+        textAlign: 'right',
+        marginBottom: 4,
+    },
+    priceRow: {
+        flexDirection: 'row-reverse',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
+    productPrice: {
+        fontFamily: 'Cairo_700Bold',
+        fontSize: 13,
+        color: COLORS.primary,
+        textAlign: 'right',
+    },
+    addToCartBtn: {
+        width: 28,
+        height: 28,
+        borderRadius: 14,
+        backgroundColor: '#f0f9ff',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    // Services List - Updated
+    servicesList: {
+        gap: 12,
+    },
+    serviceCard: {
+        backgroundColor: 'white',
+        borderRadius: 20,
+        padding: 16,
+        borderWidth: 1,
+        borderColor: '#f1f5f9',
+    },
+    serviceContent: {
+        flexDirection: 'row-reverse',
+        gap: 12,
+        marginBottom: 16,
+    },
+    avatarContainer: {
+        position: 'relative',
+        marginBottom: 8, // Make space for the overlapping badge
+    },
+    avatar: {
+        width: 60,
+        height: 60,
+        borderRadius: 30,
+        backgroundColor: '#f1f5f9',
+    },
+    verifiedBadge: {
+        position: 'absolute',
+        bottom: -6, // Halfway out (approx)
+        alignSelf: 'center', // Center horizontally
+        left: '50%',
+        marginLeft: -10, // Half of width (20/2) to center exact
+        width: 20,
+        height: 20,
+        backgroundColor: 'white', // White background for contrast
+        borderRadius: 10, // Circular
+        alignItems: 'center',
+        justifyContent: 'center',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.1,
+        shadowRadius: 2,
+        elevation: 2,
+    },
+    serviceInfo: {
+        flex: 1,
+        justifyContent: 'center',
+    },
+    serviceHeader: {
+        flexDirection: 'row-reverse',
+        alignItems: 'flex-start',
+        justifyContent: 'space-between',
+    },
+    providerName: {
+        fontFamily: 'Cairo_700Bold',
+        fontSize: 15,
+        color: '#0f172a',
+        textAlign: 'right',
+        marginBottom: 2,
+    },
+    serviceCategory: {
+        fontFamily: 'Cairo_500Medium',
+        fontSize: 12,
+        color: '#64748b',
+        textAlign: 'right',
+    },
+    serviceHeartBtn: {
+        padding: 0,
+    },
+    serviceFooter: {
+        flexDirection: 'row-reverse',
+        alignItems: 'center',
+        justifyContent: 'flex-start',
+        marginTop: 8,
+        gap: 12,
+    },
+    ratingContainer: {
+        flexDirection: 'row-reverse',
+        alignItems: 'center',
+        gap: 4,
+    },
+    ratingText: {
+        fontFamily: 'Cairo_700Bold',
+        fontSize: 13,
+        color: '#0f172a',
+    },
+    servicePrice: {
+        fontFamily: 'Cairo_700Bold',
+        fontSize: 13,
+        color: '#0f172a',
+    },
+    cardBottomRow: {
+        flexDirection: 'row-reverse',
+        alignItems: 'center',
+        gap: 12,
+    },
+    bookButton: {
+        flex: 1,
+        backgroundColor: '#f0f9ff',
+        borderRadius: 12,
+        height: 44,
+        flexDirection: 'row-reverse',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 8,
+    },
+    bookButtonText: {
+        fontFamily: 'Cairo_700Bold',
+        fontSize: 14,
+        color: '#0f172a',
+    },
+});

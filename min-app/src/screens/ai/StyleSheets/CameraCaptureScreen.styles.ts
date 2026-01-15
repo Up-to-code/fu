@@ -1,0 +1,183 @@
+// File: src/screens/ai/StyleSheets/CameraCaptureScreen.styles.ts
+// Purpose: Styles for CameraCaptureScreen component
+
+import { StyleSheet } from 'react-native';
+import { COLORS } from '../../../constants/theme';
+
+export const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: 'black',
+    },
+    loadingContainer: {
+        flex: 1,
+        backgroundColor: 'black',
+    },
+    permissionContainer: {
+        flex: 1,
+        backgroundColor: '#0f172a',
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingHorizontal: 20,
+    },
+    permissionIcon: {
+        width: 80,
+        height: 80,
+        borderRadius: 40,
+        backgroundColor: '#1e293b',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginBottom: 32,
+    },
+    permissionTitle: {
+        color: 'white',
+        fontSize: 20,
+        fontFamily: 'Cairo_700Bold',
+        textAlign: 'center',
+        marginBottom: 16,
+    },
+    permissionDescription: {
+        color: '#94a3b8',
+        textAlign: 'center',
+        marginBottom: 40,
+        fontFamily: 'Cairo_500Medium',
+        fontSize: 16,
+        lineHeight: 24,
+        paddingHorizontal: 16,
+    },
+    permissionButton: {
+        backgroundColor: COLORS.primary,
+        paddingHorizontal: 40,
+        paddingVertical: 16,
+        borderRadius: 16,
+        flexDirection: 'row-reverse',
+        alignItems: 'center',
+        gap: 12,
+    },
+    permissionButtonText: {
+        color: 'white',
+        fontFamily: 'Cairo_700Bold',
+        fontSize: 16,
+    },
+    topBar: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+    },
+    topBarContent: {
+        paddingHorizontal: 20,
+        paddingVertical: 16,
+        flexDirection: 'row-reverse',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
+    backButton: {
+        width: 48,
+        height: 48,
+        borderRadius: 24,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    titleBadge: {
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        paddingHorizontal: 20,
+        paddingVertical: 10,
+        borderRadius: 16,
+    },
+    titleText: {
+        color: 'white',
+        fontSize: 14,
+        fontFamily: 'Cairo_700Bold',
+    },
+    spacer: {
+        width: 48,
+    },
+    guideFrame: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    guideFrameBorder: {
+        width: '85%',
+        height: '55%',
+        borderWidth: 2,
+        borderColor: 'rgba(255, 255, 255, 0.4)',
+        borderRadius: 24,
+    },
+    bottomContainer: {
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+    },
+    bottomContent: {
+        paddingBottom: 24,
+        paddingTop: 24,
+    },
+    hintText: {
+        color: 'rgba(255, 255, 255, 0.8)',
+        fontSize: 14,
+        fontFamily: 'Cairo_500Medium',
+        textAlign: 'center',
+        marginBottom: 32,
+        paddingHorizontal: 20,
+    },
+    controlsRow: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingHorizontal: 32,
+    },
+    galleryButton: {
+        width: 56,
+        height: 56,
+        borderRadius: 28,
+        backgroundColor: 'rgba(255, 255, 255, 0.2)',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    captureButton: {
+        width: 80,
+        height: 80,
+        borderRadius: 40,
+        borderWidth: 4,
+        borderColor: 'white',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginHorizontal: 32,
+    },
+    captureButtonInner: {
+        width: 64,
+        height: 64,
+        borderRadius: 32,
+        backgroundColor: COLORS.primary,
+    },
+    flashButton: {
+        width: 56,
+        height: 56,
+        borderRadius: 28,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    flashButtonOn: {
+        backgroundColor: '#eab308',
+    },
+    flashButtonOff: {
+        backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    },
+    flashOverlay: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'white',
+        zIndex: 9999,
+    },
+});

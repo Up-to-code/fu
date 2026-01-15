@@ -3,9 +3,10 @@
 
 import { useRouter } from 'expo-router';
 import React from 'react';
-import { Dimensions, Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { Dimensions, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ScreenHeader } from '../../components/shared';
+import { Header, LoadingSpinner } from '../shared';
+import { useCategories } from './_hooks';
 
 const { width } = Dimensions.get('window');
 const isTablet = width >= 768;
@@ -22,55 +23,119 @@ const CATEGORIES = [
 
 export default function CategoriesScreen() {
     const router = useRouter();
+    const { categories, isLoading } = useCategories();
+    // Fallback to mock data if hook returns empty
+    const displayCategories = categories.length > 0 
+        ? categories.map(c => ({ id: c.id, name: c.name, label: c.name, image: c.imageUrl || '', count: 0 }))
+        : CATEGORIES;
 
     return (
-        <SafeAreaView className="flex-1 bg-white" edges={['top']}>
-            {/* Shared Header */}
-            <ScreenHeader
-                title="التصنيفات"
-                subtitle="اكتشف مجموعاتنا"
-                icon="grid"
-            />
+        <SafeAreaView style={styles.container} edges={['top']}>
+            <Header title="التصنيفات" showBack />
 
-            <ScrollView
-                className="flex-1"
-                contentContainerStyle={{
-                    paddingBottom: 20,
-                    paddingHorizontal: 20,
-                    paddingTop: 16,
-                }}
-            >
-                <View className="flex-row flex-wrap justify-between" style={{ direction: 'rtl' }}>
-                    {CATEGORIES.map((category) => (
-                        <TouchableOpacity
-                            key={category.id}
-                            style={{ width: cardWidth }}
-                            className="mb-4 bg-white rounded-2xl border border-slate-100 overflow-hidden"
-                            activeOpacity={0.8}
-                            onPress={() => router.push({
-                                pathname: '/category/[id]',
-                                params: { id: category.id, name: category.label }
-                            })}
-                        >
-                            <View className={`bg-slate-100 ${isTablet ? 'h-44' : 'h-32'}`}>
-                                <Image
-                                    source={{ uri: category.image }}
-                                    className="w-full h-full"
-                                    resizeMode="cover"
-                                />
-                            </View>
-                            <View className={`items-end ${isTablet ? 'p-5' : 'p-4'}`}>
-                                <Text className={`font-cairo-bold text-slate-800 mb-1 ${isTablet ? 'text-lg' : 'text-base'}`}>
-                                    {category.label}
-                                </Text>
-                                <Text className={`text-slate-500 font-cairo-medium ${isTablet ? 'text-sm' : 'text-xs'}`}>
-                                    {category.count} منتج
-                                </Text>
-                            </View>
-                        </TouchableOpacity>
-                    ))}
-                </View>
-            </ScrollView>
+            {isLoading ? (
+                <LoadingSpinner message="جاري التحميل..." />
+            ) : (
+                <ScrollView
+                    style={styles.scrollView}
+                    contentContainerStyle={styles.scrollContent}
+                >
+                    <View style={styles.grid}>
+                        {displayCategories.map((category) => (
+                            <TouchableOpacity
+                                key={category.id}
+                                style={[styles.categoryCard, { width: cardWidth }]}
+                                activeOpacity={0.8}
+                                onPress={() => router.push({
+                                    pathname: '/category/[id]',
+                                    params: { id: category.id.toString(), name: category.label }
+                                })}
+                            >
+                                <View style={[styles.imageContainer, isTablet && styles.imageContainerTablet]}>
+                                    <Image
+                                        source={{ uri: category.image }}
+                                        style={styles.image}
+                                        resizeMode="cover"
+                                    />
+                                </View>
+                                <View style={[styles.categoryInfo, isTablet && styles.categoryInfoTablet]}>
+                                    <Text style={[styles.categoryLabel, isTablet && styles.categoryLabelTablet]}>
+                                        {category.label}
+                                    </Text>
+                                    {category.count > 0 && (
+                                        <Text style={[styles.categoryCount, isTablet && styles.categoryCountTablet]}>
+                                            {category.count} منتج
+                                        </Text>
+                                    )}
+                                </View>
+                            </TouchableOpacity>
+                        ))}
+                    </View>
+                </ScrollView>
+            )}
         </SafeAreaView>
     );
 }
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: 'white',
+    },
+    scrollView: {
+        flex: 1,
+    },
+    scrollContent: {
+        paddingBottom: 20,
+        paddingHorizontal: 20,
+        paddingTop: 16,
+    },
+    grid: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        justifyContent: 'space-between',
+    },
+    categoryCard: {
+        marginBottom: 16,
+        backgroundColor: 'white',
+        borderRadius: 16,
+        borderWidth: 1,
+        borderColor: '#e2e8f0',
+        overflow: 'hidden',
+    },
+    imageContainer: {
+        height: 128,
+        backgroundColor: '#f1f5f9',
+    },
+    imageContainerTablet: {
+        height: 176,
+    },
+    image: {
+        width: '100%',
+        height: '100%',
+    },
+    categoryInfo: {
+        alignItems: 'flex-end',
+        padding: 16,
+    },
+    categoryInfoTablet: {
+        padding: 20,
+    },
+    categoryLabel: {
+        fontFamily: 'Cairo_700Bold',
+        fontSize: 16,
+        color: '#1e293b',
+        marginBottom: 4,
+    },
+    categoryLabelTablet: {
+        fontSize: 18,
+    },
+    categoryCount: {
+        fontFamily: 'Cairo_500Medium',
+        fontSize: 12,
+        color: '#64748b',
+    },
+    categoryCountTablet: {
+        fontSize: 14,
+    },
+});

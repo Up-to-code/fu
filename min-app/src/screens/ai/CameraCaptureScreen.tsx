@@ -8,8 +8,10 @@ import { router } from 'expo-router';
 import React, { useRef, useState } from 'react';
 import { Alert, StatusBar, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Header } from '../shared';
 import { COLORS } from '../../constants/theme';
 import { saveAISession } from '../../utils/storage';
+import { styles } from './StyleSheets/CameraCaptureScreen.styles';
 
 const CameraCaptureScreen = () => {
     const [showFlash, setShowFlash] = useState(false);
@@ -18,32 +20,32 @@ const CameraCaptureScreen = () => {
     const cameraRef = useRef<CameraView>(null);
 
     if (!permission) {
-        return <View className="flex-1 bg-black" />;
+        return <View style={styles.loadingContainer} />;
     }
 
     if (!permission.granted) {
         return (
-            <SafeAreaView className="flex-1 bg-slate-900 items-center justify-center px-5" edges={['top', 'bottom']}>
-                <StatusBar barStyle="light-content" />
+            <SafeAreaView style={styles.permissionContainer} edges={['top', 'bottom']}>
+                <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
 
-                <View className="w-20 h-20 rounded-full bg-slate-800 items-center justify-center mb-8">
+                <View style={styles.permissionIcon}>
                     <Feather name="camera-off" size={32} color="white" />
                 </View>
 
-                <Text className="text-white text-xl font-cairo-bold text-center mb-4">
+                <Text style={styles.permissionTitle}>
                     نحتاج إذن الكاميرا
                 </Text>
 
-                <Text className="text-slate-400 text-center mb-10 font-cairo-medium text-base leading-6 px-4">
+                <Text style={styles.permissionDescription}>
                     للتصوير وتصميم غرفتك بالذكاء الاصطناعي
                 </Text>
 
                 <TouchableOpacity
                     onPress={requestPermission}
-                    className="bg-primary px-10 py-4 rounded-2xl flex-row-reverse items-center gap-3"
+                    style={styles.permissionButton}
                     activeOpacity={0.8}
                 >
-                    <Text className="text-white font-cairo-bold text-base">السماح</Text>
+                    <Text style={styles.permissionButtonText}>السماح</Text>
                     <Feather name="unlock" size={18} color="white" />
                 </TouchableOpacity>
             </SafeAreaView>
@@ -107,8 +109,8 @@ const CameraCaptureScreen = () => {
     };
 
     return (
-        <View className="flex-1 bg-black">
-            <StatusBar barStyle="light-content" />
+        <View style={styles.container}>
+            <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
 
             {/* Camera */}
             <CameraView
@@ -119,44 +121,34 @@ const CameraCaptureScreen = () => {
                 enableTorch={flashMode === 'on'}
             />
 
-            {/* Top Bar */}
-            <SafeAreaView className="absolute top-0 left-0 right-0" edges={['top']}>
-                <View className="px-5 py-4 flex-row-reverse justify-between items-center">
-                    <TouchableOpacity
-                        onPress={handleBack}
-                        className="w-12 h-12 rounded-full bg-black/50 items-center justify-center"
-                        activeOpacity={0.8}
-                    >
-                        <Feather name="x" size={22} color="white" />
-                    </TouchableOpacity>
-
-                    <View className="bg-black/50 px-5 py-2.5 rounded-2xl">
-                        <Text className="text-white text-sm font-cairo-bold">صوّر الغرفة</Text>
-                    </View>
-
-                    <View className="w-12" />
-                </View>
+            {/* Header */}
+            <SafeAreaView style={styles.topBar} edges={['top']}>
+                <Header
+                    title="تصميم بالذكاء الاصطناعي"
+                    showBack
+                    onBack={handleBack}
+                />
             </SafeAreaView>
 
             {/* Guide Frame */}
-            <View className="absolute inset-0 items-center justify-center pointer-events-none">
-                <View className="w-[85%] h-[55%] border-2 border-white/40 rounded-3xl" />
+            <View style={styles.guideFrame} pointerEvents="none">
+                <View style={styles.guideFrameBorder} />
             </View>
 
             {/* Bottom Controls */}
-            <SafeAreaView className="absolute bottom-0 left-0 right-0" edges={['bottom']}>
-                <View className="pb-6 pt-6">
+            <SafeAreaView style={styles.bottomContainer} edges={['bottom']}>
+                <View style={styles.bottomContent}>
                     {/* Hint */}
-                    <Text className="text-white/80 text-sm font-cairo-medium text-center mb-8 px-5">
+                    <Text style={styles.hintText}>
                         حاول تصوير الغرفة كاملة
                     </Text>
 
                     {/* Controls */}
-                    <View className="flex-row justify-center items-center px-8">
+                    <View style={styles.controlsRow}>
                         {/* Gallery */}
                         <TouchableOpacity
                             onPress={handleGalleryPick}
-                            className="w-14 h-14 rounded-full bg-white/20 items-center justify-center"
+                            style={styles.galleryButton}
                             activeOpacity={0.8}
                         >
                             <Feather name="image" size={24} color="white" />
@@ -165,18 +157,19 @@ const CameraCaptureScreen = () => {
                         {/* Capture */}
                         <TouchableOpacity
                             onPress={handleCapture}
-                            className="w-20 h-20 rounded-full border-4 border-white items-center justify-center mx-8"
+                            style={styles.captureButton}
                             activeOpacity={0.8}
                         >
-                            <View className="w-16 h-16 rounded-full bg-primary" />
+                            <View style={styles.captureButtonInner} />
                         </TouchableOpacity>
 
                         {/* Flash Toggle */}
                         <TouchableOpacity
                             onPress={toggleFlash}
-                            className={`w-14 h-14 rounded-full items-center justify-center ${
-                                flashMode === 'on' ? 'bg-yellow-500' : 'bg-white/20'
-                            }`}
+                            style={[
+                                styles.flashButton,
+                                flashMode === 'on' ? styles.flashButtonOn : styles.flashButtonOff
+                            ]}
                             activeOpacity={0.8}
                         >
                             <Feather
@@ -190,7 +183,7 @@ const CameraCaptureScreen = () => {
             </SafeAreaView>
 
             {/* Flash Overlay */}
-            {showFlash && <View className="absolute inset-0 bg-white" style={{ zIndex: 9999 }} />}
+            {showFlash && <View style={styles.flashOverlay} />}
         </View>
     );
 };

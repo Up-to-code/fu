@@ -3,15 +3,14 @@
 
 import { useRouter } from 'expo-router';
 import React from 'react';
-import { Dimensions, ScrollView, View } from 'react-native';
-import type { Product } from '../../components/shared';
-import { EmptyState, ScreenHeader } from '../../components/shared';
-import { ProductGrid } from './_components';
+import { ScrollView, Text, View } from 'react-native';
+import { EmptyState } from '../../components/shared';
+import { Header, ProductGrid, IProductCardProps, LoadingSpinner } from '../shared';
+import { useCategoryProducts } from './_hooks';
+import { CategoryDetailsScreenProps } from './types/category';
+import { styles } from './StyleSheets/CategoryDetailsScreen.styles';
 
-const { width } = Dimensions.get('window');
-const isTablet = width >= 768;
-
-const MOCK_PRODUCTS: Record<string, Product[]> = {
+const MOCK_PRODUCTS: Record<string, IProductCardProps[]> = {
     '1': [ // كنب
         { id: '1', name: 'صوفا مودرن مريحة', price: 2499, image: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=500&q=80', rating: 4.8 },
         { id: '2', name: 'كنبة زاوية فاخرة', price: 3499, discount: 15, image: 'https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?w=500&q=80', rating: 4.5 },
@@ -39,34 +38,35 @@ const MOCK_PRODUCTS: Record<string, Product[]> = {
     ],
 };
 
-interface CategoryDetailsScreenProps {
-    id: string;
-    name: string;
-}
-
 export default function CategoryDetailsScreen({ id, name }: CategoryDetailsScreenProps) {
     const router = useRouter();
-    const products = MOCK_PRODUCTS[id] || [];
+    const { products, isLoading } = useCategoryProducts(id);
+    // Fallback to mock data if hook returns empty
+    const displayProducts = products.length > 0 ? products : (MOCK_PRODUCTS[id] || []);
 
     return (
-        <View className="flex-1 bg-white">
-            <ScreenHeader
+        <View style={styles.container}>
+            <Header
                 title={name || 'التصنيف'}
-                subtitle={`${products.length} منتج`}
+                rightAction={
+                    <View>
+                        <Text style={{ fontFamily: 'Cairo_500Medium', fontSize: 13, color: '#64748b' }}>
+                            {displayProducts.length} منتج
+                        </Text>
+                    </View>
+                }
                 showBack
             />
 
             <ScrollView
-                className="flex-1"
-                contentContainerStyle={{
-                    paddingBottom: 20,
-                    paddingHorizontal: 20,
-                    paddingTop: 16,
-                }}
+                style={{ flex: 1 }}
+                contentContainerStyle={styles.scrollContent}
             >
-                {products.length > 0 ? (
+                {isLoading ? (
+                    <LoadingSpinner message="جاري التحميل..." />
+                ) : displayProducts.length > 0 ? (
                     <ProductGrid
-                        products={products}
+                        products={displayProducts}
                         onProductPress={(product) => router.push(`/product/${product.id}`)}
                     />
                 ) : (

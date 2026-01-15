@@ -1,2 +1,2 @@
-import AddressesScreen from '../../../src/screens/account/addresses/AddressesScreen';
+import AddressesScreen from '../../../src/screens/account/AddressesScreen';
 export default AddressesScreen;

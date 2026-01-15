@@ -1,122 +1,137 @@
 // File: src/screens/auth/RegisterScreen.tsx
 // Purpose: Simple Arabic Registration screen
 
-import { Feather } from '@expo/vector-icons';
-import { Link, useRouter } from 'expo-router';
-import React, { useState } from 'react';
-import { Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Link } from 'expo-router';
+import React from 'react';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useAuth } from '../../hooks/useAuth';
+import { Header, FormInput, PasswordInput, PrimaryButton, SocialButton } from '../shared';
+import { useRegister } from './_hooks';
 import { COLORS } from '../../constants/theme';
 
 const RegisterScreen = () => {
-    const { register, isLoading } = useAuth();
-    const router = useRouter();
-    const [name, setName] = useState('');
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [showPassword, setShowPassword] = useState(false);
-
-    const handleRegister = async () => {
-        try {
-            await register(email, password, name);
-            router.replace('/(tabs)/home');
-        } catch (error: any) {
-            alert(error.message || "فشل إنشاء الحساب");
-        }
-    };
+    const { name, email, password, setName, setEmail, setPassword, handleRegister, isLoading, errors } = useRegister();
 
     return (
-        <SafeAreaView className="flex-1 bg-white" style={{ padding: 20 }}>
-            <Text className="text-2xl font-cairo-bold text-slate-800 text-right mb-8">
-                إنشاء حساب جديد
-            </Text>
+        <SafeAreaView style={styles.container}>
+            <Header title="إنشاء حساب جديد" showBack={false} />
 
-            <View className="mb-4">
-                <Text className="text-slate-700 font-cairo-bold text-right mb-2">الاسم الكامل</Text>
-                <TextInput
+            <View style={styles.content}>
+                <FormInput
+                    label="الاسم الكامل"
                     value={name}
                     onChangeText={setName}
                     placeholder="أحمد منصور"
-                    className="border border-slate-200 rounded-xl px-4 py-3 text-right font-cairo-medium text-slate-800"
-                    placeholderTextColor={COLORS.textLight}
+                    required
+                    error={errors.name}
                 />
-            </View>
 
-            <View className="mb-4">
-                <Text className="text-slate-700 font-cairo-bold text-right mb-2">البريد الإلكتروني</Text>
-                <TextInput
+                <FormInput
+                    label="البريد الإلكتروني"
                     value={email}
                     onChangeText={setEmail}
                     placeholder="example@email.com"
                     keyboardType="email-address"
                     autoCapitalize="none"
-                    className="border border-slate-200 rounded-xl px-4 py-3 text-right font-cairo-medium text-slate-800"
-                    placeholderTextColor={COLORS.textLight}
+                    required
+                    error={errors.email}
                 />
-            </View>
 
-            <View className="mb-6">
-                <Text className="text-slate-700 font-cairo-bold text-right mb-2">كلمة المرور</Text>
-                <View className="flex-row-reverse items-center border border-slate-200 rounded-xl px-4 py-3">
-                    <TextInput
-                        value={password}
-                        onChangeText={setPassword}
-                        placeholder="••••••••"
-                        secureTextEntry={!showPassword}
-                        className="flex-1 text-right font-cairo-medium text-slate-800"
-                        placeholderTextColor={COLORS.textLight}
-                    />
-                    <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-                        <Feather name={showPassword ? 'eye-off' : 'eye'} size={20} color={COLORS.textLight} />
-                    </TouchableOpacity>
+                <PasswordInput
+                    label="كلمة المرور"
+                    value={password}
+                    onChangeText={setPassword}
+                    placeholder="••••••••"
+                    required
+                    error={errors.password}
+                />
+
+                <PrimaryButton
+                    label="إنشاء حساب"
+                    onPress={handleRegister}
+                    loading={isLoading}
+                    disabled={isLoading}
+                />
+
+                <View style={styles.divider}>
+                    <View style={styles.dividerLine} />
+                    <Text style={styles.dividerText}>أو</Text>
+                    <View style={styles.dividerLine} />
                 </View>
-            </View>
 
-            <TouchableOpacity
-                onPress={handleRegister}
-                disabled={isLoading}
-                className="py-4 rounded-xl mb-6"
-                style={{ backgroundColor: COLORS.primary }}
-            >
-                <Text className="text-white font-cairo-bold text-center">
-                    {isLoading ? "جاري التحميل..." : "إنشاء حساب"}
-                </Text>
-            </TouchableOpacity>
+                <View style={styles.socialButtons}>
+                    <SocialButton
+                        provider="google"
+                        label="Google"
+                        onPress={() => {}}
+                    />
+                    <SocialButton
+                        provider="apple"
+                        label="Apple"
+                        onPress={() => {}}
+                    />
+                </View>
 
-            <View className="flex-row items-center my-6">
-                <View className="flex-1 h-px bg-slate-200" />
-                <Text className="px-4 text-slate-400 font-cairo-medium text-sm">أو</Text>
-                <View className="flex-1 h-px bg-slate-200" />
-            </View>
-
-            <View className="flex-row gap-3 mb-6">
-                <TouchableOpacity 
-                    className="flex-1 flex-row items-center justify-center gap-2 py-4 rounded-xl"
-                    style={{ backgroundColor: '#4285F4' }}
-                >
-                    <Feather name="chrome" size={20} color="#FFFFFF" />
-                    <Text className="font-cairo-bold text-white">Google</Text>
-                </TouchableOpacity>
-                <TouchableOpacity 
-                    className="flex-1 flex-row items-center justify-center gap-2 py-4 rounded-xl"
-                    style={{ backgroundColor: '#000000' }}
-                >
-                    <Feather name="smartphone" size={20} color="#FFFFFF" />
-                    <Text className="font-cairo-bold text-white">Apple</Text>
-                </TouchableOpacity>
-            </View>
-
-            <View className="flex-row justify-center gap-2">
-                <Text className="text-slate-500 font-cairo-medium text-sm">لديك حساب بالفعل؟</Text>
-                <Link href="/auth/login" asChild>
-                    <TouchableOpacity>
-                        <Text className="font-cairo-bold text-sm" style={{ color: COLORS.primary }}>سجل الدخول</Text>
-                    </TouchableOpacity>
-                </Link>
+                <View style={styles.loginLink}>
+                    <Text style={styles.loginText}>لديك حساب بالفعل؟</Text>
+                    <Link href="/auth/login" asChild>
+                        <TouchableOpacity>
+                            <Text style={styles.loginLinkText}>سجل الدخول</Text>
+                        </TouchableOpacity>
+                    </Link>
+                </View>
             </View>
         </SafeAreaView>
     );
 };
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: 'white',
+    },
+    content: {
+        flex: 1,
+        padding: 20,
+        gap: 16,
+    },
+    divider: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginVertical: 24,
+        gap: 16,
+    },
+    dividerLine: {
+        flex: 1,
+        height: 1,
+        backgroundColor: '#e2e8f0',
+    },
+    dividerText: {
+        fontFamily: 'Cairo_500Medium',
+        fontSize: 13,
+        color: '#94a3b8',
+    },
+    socialButtons: {
+        flexDirection: 'row',
+        gap: 12,
+    },
+    loginLink: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        gap: 8,
+        marginTop: 8,
+    },
+    loginText: {
+        fontFamily: 'Cairo_500Medium',
+        fontSize: 13,
+        color: '#64748b',
+    },
+    loginLinkText: {
+        fontFamily: 'Cairo_700Bold',
+        fontSize: 13,
+        color: COLORS.primary,
+    },
+});
 
 export default RegisterScreen;

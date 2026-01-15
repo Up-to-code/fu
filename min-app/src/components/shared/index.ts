@@ -21,4 +21,4 @@ export type { Review } from './ReviewCard';
 export { SettingItem } from './SettingItem';
 export { StarRating } from './StarRating';
 export { SwipeToConfirm } from './SwipeToConfirm';
-
+export { default as ConfirmModal } from './ConfirmModal';

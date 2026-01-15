@@ -1,0 +1,385 @@
+# UI/UX Design Rules
+
+## Design Philosophy
+
+### Core Principles
+- **Minimalism First**: Remove unnecessary elements and decorations. Every element should serve a purpose.
+- **StyleSheet Over Tailwind**: Use React Native StyleSheet for all styling - more maintainable and consistent.
+- **Clear Visual Hierarchy**: Use typography, spacing, and color to guide user attention.
+- **Reduced Clutter**: Simplify cards, remove excessive badges and overlays.
+- **White Space**: More breathing room between elements improves readability and reduces cognitive load.
+- **Clean Cards**: Simple, flat designs with subtle borders and NO shadows.
+- **Consistent Spacing**: Use 8px/12px/16px grid system for consistency.
+- **RTL First**: All layouts must support right-to-left by default using `flexDirection: 'row-reverse'`.
+
+## Spacing System
+
+### Base Spacing Units
+- **xs**: 8px - Small gaps, tight spacing
+- **sm**: 12px - Standard gaps, card padding
+- **md**: 16px - Section margins, larger padding
+- **lg**: 24px - Major section spacing
+- **xl**: 32px - Screen-level spacing
+
+### Spacing Guidelines
+- Card padding: 12px-16px
+- Section margins: 12px-16px
+- Gap between cards: 8px-12px
+- Internal element spacing: 8px-12px
+- Screen edge padding: 16px
+
+## Typography
+
+### Font Families
+- **Headers**: `Cairo_700Bold` - For titles and important text
+- **Body**: `Cairo_500Medium` - For regular content
+- **Labels**: `Cairo_500Medium` - For form labels and metadata
+
+### Font Sizes
+- **Large Title**: 24px - Hero sections, main titles
+- **Title**: 18px - Section headers
+- **Subtitle**: 16px - Card titles, important text
+- **Body**: 14px - Regular content
+- **Small**: 12px-13px - Labels, metadata, secondary text
+
+### Typography Hierarchy
+- Use size and weight to create clear hierarchy
+- Maintain consistent line heights (1.4-1.6x font size)
+- Text alignment: Right-to-left (RTL) for Arabic content
+
+## Color Usage
+
+### Primary Colors
+- **Primary**: `#1E3A5F` - Main actions, important elements
+- **Text**: `#1e293b` - Primary text color
+- **Text Light**: `#64748b` - Secondary text, metadata
+- **Background**: `#f8fafc` - Screen backgrounds
+- **White**: `#FFFFFF` - Card backgrounds
+
+### Accent Colors
+- **Rating Gold**: `#F59E0B` - Star ratings
+- **Error/Heart**: `#EF4444` - Error states, favorite icons
+- **Success**: `#10B981` - Success states, checkmarks
+- **Verified**: `#3b82f6` - Verification badges
+
+### Border Colors
+- **Light Border**: `#f1f5f9` - Card borders, dividers
+- **Medium Border**: `#e2e8f0` - Input borders
+
+## Component Design Patterns
+
+### Cards
+- **Border Radius**: 12px (standard), 8px (small elements)
+- **Border**: 1px solid `#f1f5f9` (REQUIRED - no shadows)
+- **Shadow**: NONE - Use borders exclusively
+- **Padding**: 12px-16px
+- **Background**: White `#FFFFFF`
+- **Spacing**: 12px margin between cards
+- **Implementation**: Always use StyleSheet, never Tailwind classes
+
+### Buttons
+- **Primary Button**: 
+  - Background: Primary color
+  - Text: White, bold
+  - Border Radius: 12px
+  - Padding: 14px vertical, 16px horizontal
+- **Secondary Button**:
+  - Background: `#f8fafc`
+  - Text: Primary color or dark text
+  - Border: 1px solid `#e2e8f0`
+  - Border Radius: 12px
+
+### Input Fields
+- **Background**: `#f8fafc`
+- **Border**: 1px solid `#e2e8f0`
+- **Border Radius**: 8px-12px
+- **Padding**: 10px-12px
+- **Text Alignment**: Right (RTL)
+
+### Badges & Tags
+- **Size**: Small and unobtrusive
+- **Border Radius**: 8px-16px (pill shape)
+- **Padding**: 6px-12px horizontal, 4px-8px vertical
+- **Background**: Light gray or primary color tint
+- **Text**: Small (12px-13px)
+
+## Layout Principles
+
+### RTL (Right-to-Left) Support
+- **CRITICAL**: Always use `flexDirection: 'row-reverse'` for ALL horizontal layouts
+- **Text alignment**: `textAlign: 'right'` for ALL text elements
+- **Icons**: Position on the right side
+- **ScrollViews**: Use `transform: [{ scaleX: -1 }]` for horizontal RTL scrolling with nested scaleX: -1 on children
+- **Headers**: Use row-reverse with right-aligned text
+- **Badges**: Use row-reverse and flex-start for RTL badge rows
+- **No LTR**: Never use `flexDirection: 'row'` - always row-reverse
+
+### Grid & Lists
+- Use consistent spacing between items (8px-12px)
+- Cards should have equal margins on all sides
+- Avoid excessive nesting
+- Use FlashList for long lists
+
+### Hero Sections
+- Height: 35-40% of screen height (not too tall)
+- Gradient overlays: Subtle (0.3-0.5 opacity)
+- Information overlay: Clean, minimal badges
+- Avoid excessive decorative elements
+
+## Image Guidelines
+
+### Image Display
+- **Aspect Ratio**: Maintain consistent ratios
+- **Border Radius**: 12px for cards, 16px for hero images
+- **Placeholder**: Use light gray background `#f1f5f9` or `#f8fafc`
+- **Overlays**: Minimal, only when necessary for text readability
+
+### Image Sizing
+- Hero images: Full width, 200-250px height
+- Card images: Full width, 160-180px height
+- Avatar images: 48px-80px (circular)
+
+## Interaction Design
+
+### Touch Targets
+- Minimum size: 44x44px
+- Adequate padding around interactive elements
+- Clear visual feedback on press
+
+### Animations
+- Keep animations subtle and fast (200-300ms)
+- Use native driver for performance
+- Avoid excessive animations
+
+### Loading States
+- Show skeleton loaders or simple spinners
+- Maintain layout structure during loading
+
+## Form Design
+
+### Input Groups
+- Label above input (RTL aligned)
+- Clear placeholder text
+- Error states: Red border, error message below
+- Success states: Green checkmark or border
+
+### Selection Elements
+- Checkboxes: Simple, clear selected state
+- Radio buttons: Clear visual distinction
+- Dropdowns: Clean, minimal design
+
+## Service-Specific Patterns
+
+### Service List (Profile-Based)
+- Profile avatar (56-72px circular) on right
+- Name and category in same row
+- Category and location combined: "Category • Location"
+- Rating and price in same row (flex layout)
+- Verified badge on avatar
+- Heart icon for favorites
+- Clean list item with dividers
+- No cards - simple list layout
+
+### Service Detail (Business Profile Style)
+- **Large Banner Image** (300px height):
+  - Full-width background image
+  - Dark overlay gradient at bottom (50% height)
+  - Company info overlaid on banner:
+    - Company name (large white text)
+    - Badges row (Busy status, Company/Freelancer type)
+    - Category and location: "Category • Location"
+    - Small square avatar (70-80px) with verified badge on right
+- **Statistics Section** (3 columns):
+  - Years of Experience
+  - Projects count
+  - Rating with star icon
+- **Info Buttons**:
+  - Language button (globe icon)
+  - Response Time button (clock icon)
+- **About Section**: Description text
+- **Services Offered**: List with checkmarks
+- **Gallery**: Horizontal scrollable images
+- **Reviews Section**: Average rating and review cards
+- **Bottom Booking Bar**: Price on left, "Book Now" button on right
+
+## Responsive Design
+
+### Screen Size Detection
+```typescript
+const { width, height } = Dimensions.get('window');
+const isTablet = width >= 768;
+const isSmallScreen = width < 375;
+```
+
+### Responsive Sizing
+- **Fonts**: Scale by 2-4px between sizes
+- **Spacing**: Scale by 4-8px between sizes
+- **Avatars**: 56px (default), 72px (tablet), 50px (small)
+- **Icons**: 14-16px (default), 18-20px (tablet), 12-14px (small)
+- **Banners**: 300px (default), 320px (tablet), 240px (small)
+
+### Responsive Patterns
+- Use function-based styles: `const getStyles = () => StyleSheet.create({...})`
+- Apply responsive values directly in style definitions
+- Test on multiple screen sizes
+
+## Best Practices
+
+### Do's
+- ✅ Use consistent spacing (8px/12px/16px grid)
+- ✅ Maintain clear visual hierarchy
+- ✅ Keep designs simple and clean
+- ✅ Use white space effectively
+- ✅ Ensure RTL support throughout
+- ✅ Use subtle borders instead of heavy shadows
+- ✅ Keep typography consistent
+- ✅ Remove unnecessary decorative elements
+- ✅ Make all screens responsive
+- ✅ Use banner images for service profiles
+- ✅ Overlay company info on banners for better UX
+
+### Don'ts
+- ❌ Don't use excessive gradients or overlays
+- ❌ Don't add too many badges or tags
+- ❌ Don't use heavy shadows (prefer borders)
+- ❌ Don't overcrowd cards with information
+- ❌ Don't use inconsistent spacing
+- ❌ Don't ignore RTL layout requirements
+- ❌ Don't use too many font sizes
+- ❌ Don't add decorative elements without purpose
+- ❌ Don't forget responsive sizing
+- ❌ Don't use fixed pixel values without responsive alternatives
+
+## Accessibility
+
+### Text Contrast
+- Ensure sufficient contrast between text and background
+- Use WCAG AA standards (4.5:1 for normal text)
+
+### Touch Accessibility
+- All interactive elements should be easily tappable
+- Provide clear visual feedback
+
+### Screen Reader Support
+- Use semantic HTML/React Native components
+- Provide meaningful labels
+
+## Complete Service Profile Implementation
+
+### Service List Screen Structure
+1. **Header**: Title with back button and filter button
+2. **Search Bar**: Full-width search with filter icon
+3. **Type Filters**: Horizontal scrollable chips (All, Freelancers, Companies)
+4. **Provider List**: Profile-based list items with:
+   - Avatar (56-72px) with verified badge
+   - Name and category in header row
+   - Category • Location format
+   - Rating and price in same row
+   - Heart icon for favorites
+
+### Service Detail Screen Structure
+1. **Banner Section** (300px height):
+   - Full-width background image
+   - Dark overlay gradient (bottom 50%)
+   - Company info overlay:
+     - Company name (large white text)
+     - Badges row (Busy status, Type)
+     - Category • Location
+     - Avatar (70-80px square) with verified badge
+   - Header buttons (back, favorite) - white icons
+
+2. **Statistics Section** (White background):
+   - 3 columns: Years, Projects, Rating
+   - Large numbers with labels below
+
+3. **Info Buttons**:
+   - Language button (globe icon)
+   - Response Time button (clock icon)
+
+4. **About Section**: Description text in card
+
+5. **Services Offered**: List with green checkmarks
+
+6. **Gallery**: Horizontal scrollable images
+
+7. **Reviews Section**: Average rating and review cards
+
+8. **Bottom Booking Bar**: Price on left, "Book Now" button on right
+
+## Examples
+
+### Clean Card Design
+```tsx
+<View style={{
+  backgroundColor: 'white',
+  borderRadius: 12,
+  padding: 16,
+  marginBottom: 12,
+  borderWidth: 1,
+  borderColor: '#f1f5f9',
+}}>
+  {/* Content */}
+</View>
+```
+
+### Banner with Overlay
+```tsx
+<View style={{ position: 'relative', height: 300 }}>
+  <Image source={{ uri: imageUrl }} style={{ width: '100%', height: '100%' }} />
+  <View style={{
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: '50%',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  }} />
+  {/* Overlay content */}
+</View>
+```
+
+### Responsive Styles
+```tsx
+const { width } = Dimensions.get('window');
+const isTablet = width >= 768;
+const isSmallScreen = width < 375;
+
+const getStyles = () => StyleSheet.create({
+  fontSize: isTablet ? 18 : isSmallScreen ? 14 : 16,
+  padding: isTablet ? 24 : 16,
+});
+```
+
+### RTL Layout
+```tsx
+<View style={{
+  flexDirection: 'row-reverse',
+  alignItems: 'center',
+  gap: 12,
+}}>
+  {/* Content */}
+</View>
+```
+
+## Design System Reference
+
+### Spacing Scale
+- 4px: Very tight spacing
+- 8px: Small gaps (xs)
+- 12px: Standard gaps (sm)
+- 16px: Medium spacing (md)
+- 24px: Large spacing (lg)
+- 32px: Extra large spacing (xl)
+
+### Border Radius Scale
+- 6px: Small elements
+- 8px: Inputs, small buttons
+- 12px: Cards, buttons (standard)
+- 16px: Large cards
+- 20px: Hero sections (use sparingly)
+
+### Shadow Guidelines
+- Prefer borders over shadows
+- If shadows needed: `shadowOpacity: 0.05-0.08`
+- Keep `shadowRadius` small (2-4px)
+- Use `elevation: 1-2` for Android

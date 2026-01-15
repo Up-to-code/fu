@@ -1,21 +1,13 @@
 // Privacy Policy Screen
-import { Feather } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
 import React from 'react';
-import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { COLORS } from '../../../constants/theme';
+import { Header } from '../../shared';
 
 export default function PrivacyScreen() {
-    const router = useRouter();
-
     return (
         <SafeAreaView className="flex-1 bg-white" edges={['top']}>
-            <View className="flex-row-reverse items-center justify-between px-5 py-3 border-b border-slate-100">
-                <TouchableOpacity onPress={() => router.back()}><Feather name="arrow-right" size={24} color={COLORS.text} /></TouchableOpacity>
-                <Text className="font-cairo-bold text-lg text-slate-800">سياسة الخصوصية</Text>
-                <View className="w-6" />
-            </View>
+            <Header title="سياسة الخصوصية" showBack />
             <ScrollView className="flex-1" contentContainerStyle={{ padding: 20 }}>
                 <Text className="font-cairo-bold text-slate-800 text-right mb-2 text-lg">جمع المعلومات</Text>
                 <Text className="font-cairo-medium text-slate-600 text-right leading-7 mb-6">

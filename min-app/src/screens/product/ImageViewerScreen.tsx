@@ -16,6 +16,7 @@ import {
     View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { styles } from './StyleSheets/ImageViewerScreen.styles';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -87,24 +88,24 @@ export default function ImageViewerScreen() {
     ).current;
 
     return (
-        <View className="flex-1 bg-black">
-            <StatusBar barStyle="light-content" />
+        <View style={styles.container}>
+            <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
 
             {/* Close Button */}
-            <SafeAreaView edges={['top']} className="absolute top-0 left-0 right-0 z-10">
-                <View className="flex-row justify-between items-center px-4 py-2">
+            <SafeAreaView edges={['top']} style={styles.headerContainer}>
+                <View style={styles.header}>
                     <TouchableOpacity
                         onPress={() => router.back()}
-                        className="w-10 h-10 bg-black/50 rounded-full items-center justify-center"
+                        style={styles.closeButton}
                     >
                         <Feather name="x" size={22} color="white" />
                     </TouchableOpacity>
 
-                    <Text className="text-white font-cairo-bold text-base">
+                    <Text style={styles.imageCounter}>
                         {currentIndex + 1} / {imageUrls.length}
                     </Text>
 
-                    <View className="w-10" />
+                    <View style={styles.spacer} />
                 </View>
             </SafeAreaView>
 
@@ -125,8 +126,10 @@ export default function ImageViewerScreen() {
                         key={idx}
                         activeOpacity={1}
                         onPress={handleDoubleTap}
-                        style={{ width: SCREEN_WIDTH, height: SCREEN_HEIGHT }}
-                        className="items-center justify-center"
+                        style={[
+                            { width: SCREEN_WIDTH, height: SCREEN_HEIGHT },
+                            styles.imageContainer
+                        ]}
                         {...panResponder.panHandlers}
                     >
                         <Animated.Image
@@ -147,12 +150,12 @@ export default function ImageViewerScreen() {
             </ScrollView>
 
             {/* Thumbnails */}
-            <SafeAreaView edges={['bottom']} className="absolute bottom-0 left-0 right-0">
+            <SafeAreaView edges={['bottom']} style={styles.thumbnailsContainer}>
                 <ScrollView
                     horizontal
                     showsHorizontalScrollIndicator={false}
-                    contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 16, gap: 8 }}
-                    className="flex-row"
+                    contentContainerStyle={styles.thumbnailsContent}
+                    style={styles.thumbnailsScroll}
                 >
                     {imageUrls.map((imageUrl, idx) => (
                         <TouchableOpacity
@@ -161,10 +164,12 @@ export default function ImageViewerScreen() {
                                 handleImageChange(idx);
                                 scrollViewRef.current?.scrollTo({ x: idx * SCREEN_WIDTH, animated: true });
                             }}
-                            className={`w-16 h-16 rounded-xl overflow-hidden border-2 ${currentIndex === idx ? 'border-white' : 'border-transparent'
-                                }`}
+                            style={[
+                                styles.thumbnail,
+                                currentIndex === idx ? styles.thumbnailSelected : styles.thumbnailUnselected
+                            ]}
                         >
-                            <Image source={{ uri: imageUrl }} className="w-full h-full" resizeMode="cover" />
+                            <Image source={{ uri: imageUrl }} style={styles.thumbnailImage} resizeMode="cover" />
                         </TouchableOpacity>
                     ))}
                 </ScrollView>
@@ -172,9 +177,9 @@ export default function ImageViewerScreen() {
 
             {/* Zoom hint */}
             {scale === 1 && (
-                <View className="absolute bottom-32 left-0 right-0 items-center">
-                    <View className="bg-black/50 px-4 py-2 rounded-full">
-                        <Text className="text-white/70 text-xs font-cairo-medium">
+                <View style={styles.zoomHint}>
+                    <View style={styles.zoomHintContainer}>
+                        <Text style={styles.zoomHintText}>
                             اضغط مرتين للتكبير
                         </Text>
                     </View>

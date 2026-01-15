@@ -2,3 +2,6 @@
 // Purpose: Export AI design screen components
 
 export { SavePreferencesView } from './SavePreferencesView';
+
+// Export types
+export type { SavePreferencesViewProps } from './types/ai';

@@ -4,7 +4,9 @@ import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Header, FilterChip, PrimaryButton } from '../shared';
 import { COLORS } from '../../constants/theme';
+import { styles } from './StyleSheets/FilterScreen.styles';
 
 const TYPES = ['الكل', 'كنب', 'طاولات', 'كراسي', 'أسرة', 'إضاءة', 'ديكور'];
 const BRANDS = ['ايكيا', 'هوم سنتر', 'بوتري بارن', 'ويست إلم', 'زارا هوم'];
@@ -42,23 +44,26 @@ export default function FilterScreen() {
     };
 
     return (
-        <SafeAreaView className="flex-1 bg-white" edges={['top', 'bottom']}>
-            {/* Header */}
-            <View className="flex-row-reverse items-center justify-between px-5 py-3 border-b border-slate-100">
-                <TouchableOpacity onPress={() => router.back()}><Feather name="arrow-right" size={24} color={COLORS.text} /></TouchableOpacity>
-                <Text className="font-cairo-bold text-lg text-slate-800">الفلترة</Text>
-                <TouchableOpacity onPress={handleReset}><Text className="font-cairo-medium text-primary text-sm">مسح</Text></TouchableOpacity>
-            </View>
+        <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+            <Header
+                title="الفلترة"
+                rightAction={
+                    <TouchableOpacity onPress={handleReset}>
+                        <Text style={{ fontFamily: 'Cairo_500Medium', fontSize: 13, color: COLORS.primary }}>مسح</Text>
+                    </TouchableOpacity>
+                }
+                showBack
+            />
 
-            <ScrollView className="flex-1" contentContainerStyle={{ padding: 20 }}>
+            <ScrollView style={{ flex: 1 }} contentContainerStyle={styles.scrollContent}>
                 {/* Price Range */}
-                <View className="mb-6">
-                    <Text className="font-cairo-bold text-slate-800 text-right mb-3">نطاق السعر</Text>
-                    <View className="flex-row-reverse gap-3">
-                        <View className="flex-1">
-                            <Text className="font-cairo-medium text-slate-500 text-xs text-right mb-1">من</Text>
+                <View style={styles.section}>
+                    <Text style={styles.sectionTitle}>نطاق السعر</Text>
+                    <View style={styles.priceRangeContainer}>
+                        <View style={styles.priceInputContainer}>
+                            <Text style={styles.priceLabel}>من</Text>
                             <TextInput
-                                className="bg-slate-50 rounded-xl px-4 py-3 text-right font-cairo-medium"
+                                style={styles.priceInput}
                                 placeholder="0"
                                 placeholderTextColor="#94a3b8"
                                 keyboardType="numeric"
@@ -66,10 +71,10 @@ export default function FilterScreen() {
                                 onChangeText={setMinPrice}
                             />
                         </View>
-                        <View className="flex-1">
-                            <Text className="font-cairo-medium text-slate-500 text-xs text-right mb-1">إلى</Text>
+                        <View style={styles.priceInputContainer}>
+                            <Text style={styles.priceLabel}>إلى</Text>
                             <TextInput
-                                className="bg-slate-50 rounded-xl px-4 py-3 text-right font-cairo-medium"
+                                style={styles.priceInput}
                                 placeholder="10000"
                                 placeholderTextColor="#94a3b8"
                                 keyboardType="numeric"
@@ -81,35 +86,37 @@ export default function FilterScreen() {
                 </View>
 
                 {/* Type */}
-                <View className="mb-6">
-                    <Text className="font-cairo-bold text-slate-800 text-right mb-3">النوع</Text>
-                    <View className="flex-row-reverse flex-wrap gap-2">
+                <View style={styles.section}>
+                    <Text style={styles.sectionTitle}>النوع</Text>
+                    <View style={styles.chipsContainer}>
                         {TYPES.map(t => (
-                            <TouchableOpacity
+                            <FilterChip
                                 key={t}
+                                text={t}
                                 onPress={() => setSelectedType(t)}
-                                className={`px-4 py-2 rounded-full border ${selectedType === t ? 'bg-primary border-primary' : 'bg-white border-slate-200'}`}
-                            >
-                                <Text className={`font-cairo-medium text-sm ${selectedType === t ? 'text-white' : 'text-slate-600'}`}>{t}</Text>
-                            </TouchableOpacity>
+                                primary={selectedType === t}
+                            />
                         ))}
                     </View>
                 </View>
 
                 {/* Brands */}
-                <View className="mb-6">
-                    <Text className="font-cairo-bold text-slate-800 text-right mb-3">الماركة</Text>
-                    <View className="flex-row-reverse flex-wrap gap-2">
+                <View style={styles.section}>
+                    <Text style={styles.sectionTitle}>الماركة</Text>
+                    <View style={styles.chipsContainer}>
                         {BRANDS.map(b => {
                             const selected = selectedBrands.includes(b);
                             return (
                                 <TouchableOpacity
                                     key={b}
                                     onPress={() => toggleBrand(b)}
-                                    className={`flex-row-reverse items-center gap-2 px-4 py-2 rounded-full border ${selected ? 'bg-primary border-primary' : 'bg-white border-slate-200'}`}
+                                    style={[
+                                        selected ? styles.brandButtonSelected : styles.brandButtonUnselected,
+                                        styles.brandButton
+                                    ]}
                                 >
                                     {selected && <Feather name="check" size={14} color="white" />}
-                                    <Text className={`font-cairo-medium text-sm ${selected ? 'text-white' : 'text-slate-600'}`}>{b}</Text>
+                                    <Text style={selected ? styles.brandTextSelected : styles.brandTextUnselected}>{b}</Text>
                                 </TouchableOpacity>
                             );
                         })}
@@ -117,16 +124,19 @@ export default function FilterScreen() {
                 </View>
 
                 {/* Sort */}
-                <View className="mb-6">
-                    <Text className="font-cairo-bold text-slate-800 text-right mb-3">الترتيب</Text>
-                    <View className="flex-row-reverse flex-wrap gap-2">
+                <View style={styles.section}>
+                    <Text style={styles.sectionTitle}>الترتيب</Text>
+                    <View style={styles.chipsContainer}>
                         {SORT_OPTIONS.map(s => (
                             <TouchableOpacity
                                 key={s}
                                 onPress={() => setSort(s)}
-                                className={`px-4 py-2 rounded-full border ${sort === s ? 'bg-primary border-primary' : 'bg-white border-slate-200'}`}
+                                style={[
+                                    sort === s ? styles.sortButtonSelected : styles.sortButtonUnselected,
+                                    styles.sortButton
+                                ]}
                             >
-                                <Text className={`font-cairo-medium text-sm ${sort === s ? 'text-white' : 'text-slate-600'}`}>{s}</Text>
+                                <Text style={sort === s ? styles.sortTextSelected : styles.sortTextUnselected}>{s}</Text>
                             </TouchableOpacity>
                         ))}
                     </View>
@@ -134,11 +144,11 @@ export default function FilterScreen() {
             </ScrollView>
 
             {/* Apply Button */}
-            <View className="px-5 pb-4 border-t border-slate-100 pt-4">
-                <TouchableOpacity onPress={handleApply} className="bg-primary py-4 rounded-2xl flex-row-reverse items-center justify-center gap-2">
-                    <Feather name="check" size={20} color="white" />
-                    <Text className="font-cairo-bold text-white text-base">تطبيق الفلتر</Text>
-                </TouchableOpacity>
+            <View style={styles.footer}>
+                <PrimaryButton
+                    label="تطبيق الفلتر"
+                    onPress={handleApply}
+                />
             </View>
         </SafeAreaView>
     );

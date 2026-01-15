@@ -2,11 +2,12 @@
 import { Feather } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { Dimensions, Image, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { SearchBar, FilterChip } from '../shared';
+import { useSearchHistory } from './_hooks';
 import { COLORS } from '../../constants/theme';
-
-const isTablet = Dimensions.get('window').width >= 768;
+import { styles } from './StyleSheets/SearchScreen.styles';
 
 const RECENT = ['صوفا مودرن', 'طاولة قهوة', 'كرسي مكتب'];
 const POPULAR = ['كنب زاوية', 'سرير ملكي', 'مكتب خشب', 'إضاءة ذكية'];
@@ -18,91 +19,86 @@ const CATEGORIES = [
     { id: '4', name: 'إضاءة', img: 'https://images.unsplash.com/photo-1565814329452-e1efa11c5b89?w=300&q=80' },
 ];
 
-// Reusable Tag Component
-const Tag = ({ icon, text, onPress, primary }: { icon: any; text: string; onPress: () => void; primary?: boolean }) => (
-    <TouchableOpacity
-        onPress={onPress}
-        className={`flex-row-reverse items-center gap-2 px-4 py-2 rounded-full ${primary ? 'bg-primary/5 border border-primary/20' : 'bg-slate-50'}`}
-    >
-        <Feather name={icon} size={14} color={primary ? COLORS.primary : '#94a3b8'} />
-        <Text className={`font-cairo-medium text-sm ${primary ? 'text-primary' : 'text-slate-600'}`}>{text}</Text>
-    </TouchableOpacity>
-);
-
 export default function SearchScreen() {
     const router = useRouter();
     const { q } = useLocalSearchParams<{ q?: string }>();
     const [query, setQuery] = useState(q || '');
+    const { recentSearches, addSearch, clearHistory } = useSearchHistory();
 
     const suggestions = query.length > 0 ? ALL_TERMS.filter(t => t.includes(query) && t !== query).slice(0, 5) : [];
-    const goResults = (term: string) => router.push(`/search/results?q=${encodeURIComponent(term)}` as any);
+    const goResults = async (term: string) => {
+        await addSearch(term);
+        router.push(`/search/results?q=${encodeURIComponent(term)}` as any);
+    };
 
     return (
-        <SafeAreaView className="flex-1 bg-white" edges={['top']}>
-            {/* Search Bar */}
-            <View className="flex-row-reverse items-center gap-3 px-5 py-3">
-                <TouchableOpacity onPress={() => router.back()}><Feather name="arrow-right" size={24} color={COLORS.text} /></TouchableOpacity>
-                <View className="flex-1 flex-row-reverse items-center bg-slate-50 rounded-xl px-4 py-3">
-                    <Feather name="search" size={20} color="#94a3b8" />
-                    <TextInput
-                        className="flex-1 text-right font-cairo-medium text-base mr-2"
-                        placeholder="ابحث عن منتج..."
-                        placeholderTextColor="#94a3b8"
+        <SafeAreaView style={styles.container} edges={['top']}>
+            {/* Header with Search Bar and Back Button */}
+            <View style={styles.header}>
+                <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+                    <Feather name="arrow-right" size={24} color={COLORS.text} />
+                </TouchableOpacity>
+                <View style={styles.searchContainer}>
+                    <SearchBar
                         value={query}
                         onChangeText={setQuery}
                         onSubmitEditing={() => query && goResults(query)}
+                        onClear={() => setQuery('')}
+                        onCameraPress={() => router.push('/search/image' as any)}
+                        showCamera
+                        placeholder="ابحث عن منتج..."
                         returnKeyType="search"
                         autoFocus
                     />
-                    {query.length > 0 && <TouchableOpacity onPress={() => setQuery('')}><Feather name="x" size={18} color="#94a3b8" /></TouchableOpacity>}
                 </View>
-                <TouchableOpacity onPress={() => router.push('/search/image' as any)}><Feather name="camera" size={22} color={COLORS.primary} /></TouchableOpacity>
             </View>
 
             {/* Suggestions */}
             {suggestions.length > 0 && (
-                <View className="px-5 py-2 border-b border-slate-100">
+                <View style={styles.suggestionsContainer}>
                     {suggestions.map(term => (
-                        <TouchableOpacity key={term} onPress={() => setQuery(term)} className="flex-row-reverse items-center gap-3 py-3">
+                        <TouchableOpacity key={term} onPress={() => setQuery(term)} style={styles.suggestionItem}>
                             <Feather name="search" size={16} color="#94a3b8" />
-                            <Text className="flex-1 font-cairo-medium text-slate-700 text-right">{term}</Text>
+                            <Text style={styles.suggestionText}>{term}</Text>
                             <Feather name="arrow-up-right" size={16} color="#94a3b8" />
                         </TouchableOpacity>
                     ))}
                 </View>
             )}
 
-            <ScrollView className="flex-1" contentContainerStyle={{ paddingBottom: 20 }}>
+            <ScrollView style={{ flex: 1 }} contentContainerStyle={{ paddingBottom: 20 }}>
                 {query.length === 0 && (
                     <>
                         {/* Recent */}
-                        <View className="px-5 py-4">
-                            <View className="flex-row-reverse items-center justify-between mb-3">
-                                <Text className="font-cairo-bold text-slate-800">عمليات البحث الأخيرة</Text>
-                                <TouchableOpacity><Text className="font-cairo-medium text-slate-400 text-xs">مسح</Text></TouchableOpacity>
+                        <View style={styles.section}>
+                            <View style={styles.sectionHeader}>
+                                <Text style={styles.sectionTitle}>عمليات البحث الأخيرة</Text>
+                                <TouchableOpacity onPress={clearHistory}>
+                                    <Text style={styles.clearText}>مسح</Text>
+                                </TouchableOpacity>
                             </View>
-                            <View className="flex-row-reverse flex-wrap gap-2">
-                                {RECENT.map(t => <Tag key={t} icon="clock" text={t} onPress={() => goResults(t)} />)}
+                            <View style={styles.chipsContainer}>
+                                {recentSearches.length > 0 ? recentSearches.map(t => <FilterChip key={t} icon="clock" text={t} onPress={() => goResults(t)} />) : RECENT.map(t => <FilterChip key={t} icon="clock" text={t} onPress={() => goResults(t)} />)}
                             </View>
                         </View>
 
                         {/* Popular */}
-                        <View className="px-5 pb-4">
-                            <Text className="font-cairo-bold text-slate-800 mb-3">الأكثر بحثاً</Text>
-                            <View className="flex-row-reverse flex-wrap gap-2">
-                                {POPULAR.map(t => <Tag key={t} icon="trending-up" text={t} onPress={() => goResults(t)} primary />)}
+                        <View style={[styles.section, { paddingBottom: 16 }]}>
+                            <Text style={[styles.sectionTitle, { marginBottom: 12 }]}>الأكثر بحثاً</Text>
+                            <View style={styles.chipsContainer}>
+                                {POPULAR.map(t => <FilterChip key={t} icon="trending-up" text={t} onPress={() => goResults(t)} primary />)}
                             </View>
                         </View>
 
                         {/* Categories */}
-                        <View className="px-5">
-                            <Text className="font-cairo-bold text-slate-800 mb-3">تصفح حسب التصنيف</Text>
-                            <View className="flex-row-reverse flex-wrap justify-between">
+                        <View style={styles.categoriesContainer}>
+                            <Text style={[styles.sectionTitle, { marginBottom: 12 }]}>تصفح حسب التصنيف</Text>
+                            <View style={styles.categoriesGrid}>
                                 {CATEGORIES.map(c => (
-                                    <TouchableOpacity key={c.id} onPress={() => router.push(`/category/${c.id}` as any)} className="w-[48%] mb-3 rounded-2xl overflow-hidden">
-                                        <Image source={{ uri: c.img }} className="w-full h-24" resizeMode="cover" />
-                                        <View className="absolute inset-0 bg-black/30 items-center justify-center">
-                                            <Text className="font-cairo-bold text-white text-base">{c.name}</Text>
+                                    <TouchableOpacity key={c.id} onPress={() => router.push(`/category/${c.id}` as any)} style={styles.categoryCard}>
+                                        <Image source={{ uri: c.img }} style={styles.categoryImage} resizeMode="cover" />
+                                        <View style={styles.categoryOverlay}>
+                                            <Text style={styles.categoryName}>{c.name}</Text>
                                         </View>
                                     </TouchableOpacity>
                                 ))}
@@ -114,10 +110,10 @@ export default function SearchScreen() {
 
             {/* Bottom Search Button */}
             {query.length > 0 && (
-                <View className="absolute bottom-0 left-0 right-0 p-5 bg-white border-t border-slate-100">
-                    <TouchableOpacity onPress={() => goResults(query)} className="bg-primary py-4 rounded-2xl flex-row-reverse items-center justify-center gap-2">
+                <View style={styles.bottomButtonContainer}>
+                    <TouchableOpacity onPress={() => goResults(query)} style={styles.searchButton}>
                         <Feather name="search" size={20} color="white" />
-                        <Text className="font-cairo-bold text-white text-base">بحث عن &quot;{query}&quot;</Text>
+                        <Text style={styles.searchButtonText}>بحث عن &quot;{query}&quot;</Text>
                     </TouchableOpacity>
                 </View>
             )}

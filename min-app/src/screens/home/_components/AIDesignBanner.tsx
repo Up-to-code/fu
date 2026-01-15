@@ -1,22 +1,11 @@
 // File: src/screens/home/_components/AIDesignBanner.tsx
 // Purpose: Modern and simple service promotions banner with accessibility focus
 
-import { LinearGradient } from 'expo-linear-gradient';
 import { Link } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
-import { Dimensions, Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
-import { COLORS } from '../../../constants/theme';
-
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const BANNER_WIDTH = SCREEN_WIDTH - 40; // Account for mx-5 margins (20px each side)
-
-interface ServiceBanner {
-    id: string;
-    title: string;
-    subtitle: string;
-    image: string;
-    route: string;
-}
+import { Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { ServiceBanner } from './types/home';
+import { styles, BANNER_WIDTH } from './StyleSheets/AIDesignBanner.styles';
 
 const SERVICE_BANNERS: ServiceBanner[] = [
     {
@@ -76,7 +65,7 @@ export const AIDesignBanner = () => {
     };
 
     return (
-        <View className="mx-5 my-4">
+        <View style={styles.container}>
             <ScrollView
                 ref={scrollViewRef}
                 horizontal
@@ -84,56 +73,31 @@ export const AIDesignBanner = () => {
                 showsHorizontalScrollIndicator={false}
                 onScroll={handleScroll}
                 scrollEventThrottle={16}
-                style={{ transform: [{ scaleX: -1 }] }}
+                style={styles.scrollView}
             >
                 {SERVICE_BANNERS.map((banner) => (
                     <Link key={banner.id} href={banner.route as any} asChild>
                         <TouchableOpacity
                             activeOpacity={0.9}
-                            className="relative overflow-hidden rounded-2xl bg-slate-50"
-                            style={{ width: BANNER_WIDTH, height: 160 }}
+                            style={[styles.banner, { width: BANNER_WIDTH }]}
                         >
                             {/* Background Image with Overlay */}
-                            <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
+                            <View style={styles.imageContainer}>
                                 <Image
                                     source={{ uri: banner.image }}
-                                    className="w-full h-full"
+                                    style={styles.bannerImage}
                                     resizeMode="cover"
-                                    style={{ transform: [{ scaleX: -1 }] }}
                                 />
-                                {/* Black overlay for contrast */}
-                                <View style={{ 
-                                    position: 'absolute', 
-                                    top: 0, 
-                                    left: 0, 
-                                    right: 0, 
-                                    bottom: 0, 
-                                    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-                                    transform: [{ scaleX: -1 }]
-                                }} />
+                                <View style={styles.overlay} />
                             </View>
                             
                             {/* Content */}
-                            <View className="flex-1 justify-center relative z-10 px-5" style={{ transform: [{ scaleX: -1 }] }}>
-                                <View className="items-end">
-                                    <Text 
-                                        className="font-cairo-bold text-xl mb-2 text-right"
-                                        style={{ 
-                                            fontSize: 22,
-                                            lineHeight: 28,
-                                            color: '#FFFFFF'
-                                        }}
-                                    >
+                            <View style={styles.content}>
+                                <View style={styles.contentInner}>
+                                    <Text style={styles.title}>
                                         {banner.title}
                                     </Text>
-                                    <Text 
-                                        className="font-cairo-medium text-base text-right"
-                                        style={{ 
-                                            fontSize: 16,
-                                            lineHeight: 22,
-                                            color: '#FFFFFF'
-                                        }}
-                                    >
+                                    <Text style={styles.subtitle}>
                                         {banner.subtitle}
                                     </Text>
                                 </View>

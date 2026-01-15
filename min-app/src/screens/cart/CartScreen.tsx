@@ -3,144 +3,87 @@
 
 import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
-import { Dimensions, Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import React from 'react';
+import { Dimensions, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { EmptyState } from '../../components/shared';
+import { Header, EmptyCartState, PrimaryButton } from '../shared';
+import { useCart } from './_hooks';
 import { COLORS } from '../../constants/theme';
 
 const { width } = Dimensions.get('window');
 const isTablet = width >= 768;
 
-interface CartItem {
-    id: string;
-    name: string;
-    price: number;
-    image: string;
-    quantity: number;
-    discount?: number;
-}
-
-const MOCK_CART: CartItem[] = [
+const MOCK_CART = [
     { id: '1', name: 'صوفا مودرن مريحة', price: 2499, image: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=500&q=80', quantity: 1 },
     { id: '2', name: 'طاولة قهوة خشبية', price: 899, discount: 15, image: 'https://images.unsplash.com/photo-1533090481720-856c6e3c1fdc?w=500&q=80', quantity: 2 },
 ];
 
 export default function CartScreen() {
     const router = useRouter();
-    const [cartItems, setCartItems] = useState<CartItem[]>(MOCK_CART);
-
-    const updateQuantity = (id: string, delta: number) => {
-        setCartItems(prevItems =>
-            prevItems.map(item =>
-                item.id === id
-                    ? { ...item, quantity: Math.max(1, item.quantity + delta) }
-                    : item
-            )
-        );
-    };
-
-    const removeItem = (id: string) => {
-        setCartItems(prevItems => prevItems.filter(item => item.id !== id));
-    };
-
-    const getItemTotal = (item: CartItem) => {
-        const price = item.discount ? item.price * (1 - item.discount / 100) : item.price;
-        return Math.round(price * item.quantity);
-    };
-
-    const cartTotal = cartItems.reduce((sum, item) => sum + getItemTotal(item), 0);
-    const isEmpty = cartItems.length === 0;
+    const { cartItems, updateQuantity, removeItem, getItemTotal, cartTotal, isEmpty } = useCart(MOCK_CART);
 
     return (
-        <View className="flex-1 bg-white">
-            <SafeAreaView className="flex-1" edges={['top']}>
-                {/* Simple Header */}
-                <View className="flex-row-reverse items-center justify-between px-5 py-4 border-b border-slate-100">
-                    <Text className="font-cairo-bold text-xl text-slate-900">السلة</Text>
-                    {!isEmpty && (
-                        <Text className="font-cairo-medium text-slate-500 text-sm">{cartItems.length} منتجات</Text>
-                    )}
-                </View>
+        <View style={styles.container}>
+            <SafeAreaView style={styles.safeArea} edges={['top']}>
+                <Header
+                    title="السلة"
+                    rightAction={
+                        !isEmpty ? (
+                            <Text style={styles.itemsCount}>{cartItems.length} منتجات</Text>
+                        ) : undefined
+                    }
+                />
 
                 {/* Content */}
                 {isEmpty ? (
-                    <View className="flex-1">
-                        <EmptyState
-                            icon="shopping-cart"
-                            title="السلة فارغة"
-                            description="لم تقم بإضافة أي منتجات للسلة بعد"
-                            actionLabel="تصفح المنتجات"
-                            onAction={() => router.push('/(tabs)/home')}
-                        />
-                    </View>
+                    <EmptyCartState onBrowseProducts={() => router.push('/(tabs)/home')} />
                 ) : (
                     <ScrollView
-                        className="flex-1"
-                        contentContainerStyle={{
-                            paddingHorizontal: 20,
-                            paddingTop: 16,
-                            paddingBottom: 16,
-                        }}
+                        style={styles.scrollView}
+                        contentContainerStyle={styles.scrollContent}
                         showsVerticalScrollIndicator={false}
                     >
                         {cartItems.map((item) => (
-                            <View
-                                key={item.id}
-                                className="flex-row-reverse bg-gray-50 rounded-2xl p-3 mb-3"
-                            >
-                                {/* Image */}
+                            <View key={item.id} style={styles.cartItem}>
                                 <Image
                                     source={{ uri: item.image }}
-                                    className="w-20 h-20 rounded-xl bg-slate-200"
+                                    style={styles.itemImage}
                                     resizeMode="cover"
                                 />
-
-                                {/* Content */}
-                                <View className="flex-1 mr-3 justify-between">
-                                    {/* Name & Delete */}
-                                    <View className="flex-row-reverse items-start justify-between">
-                                        <Text 
-                                            className="font-cairo-bold text-slate-800 text-right text-sm flex-1"
-                                            numberOfLines={2}
-                                        >
+                                <View style={styles.itemContent}>
+                                    <View style={styles.itemHeader}>
+                                        <Text style={styles.itemName} numberOfLines={2}>
                                             {item.name}
                                         </Text>
                                         <TouchableOpacity
                                             onPress={() => removeItem(item.id)}
-                                            className="w-7 h-7 bg-red-50 rounded-full items-center justify-center ml-2"
+                                            style={styles.deleteButton}
                                         >
                                             <Feather name="trash-2" size={14} color="#EF4444" />
                                         </TouchableOpacity>
                                     </View>
-
-                                    {/* Price & Quantity */}
-                                    <View className="flex-row-reverse items-center justify-between mt-2">
-                                        <View className="flex-row-reverse items-center gap-2">
-                                            <Text className="font-cairo-bold text-base" style={{ color: COLORS.primary }}>
+                                    <View style={styles.itemFooter}>
+                                        <View style={styles.priceRow}>
+                                            <Text style={styles.itemPrice}>
                                                 {getItemTotal(item)} ر.س
                                             </Text>
                                             {item.discount && (
-                                                <Text className="text-slate-400 text-xs line-through">
+                                                <Text style={styles.originalPrice}>
                                                     {item.price * item.quantity}
                                                 </Text>
                                             )}
                                         </View>
-
-                                        {/* Quantity Controls */}
-                                        <View className="flex-row items-center bg-white rounded-lg">
+                                        <View style={styles.quantityControls}>
                                             <TouchableOpacity
                                                 onPress={() => updateQuantity(item.id, -1)}
-                                                className="w-8 h-8 items-center justify-center"
+                                                style={styles.quantityButton}
                                             >
                                                 <Feather name="minus" size={14} color={COLORS.text} />
                                             </TouchableOpacity>
-                                            <Text className="text-sm font-cairo-bold text-slate-800 w-6 text-center">
-                                                {item.quantity}
-                                            </Text>
+                                            <Text style={styles.quantityText}>{item.quantity}</Text>
                                             <TouchableOpacity
                                                 onPress={() => updateQuantity(item.id, 1)}
-                                                className="w-8 h-8 items-center justify-center"
+                                                style={styles.quantityButton}
                                             >
                                                 <Feather name="plus" size={14} color={COLORS.text} />
                                             </TouchableOpacity>
@@ -153,42 +96,150 @@ export default function CartScreen() {
                 )}
             </SafeAreaView>
 
-            {/* Bottom Bar - Fixed in normal flow */}
-            <View className="bg-white border-t border-slate-100">
-                <View className="flex-row-reverse items-center px-5 py-3 gap-4">
-                    {/* Total */}
-                    <View>
-                        <Text className="text-slate-500 font-cairo-medium text-right text-xs">
-                            الإجمالي
-                        </Text>
-                        <Text 
-                            className="font-cairo-bold text-right text-lg" 
-                            style={{ color: isEmpty ? '#94a3b8' : COLORS.primary }}
-                        >
-                            {cartTotal} ر.س
-                        </Text>
+            {/* Bottom Bar */}
+            {!isEmpty && (
+                <View style={styles.footer}>
+                    <View style={styles.totalSection}>
+                        <Text style={styles.totalLabel}>الإجمالي</Text>
+                        <Text style={styles.totalAmount}>{cartTotal} ر.س</Text>
                     </View>
-                    
-                    {/* Button */}
-                    <TouchableOpacity
-                        className="flex-1 py-3.5 rounded-xl flex-row-reverse items-center justify-center gap-2"
-                        style={{ 
-                            backgroundColor: isEmpty ? '#e2e8f0' : COLORS.primary 
-                        }}
-                        activeOpacity={0.8}
-                        onPress={() => !isEmpty && router.push('/checkout')}
-                        disabled={isEmpty}
-                    >
-                        <Text 
-                            className="font-cairo-bold text-base"
-                            style={{ color: isEmpty ? '#94a3b8' : 'white' }}
-                        >
-                            إتمام الطلب
-                        </Text>
-                        <Feather name="arrow-left" size={18} color={isEmpty ? '#94a3b8' : 'white'} />
-                    </TouchableOpacity>
+                    <PrimaryButton
+                        label="إتمام الطلب"
+                        onPress={() => router.push('/checkout')}
+                        style={styles.checkoutButton}
+                    />
                 </View>
-            </View>
+            )}
         </View>
     );
 }
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: 'white',
+    },
+    safeArea: {
+        flex: 1,
+    },
+    itemsCount: {
+        fontFamily: 'Cairo_500Medium',
+        fontSize: 13,
+        color: '#64748b',
+    },
+    scrollView: {
+        flex: 1,
+    },
+    scrollContent: {
+        paddingHorizontal: 20,
+        paddingTop: 16,
+        paddingBottom: 16,
+    },
+    cartItem: {
+        flexDirection: 'row-reverse',
+        backgroundColor: '#f8fafc',
+        borderRadius: 16,
+        padding: 12,
+        marginBottom: 12,
+    },
+    itemImage: {
+        width: 80,
+        height: 80,
+        borderRadius: 12,
+        backgroundColor: '#e2e8f0',
+    },
+    itemContent: {
+        flex: 1,
+        marginRight: 12,
+        justifyContent: 'space-between',
+    },
+    itemHeader: {
+        flexDirection: 'row-reverse',
+        alignItems: 'flex-start',
+        justifyContent: 'space-between',
+        marginBottom: 8,
+    },
+    itemName: {
+        flex: 1,
+        fontFamily: 'Cairo_700Bold',
+        fontSize: 14,
+        color: '#1e293b',
+        textAlign: 'right',
+    },
+    deleteButton: {
+        width: 28,
+        height: 28,
+        backgroundColor: '#FEF2F2',
+        borderRadius: 14,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginLeft: 8,
+    },
+    itemFooter: {
+        flexDirection: 'row-reverse',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+    },
+    priceRow: {
+        flexDirection: 'row-reverse',
+        alignItems: 'center',
+        gap: 8,
+    },
+    itemPrice: {
+        fontFamily: 'Cairo_700Bold',
+        fontSize: 16,
+        color: COLORS.primary,
+    },
+    originalPrice: {
+        fontFamily: 'Cairo_500Medium',
+        fontSize: 12,
+        color: '#94a3b8',
+        textDecorationLine: 'line-through',
+    },
+    quantityControls: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: 'white',
+        borderRadius: 8,
+    },
+    quantityButton: {
+        width: 32,
+        height: 32,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    quantityText: {
+        fontFamily: 'Cairo_700Bold',
+        fontSize: 14,
+        color: '#1e293b',
+        width: 24,
+        textAlign: 'center',
+    },
+    footer: {
+        flexDirection: 'row-reverse',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: 20,
+        backgroundColor: 'white',
+        borderTopWidth: 1,
+        borderTopColor: '#f1f5f9',
+        gap: 16,
+    },
+    totalSection: {
+        alignItems: 'flex-end',
+    },
+    totalLabel: {
+        fontFamily: 'Cairo_500Medium',
+        fontSize: 12,
+        color: '#64748b',
+        marginBottom: 4,
+    },
+    totalAmount: {
+        fontFamily: 'Cairo_700Bold',
+        fontSize: 18,
+        color: COLORS.primary,
+    },
+    checkoutButton: {
+        flex: 1,
+    },
+});

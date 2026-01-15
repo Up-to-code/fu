@@ -1,4 +1,4 @@
-// File: src/components/home/ProductListSection.tsx
+// File: src/screens/home/_components/ProductListSection.tsx
 // Purpose: Simplified product list section using FlashList for better performance
 
 import { Feather } from '@expo/vector-icons';
@@ -7,23 +7,19 @@ import React from 'react';
 import { Dimensions, Text, TouchableOpacity, View } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 import { COLORS } from '../../../constants/theme';
-import { Product, ProductCard } from '../../../components/shared';
+import { IProductCardProps, ProductCard } from '../../shared';
+import { ProductListSectionProps } from './types/home';
+import { styles } from './StyleSheets/ProductListSection.styles';
 
 const { width } = Dimensions.get('window');
 const isTablet = width >= 768;
 const ESTIMATED_ITEM_SIZE = isTablet ? 200 : 170;
 
-interface ProductListSectionProps {
-    title: string;
-    products: Product[];
-    onToggleFavorite?: (id: string) => void;
-}
-
-export const ProductListSection = ({ title, products, onToggleFavorite }: ProductListSectionProps) => {
+export const ProductListSection: React.FC<ProductListSectionProps> = ({ title, products, onToggleFavorite }) => {
     const router = useRouter();
 
-    const renderItem = ({ item }: { item: Product }) => (
-        <View style={{ marginLeft: 12, transform: [{ scaleX: -1 }] }}>
+    const renderItem = ({ item }: { item: IProductCardProps }) => (
+        <View style={styles.itemWrapper}>
             <ProductCard
                 product={item}
                 variant="horizontal"
@@ -33,20 +29,20 @@ export const ProductListSection = ({ title, products, onToggleFavorite }: Produc
     );
 
     return (
-        <View className="mb-6">
+        <View style={styles.container}>
             {/* Header */}
-            <View className="flex-row-reverse justify-between items-center px-5 mb-4">
-                <Text className="text-base font-cairo-bold text-slate-800">{title}</Text>
+            <View style={styles.header}>
+                <Text style={styles.title}>{title}</Text>
                 <Link href={`/category/${title}` as any} asChild>
-                    <TouchableOpacity className="flex-row-reverse items-center gap-1">
-                        <Text className="text-sm font-cairo-medium text-slate-500">عرض الكل</Text>
+                    <TouchableOpacity style={styles.viewAllButton}>
+                        <Text style={styles.viewAllText}>عرض الكل</Text>
                         <Feather name="chevron-left" size={16} color={COLORS.textLight} />
                     </TouchableOpacity>
                 </Link>
             </View>
 
             {/* Products */}
-            <View style={{ height: isTablet ? 280 : 240, transform: [{ scaleX: -1 }] }}>
+            <View style={styles.listContainer}>
                 <FlashList
                     data={products}
                     renderItem={renderItem}

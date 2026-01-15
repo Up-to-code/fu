@@ -7,7 +7,11 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Alert, Animated, Image, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { SwipeToConfirm } from '../../components/shared';
+import { Header } from '../shared';
+import { useCheckout, usePaymentMethods } from './_hooks';
+import { useCart } from '../cart/_hooks';
 import { COLORS } from '../../constants/theme';
+import { styles } from './StyleSheets/CheckoutScreen.styles';
 
 // Mock cart data (in real app, this would come from context/store)
 const CART_ITEMS = [
@@ -30,12 +34,14 @@ const ADDRESSES = [
 
 export default function CheckoutScreen() {
     const router = useRouter();
+    const { cartItems, cartTotal } = useCart(CART_ITEMS);
+    const { formState, handleChange, handleSubmit, isLoading, errors } = useCheckout();
+    const { paymentMethods, selectedMethod, setSelectedMethod } = usePaymentMethods();
     const [selectedTime, setSelectedTime] = useState<string>('1');
     const [selectedAddress, setSelectedAddress] = useState<string>('1');
     const [showAddressMenu, setShowAddressMenu] = useState(false);
     const [promoCode, setPromoCode] = useState('');
     const [promoApplied, setPromoApplied] = useState(false);
-    const [notes, setNotes] = useState('');
 
     // Animations
     const fadeAnim = useRef(new Animated.Value(0)).current;
@@ -86,53 +92,41 @@ export default function CheckoutScreen() {
         }
     };
 
-    const handleConfirmOrder = () => {
-        Alert.alert(
-            'تم تأكيد الطلب! 🎉',
-            'سيتم التواصل معك قريباً لتأكيد موعد التوصيل',
-            [
-                {
-                    text: 'حسناً',
-                    onPress: () => router.replace('/(tabs)/home'),
-                },
-            ]
-        );
+    const handleConfirmOrder = async () => {
+        await handleSubmit(cartItems, cartTotal);
     };
 
+    const [notes, setNotes] = useState('');
+
     return (
-        <View className="flex-1 bg-white">
-            <SafeAreaView className="flex-1" edges={['top']}>
-                {/* Header */}
-                <View className="flex-row-reverse items-center justify-between px-5 py-4 border-b border-slate-100">
-                    <TouchableOpacity onPress={() => router.back()}>
-                        <Feather name="arrow-right" size={24} color={COLORS.text} />
-                    </TouchableOpacity>
-                    <Text className="font-cairo-bold text-xl text-slate-900">تأكيد الطلب</Text>
-                    <View className="w-6" />
-                </View>
+        <View style={styles.container}>
+            <SafeAreaView style={styles.safeArea} edges={['top']}>
+                <Header title="تأكيد الطلب" showBack />
 
                 <ScrollView
-                    className="flex-1"
-                    contentContainerStyle={{ paddingBottom: 20 }}
+                    style={{ flex: 1 }}
+                    contentContainerStyle={styles.scrollContent}
                     showsVerticalScrollIndicator={false}
                 >
                     {/* Delivery Address */}
                     <Animated.View 
-                        className="px-5 py-4"
-                        style={{ 
-                            opacity: fadeAnim, 
-                            transform: [{ translateY: slideAnim }] 
-                        }}
+                        style={[
+                            styles.section,
+                            { 
+                                opacity: fadeAnim, 
+                                transform: [{ translateY: slideAnim }] 
+                            }
+                        ]}
                     >
-                        <View className="flex-row-reverse items-center justify-between mb-4">
-                            <Text className="font-cairo-bold text-lg text-slate-900">
+                        <View style={styles.sectionHeader}>
+                            <Text style={styles.sectionTitle}>
                                 عنوان التوصيل
                             </Text>
                             <TouchableOpacity 
                                 onPress={() => setShowAddressMenu(!showAddressMenu)}
-                                className="flex-row-reverse items-center gap-1"
+                                style={styles.changeButton}
                             >
-                                <Text className="font-cairo-medium text-sm" style={{ color: COLORS.primary }}>
+                                <Text style={styles.changeText}>
                                     تغيير
                                 </Text>
                                 <Feather name="chevron-down" size={16} color={COLORS.primary} />
@@ -140,19 +134,19 @@ export default function CheckoutScreen() {
                         </View>
                         
                         {/* Current Address Card */}
-                        <View className="bg-slate-50 rounded-2xl p-4">
-                            <View className="flex-row-reverse items-start gap-3">
-                                <View className="w-10 h-10 rounded-full bg-primary/10 items-center justify-center">
+                        <View style={styles.addressCard}>
+                            <View style={styles.addressCardContent}>
+                                <View style={styles.addressIcon}>
                                     <Feather name="map-pin" size={20} color={COLORS.primary} />
                                 </View>
-                                <View className="flex-1">
-                                    <Text className="font-cairo-bold text-base text-slate-800 text-right">
+                                <View style={styles.addressDetails}>
+                                    <Text style={styles.addressName}>
                                         {currentAddress.name}
                                     </Text>
-                                    <Text className="font-cairo-medium text-sm text-slate-600 text-right mt-1">
+                                    <Text style={styles.addressText}>
                                         {currentAddress.address}
                                     </Text>
-                                    <Text className="font-cairo-medium text-xs text-slate-500 text-right mt-1">
+                                    <Text style={styles.addressPhone}>
                                         {currentAddress.phone}
                                     </Text>
                                 </View>
@@ -162,16 +156,18 @@ export default function CheckoutScreen() {
                         {/* Address Selection Menu */}
                         {showAddressMenu && (
                             <Animated.View 
-                                className="mt-3 bg-white rounded-2xl border border-slate-200 overflow-hidden"
-                                style={{
-                                    opacity: addressMenuAnim,
-                                    transform: [{
-                                        translateY: addressMenuAnim.interpolate({
-                                            inputRange: [0, 1],
-                                            outputRange: [-10, 0],
-                                        })
-                                    }]
-                                }}
+                                style={[
+                                    styles.addressMenu,
+                                    {
+                                        opacity: addressMenuAnim,
+                                        transform: [{
+                                            translateY: addressMenuAnim.interpolate({
+                                                inputRange: [0, 1],
+                                                outputRange: [-10, 0],
+                                            })
+                                        }]
+                                    }
+                                ]}
                             >
                                 {ADDRESSES.map((addr, index) => (
                                     <TouchableOpacity
@@ -180,22 +176,24 @@ export default function CheckoutScreen() {
                                             setSelectedAddress(addr.id);
                                             setShowAddressMenu(false);
                                         }}
-                                        className={`flex-row-reverse items-center gap-3 p-4 ${
-                                            index < ADDRESSES.length - 1 ? 'border-b border-slate-100' : ''
-                                        }`}
+                                        style={[
+                                            styles.addressMenuItem,
+                                            index < ADDRESSES.length - 1 && styles.addressMenuItemBorder
+                                        ]}
                                     >
-                                        <View className={`w-5 h-5 rounded-full border-2 items-center justify-center ${
-                                            selectedAddress === addr.id ? 'border-primary bg-primary' : 'border-slate-300'
-                                        }`}>
+                                        <View style={[
+                                            styles.addressRadio,
+                                            selectedAddress === addr.id ? styles.addressRadioSelected : styles.addressRadioUnselected
+                                        ]}>
                                             {selectedAddress === addr.id && (
-                                                <View className="w-2 h-2 rounded-full bg-white" />
+                                                <View style={styles.addressRadioDot} />
                                             )}
                                         </View>
-                                        <View className="flex-1">
-                                            <Text className="font-cairo-bold text-sm text-slate-800 text-right">
+                                        <View style={styles.addressMenuItemDetails}>
+                                            <Text style={styles.addressMenuItemName}>
                                                 {addr.name}
                                             </Text>
-                                            <Text className="font-cairo-medium text-xs text-slate-500 text-right">
+                                            <Text style={styles.addressMenuItemText}>
                                                 {addr.address}
                                             </Text>
                                         </View>
@@ -208,12 +206,12 @@ export default function CheckoutScreen() {
                                         setShowAddressMenu(false);
                                         router.push('/account/addresses' as any);
                                     }}
-                                    className="flex-row-reverse items-center gap-3 p-4 bg-slate-50"
+                                    style={styles.addAddressButton}
                                 >
-                                    <View className="w-5 h-5 rounded-full bg-primary/10 items-center justify-center">
+                                    <View style={styles.addAddressIcon}>
                                         <Feather name="plus" size={14} color={COLORS.primary} />
                                     </View>
-                                    <Text className="font-cairo-bold text-sm text-right" style={{ color: COLORS.primary }}>
+                                    <Text style={styles.addAddressText}>
                                         إضافة عنوان جديد
                                     </Text>
                                 </TouchableOpacity>
@@ -221,17 +219,19 @@ export default function CheckoutScreen() {
                         )}
                     </Animated.View>
 
-                    <View className="h-2 bg-slate-50" />
+                    <View style={styles.divider} />
 
                     {/* Order Summary */}
                     <Animated.View 
-                        className="px-5 py-4"
-                        style={{ 
-                            opacity: fadeAnim, 
-                            transform: [{ translateY: slideAnim }] 
-                        }}
+                        style={[
+                            styles.section,
+                            { 
+                                opacity: fadeAnim, 
+                                transform: [{ translateY: slideAnim }] 
+                            }
+                        ]}
                     >
-                        <Text className="font-cairo-bold text-lg text-slate-900 text-right mb-4">
+                        <Text style={styles.sectionTitle}>
                             ملخص الطلب
                         </Text>
                         {CART_ITEMS.map((item) => {
@@ -239,21 +239,21 @@ export default function CheckoutScreen() {
                                 ? Math.round(item.price * (1 - item.discount / 100)) 
                                 : item.price;
                             return (
-                                <View key={item.id} className="flex-row-reverse items-center mb-3">
+                                <View key={item.id} style={styles.orderItem}>
                                     <Image
                                         source={{ uri: item.image }}
-                                        className="w-14 h-14 rounded-xl bg-slate-100"
+                                        style={styles.orderItemImage}
                                         resizeMode="cover"
                                     />
-                                    <View className="flex-1 mr-3">
-                                        <Text className="font-cairo-medium text-sm text-slate-800 text-right" numberOfLines={1}>
+                                    <View style={styles.orderItemDetails}>
+                                        <Text style={styles.orderItemName} numberOfLines={1}>
                                             {item.name}
                                         </Text>
-                                        <Text className="font-cairo-medium text-xs text-slate-500 text-right">
+                                        <Text style={styles.orderItemQuantity}>
                                             {item.quantity} × {itemPrice} ر.س
                                         </Text>
                                     </View>
-                                    <Text className="font-cairo-bold text-sm" style={{ color: COLORS.primary }}>
+                                    <Text style={styles.orderItemPrice}>
                                         {itemPrice * item.quantity} ر.س
                                     </Text>
                                 </View>
@@ -261,53 +261,57 @@ export default function CheckoutScreen() {
                         })}
                     </Animated.View>
 
-                    <View className="h-2 bg-slate-50" />
+                    <View style={styles.divider} />
 
                     {/* Delivery Time */}
                     <Animated.View 
-                        className="px-5 py-4"
-                        style={{ 
-                            opacity: fadeAnim, 
-                            transform: [{ translateY: slideAnim }] 
-                        }}
+                        style={[
+                            styles.section,
+                            { 
+                                opacity: fadeAnim, 
+                                transform: [{ translateY: slideAnim }] 
+                            }
+                        ]}
                     >
-                        <Text className="font-cairo-bold text-lg text-slate-900 text-right mb-4">
+                        <Text style={styles.sectionTitle}>
                             موعد التوصيل
                         </Text>
-                        <View className="flex-row-reverse flex-wrap gap-3">
+                        <View style={styles.deliveryTimesContainer}>
                             {DELIVERY_TIMES.map((time) => (
                                 <TouchableOpacity
                                     key={time.id}
                                     onPress={() => time.available && setSelectedTime(time.id)}
                                     disabled={!time.available}
-                                    className={`px-4 py-3 rounded-xl border ${
+                                    style={[
+                                        styles.deliveryTimeButton,
                                         selectedTime === time.id
-                                            ? 'border-primary bg-primary/5'
+                                            ? styles.deliveryTimeButtonSelected
                                             : time.available
-                                            ? 'border-slate-200 bg-white'
-                                            : 'border-slate-100 bg-slate-50'
-                                    }`}
-                                    style={{ minWidth: '45%' }}
+                                            ? styles.deliveryTimeButtonAvailable
+                                            : styles.deliveryTimeButtonUnavailable
+                                    ]}
                                 >
                                     <Text
-                                        className={`font-cairo-bold text-sm text-right ${
+                                        style={[
+                                            styles.deliveryTimeLabel,
                                             selectedTime === time.id
-                                                ? 'text-primary'
+                                                ? styles.deliveryTimeLabelSelected
                                                 : time.available
-                                                ? 'text-slate-800'
-                                                : 'text-slate-400'
-                                        }`}
+                                                ? styles.deliveryTimeLabelAvailable
+                                                : styles.deliveryTimeLabelUnavailable
+                                        ]}
                                     >
                                         {time.label}
                                     </Text>
                                     <Text
-                                        className={`font-cairo-medium text-xs text-right ${
+                                        style={[
+                                            styles.deliveryTimeText,
                                             selectedTime === time.id
-                                                ? 'text-primary/70'
+                                                ? styles.deliveryTimeTextSelected
                                                 : time.available
-                                                ? 'text-slate-500'
-                                                : 'text-slate-300'
-                                        }`}
+                                                ? styles.deliveryTimeTextAvailable
+                                                : styles.deliveryTimeTextUnavailable
+                                        ]}
                                     >
                                         {time.time}
                                     </Text>
@@ -316,22 +320,24 @@ export default function CheckoutScreen() {
                         </View>
                     </Animated.View>
 
-                    <View className="h-2 bg-slate-50" />
+                    <View style={styles.divider} />
 
                     {/* Promo Code */}
                     <Animated.View 
-                        className="px-5 py-4"
-                        style={{ 
-                            opacity: fadeAnim, 
-                            transform: [{ translateY: slideAnim }] 
-                        }}
+                        style={[
+                            styles.section,
+                            { 
+                                opacity: fadeAnim, 
+                                transform: [{ translateY: slideAnim }] 
+                            }
+                        ]}
                     >
-                        <Text className="font-cairo-bold text-lg text-slate-900 text-right mb-4">
+                        <Text style={styles.sectionTitle}>
                             كود الخصم
                         </Text>
-                        <View className="flex-row-reverse gap-3">
+                        <View style={styles.promoContainer}>
                             <TextInput
-                                className="flex-1 bg-slate-50 rounded-xl px-4 py-3 text-right font-cairo-medium text-base"
+                                style={styles.promoInput}
                                 placeholder="أدخل كود الخصم"
                                 placeholderTextColor="#94a3b8"
                                 value={promoCode}
@@ -341,89 +347,94 @@ export default function CheckoutScreen() {
                             <TouchableOpacity
                                 onPress={handleApplyPromo}
                                 disabled={promoApplied || !promoCode}
-                                className={`px-5 py-3 rounded-xl ${
+                                style={[
+                                    styles.promoButton,
                                     promoApplied
-                                        ? 'bg-green-500'
+                                        ? styles.promoButtonApplied
                                         : promoCode
-                                        ? 'bg-primary'
-                                        : 'bg-slate-200'
-                                }`}
+                                        ? styles.promoButtonActive
+                                        : styles.promoButtonDisabled
+                                ]}
                             >
-                                <Text className="font-cairo-bold text-sm text-white">
+                                <Text style={styles.promoButtonText}>
                                     {promoApplied ? '✓ تم' : 'تطبيق'}
                                 </Text>
                             </TouchableOpacity>
                         </View>
                         {promoApplied && (
-                            <Text className="font-cairo-medium text-sm text-green-600 text-right mt-2">
+                            <Text style={styles.promoSuccessText}>
                                 تم تطبيق خصم 10%
                             </Text>
                         )}
                     </Animated.View>
 
-                    <View className="h-2 bg-slate-50" />
+                    <View style={styles.divider} />
 
                     {/* Order Notes */}
                     <Animated.View 
-                        className="px-5 py-4"
-                        style={{ 
-                            opacity: fadeAnim, 
-                            transform: [{ translateY: slideAnim }] 
-                        }}
+                        style={[
+                            styles.section,
+                            { 
+                                opacity: fadeAnim, 
+                                transform: [{ translateY: slideAnim }] 
+                            }
+                        ]}
                     >
-                        <Text className="font-cairo-bold text-lg text-slate-900 text-right mb-4">
+                        <Text style={styles.sectionTitle}>
                             ملاحظات الطلب
                         </Text>
                         <TextInput
-                            className="bg-slate-50 rounded-xl px-4 py-3 text-right font-cairo-medium text-base"
+                            style={styles.notesInput}
                             placeholder="أضف ملاحظات للطلب (اختياري)"
                             placeholderTextColor="#94a3b8"
                             value={notes}
                             onChangeText={setNotes}
                             multiline
                             numberOfLines={3}
-                            style={{ minHeight: 80, textAlignVertical: 'top' }}
+                            textAlignVertical="top"
                         />
                     </Animated.View>
 
-                    <View className="h-2 bg-slate-50" />
+                    <View style={styles.divider} />
 
                     {/* Price Breakdown */}
                     <Animated.View 
-                        className="px-5 py-4"
-                        style={{ 
-                            opacity: fadeAnim, 
-                            transform: [{ translateY: slideAnim }] 
-                        }}
+                        style={[
+                            styles.section,
+                            { 
+                                opacity: fadeAnim, 
+                                transform: [{ translateY: slideAnim }] 
+                            }
+                        ]}
                     >
-                        <Text className="font-cairo-bold text-lg text-slate-900 text-right mb-4">
+                        <Text style={styles.sectionTitle}>
                             تفاصيل السعر
                         </Text>
                         
-                        <View className="flex-row-reverse justify-between mb-2">
-                            <Text className="font-cairo-medium text-sm text-slate-600">المجموع الفرعي</Text>
-                            <Text className="font-cairo-medium text-sm text-slate-800">{subtotal} ر.س</Text>
+                        <View style={styles.priceRow}>
+                            <Text style={styles.priceLabel}>المجموع الفرعي</Text>
+                            <Text style={styles.priceValue}>{subtotal} ر.س</Text>
                         </View>
                         
                         {promoApplied && (
-                            <View className="flex-row-reverse justify-between mb-2">
-                                <Text className="font-cairo-medium text-sm text-green-600">خصم الكود</Text>
-                                <Text className="font-cairo-medium text-sm text-green-600">-{promoDiscount} ر.س</Text>
+                            <View style={styles.priceRow}>
+                                <Text style={styles.priceDiscountLabel}>خصم الكود</Text>
+                                <Text style={styles.priceDiscountValue}>-{promoDiscount} ر.س</Text>
                             </View>
                         )}
                         
-                        <View className="flex-row-reverse justify-between mb-3">
-                            <Text className="font-cairo-medium text-sm text-slate-600">الشحن</Text>
-                            <Text className="font-cairo-medium text-sm text-slate-800">
+                        <View style={[styles.priceRow, { marginBottom: 12 }]}>
+                            <Text style={styles.priceLabel}>الشحن</Text>
+                            <Text style={styles.priceValue}>
                                 {shipping === 0 ? 'مجاني' : `${shipping} ر.س`}
                             </Text>
                         </View>
                         
-                        <View className="h-px bg-slate-200 my-3" />
+                        <View style={styles.priceDivider} />
                         
-                        <View className="flex-row-reverse justify-between">
-                            <Text className="font-cairo-bold text-base text-slate-900">الإجمالي</Text>
-                            <Text className="font-cairo-bold text-xl" style={{ color: COLORS.primary }}>
+                        <View style={styles.totalRow}>
+                            <Text style={styles.totalLabel}>الإجمالي</Text>
+                            <Text style={styles.totalValue}>
                                 {total} ر.س
                             </Text>
                         </View>
@@ -432,8 +443,8 @@ export default function CheckoutScreen() {
             </SafeAreaView>
 
             {/* Bottom - Swipe to Confirm */}
-            <SafeAreaView edges={['bottom']} className="bg-white border-t border-slate-100">
-                <View className="px-5 py-4">
+            <SafeAreaView edges={['bottom']} style={styles.bottomContainer}>
+                <View style={styles.bottomContent}>
                     <SwipeToConfirm
                         onConfirm={handleConfirmOrder}
                         label="اسحب لتأكيد الطلب"

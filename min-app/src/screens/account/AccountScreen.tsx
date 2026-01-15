@@ -1,125 +1,299 @@
 // File: src/screens/account/AccountScreen.tsx
-// Purpose: User Account/Settings Screen - Using Shared Components
+// Purpose: Redesigned Account Screen with clean grid layout, role badge, and flat minimal design
 
 import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React from 'react';
-import { Alert, Dimensions, Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ActionButton, SettingItem } from '../../components/shared';
+import { useQuery } from 'convex/react';
+import { api } from '../../../../convex/_generated/api';
+import { COLORS } from '../../constants/theme';
 import { useAuth } from '../../hooks/useAuth';
+import { useAccountStats } from '../../hooks/useAccountStats';
+import { useUserProfile } from '../../hooks/useUserProfile';
+import { useProfileImage } from '../../hooks/useLocalData';
+import { RoleBadge } from '../shared';
 
-const { width } = Dimensions.get('window');
-const isTablet = width >= 768;
+// Helper function to get user initials
+const getUserInitials = (user: { name?: string | null; email?: string | null } | null): string => {
+    if (!user) return 'U';
+    
+    if (user.name) {
+        const firstLetter = user.name.trim().charAt(0).toUpperCase();
+        return firstLetter || 'U';
+    }
+    
+    if (user.email) {
+        const firstLetter = user.email.trim().charAt(0).toUpperCase();
+        return firstLetter || 'U';
+    }
+    
+    return 'U';
+};
+
+// Helper function to render avatar component
+const renderAvatar = (
+    user: { image?: string | null; name?: string | null; email?: string | null } | null,
+    convexImageUrl: string | null | undefined,
+    localImageBase64: string | null,
+    size: number = 80
+) => {
+    // Priority: Convex storage > SQLite base64 > user image > initials
+    if (convexImageUrl) {
+        return (
+            <Image
+                source={{ uri: convexImageUrl }}
+                style={[styles.avatar, { width: size, height: size, borderRadius: size / 2 }]}
+            />
+        );
+    }
+    
+    if (localImageBase64) {
+        return (
+            <Image
+                source={{ uri: `data:image/jpeg;base64,${localImageBase64}` }}
+                style={[styles.avatar, { width: size, height: size, borderRadius: size / 2 }]}
+            />
+        );
+    }
+    
+    if (user?.image) {
+        return (
+            <Image
+                source={{ uri: user.image }}
+                style={[styles.avatar, { width: size, height: size, borderRadius: size / 2 }]}
+            />
+        );
+    }
+    
+    const initials = getUserInitials(user);
+    const backgroundColor = user ? COLORS.primary : '#e2e8f0';
+    
+    return (
+        <View style={[
+            styles.avatar,
+            styles.avatarInitials,
+            { width: size, height: size, borderRadius: size / 2, backgroundColor }
+        ]}>
+            {user ? (
+                <Text style={[styles.avatarInitialsText, { fontSize: size * 0.4 }]}>
+                    {initials}
+                </Text>
+            ) : (
+                <Feather name="user" size={size * 0.5} color="#94a3b8" />
+            )}
+        </View>
+    );
+};
+
+// Stat Card Component - Flat minimal design
+const StatCard = ({ 
+    icon, 
+    label, 
+    count, 
+    onPress 
+}: { 
+    icon: string; 
+    label: string; 
+    count: number | undefined; 
+    onPress: () => void;
+}) => (
+    <TouchableOpacity style={styles.statCard} onPress={onPress} activeOpacity={0.7}>
+        <View style={styles.statIconContainer}>
+            <Feather name={icon as any} size={24} color={COLORS.primary} />
+        </View>
+        <Text style={styles.statCount}>{count ?? 0}</Text>
+        <Text style={styles.statLabel}>{label}</Text>
+    </TouchableOpacity>
+);
 
 export default function AccountScreen() {
     const router = useRouter();
-    const { logout, user } = useAuth();
-    const [notifications, setNotifications] = React.useState(true);
-
-    const handleLogout = async () => {
-        Alert.alert(
-            'تسجيل الخروج',
-            'هل أنت متأكد أنك تريد تسجيل الخروج؟',
-            [
-                { text: 'إلغاء', style: 'cancel' },
-                {
-                    text: 'خروج',
-                    style: 'destructive',
-                    onPress: async () => {
-                        await logout();
-                        router.replace('/');
-                    }
-                },
-            ]
-        );
-    };
+    const { user } = useAuth();
+    const { role } = useUserProfile(user?.id);
+    const { imageBase64 } = useProfileImage(user?.id);
+    
+    // Fetch profile image URL from Convex storage
+    const convexImageUrl = useQuery(
+        api.users.getProfileImageUrl,
+        user?.id ? { userId: user.id } : 'skip'
+    );
+    
+    // Fetch counts from Convex using custom hook
+    const { ordersCount, bookingsCount, addressesCount, favoritesCount, messagesCount } = useAccountStats(user?.id);
 
     return (
-        <SafeAreaView className="flex-1 bg-white" edges={['top']}>
-            <ScrollView
-                contentContainerStyle={{
-                    paddingBottom: 20,
-                    maxWidth: isTablet ? 600 : '100%',
-                    alignSelf: 'center',
-                    width: '100%'
-                }}
-            >
-                {/* Profile Header */}
-                <View className="bg-slate-50 items-center py-8 px-5">
-                    <View className="relative mb-4">
-                        <View className={`rounded-full bg-white p-1 ${isTablet ? 'w-32 h-32' : 'w-24 h-24'}`}>
-                            <Image
-                                source={{ uri: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=500&q=80' }}
-                                className="w-full h-full rounded-full"
-                            />
+        <View style={styles.container}>
+            <SafeAreaView style={styles.safeArea} edges={['top']}>
+                <ScrollView
+                    contentContainerStyle={styles.scrollContent}
+                    showsVerticalScrollIndicator={false}
+                >
+                    {/* Profile Card - Full Width, Clickable, Flat Design */}
+                    <TouchableOpacity
+                        style={styles.profileCard}
+                        onPress={() => router.push('/account/settings' as any)}
+                        activeOpacity={0.8}
+                    >
+                        <View style={styles.profileCardContent}>
+                            <View style={styles.profileInfo}>
+                                {renderAvatar(user, convexImageUrl, imageBase64, 80)}
+                                <View style={styles.profileText}>
+                                    <Text style={styles.userName}>
+                                        {user?.name || 'الاسم غير متوفر'}
+                                    </Text>
+                                    <Text style={styles.userEmail}>
+                                        {user?.email || 'البريد الإلكتروني غير متوفر'}
+                                    </Text>
+                                    {role !== 'customer' && (
+                                        <View style={styles.roleBadgeContainer}>
+                                            <RoleBadge role={role} size="small" />
+                                        </View>
+                                    )}
+                                </View>
+                            </View>
+                            <Feather name="chevron-left" size={20} color="#94a3b8" />
                         </View>
-                        <TouchableOpacity className={`absolute bottom-0 right-0 bg-primary rounded-full items-center justify-center border-2 border-white ${isTablet ? 'w-10 h-10' : 'w-8 h-8'}`}>
-                            <Feather name="camera" size={isTablet ? 18 : 14} color="white" />
-                        </TouchableOpacity>
+                    </TouchableOpacity>
+
+                    {/* Stats Grid - 2x2 with Messages */}
+                    <View style={styles.statsGrid}>
+                        <StatCard
+                            icon="package"
+                            label="الطلبات"
+                            count={ordersCount}
+                            onPress={() => router.push('/orders' as any)}
+                        />
+                        <StatCard
+                            icon="message-circle"
+                            label="الرسائل"
+                            count={messagesCount}
+                            onPress={() => router.push('/chats' as any)}
+                        />
+                        <StatCard
+                            icon="map-pin"
+                            label="العناوين"
+                            count={addressesCount}
+                            onPress={() => router.push('/account/addresses' as any)}
+                        />
+                        <StatCard
+                            icon="heart"
+                            label="المفضلة"
+                            count={favoritesCount}
+                            onPress={() => router.push('/(tabs)/favorites')}
+                        />
                     </View>
 
-                    <Text className={`font-cairo-bold text-slate-800 mb-1 ${isTablet ? 'text-2xl' : 'text-xl'}`}>
-                        {user?.name || 'أحمد منصور'}
-                    </Text>
-                    <Text className={`text-slate-500 font-cairo-medium ${isTablet ? 'text-base' : 'text-sm'}`}>
-                        {user?.email || 'ahmed@example.com'}
-                    </Text>
-                </View>
-
-                {/* Account Settings */}
-                <View className="px-5 pt-6">
-                    <Text className={`text-right font-cairo-bold text-slate-800 mb-4 ${isTablet ? 'text-xl' : 'text-lg'}`}>
-                        إعدادات الحساب
-                    </Text>
-
-                    <SettingItem icon="user" label="تعديل الملف الشخصي" subLabel="الاسم، البريد الإلكتروني" />
-                    <SettingItem icon="package" label="طلباتي" subLabel="تتبع طلباتك" />
-                    <SettingItem icon="map-pin" label="العناوين المحفوظة" onPress={() => router.push('/account/addresses' as any)} />
-                    <SettingItem
-                        icon="heart"
-                        label="المفضلة"
-                        subLabel="المنتجات المحفوظة"
-                        iconColor="#EF4444"
-                        iconBgColor="#fef2f2"
-                        onPress={() => router.push('/(tabs)/favorites')}
-                    />
-                </View>
-
-                <View className="h-2 bg-slate-50 my-6" />
-
-                {/* General Settings */}
-                <View className="px-5">
-                    <Text className={`text-right font-cairo-bold text-slate-800 mb-4 ${isTablet ? 'text-xl' : 'text-lg'}`}>
-                        عام
-                    </Text>
-
-                    <SettingItem
-                        icon="bell"
-                        label="الإشعارات"
-                        toggle
-                        toggleValue={notifications}
-                        onToggle={setNotifications}
-                    />
-                    <SettingItem icon="help-circle" label="المساعدة والدعم" onPress={() => router.push('/account/support' as any)} />
-                </View>
-
-                <View className="h-2 bg-slate-50 my-6" />
-
-                {/* Logout */}
-                <View className="px-5 pb-8">
-                    <ActionButton
-                        label="تسجيل الخروج"
-                        icon="log-out"
-                        variant="danger"
-                        onPress={handleLogout}
-                    />
-
-                    <Text className={`text-center text-slate-400 mt-6 font-cairo-medium ${isTablet ? 'text-sm' : 'text-xs'}`}>
-                        الإصدار 1.0.0
-                    </Text>
-                </View>
-            </ScrollView>
-        </SafeAreaView>
+                    <View style={{ height: 40 }} />
+                </ScrollView>
+            </SafeAreaView>
+        </View>
     );
 }
+
+const styles = StyleSheet.create({
+    container: { 
+        flex: 1, 
+        backgroundColor: COLORS.background
+    },
+    safeArea: { 
+        flex: 1 
+    },
+    scrollContent: { 
+        padding: 20 
+    },
+    profileCard: {
+        backgroundColor: COLORS.white,
+        borderRadius: 12,
+        padding: 20,
+        marginBottom: 24,
+        borderWidth: 1,
+        borderColor: COLORS.border,
+        // No shadows - flat minimal design
+    },
+    profileCardContent: {
+        flexDirection: 'row-reverse',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+    },
+    profileInfo: {
+        flexDirection: 'row-reverse',
+        alignItems: 'center',
+        flex: 1,
+    },
+    profileText: {
+        marginRight: 16,
+        flex: 1,
+    },
+    avatar: {
+        width: 80,
+        height: 80,
+        borderRadius: 40,
+        backgroundColor: '#e2e8f0',
+    },
+    avatarInitials: {
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    avatarInitialsText: {
+        fontFamily: 'Cairo_700Bold',
+        color: 'white',
+    },
+    userName: {
+        fontFamily: 'Cairo_700Bold',
+        fontSize: 18,
+        color: COLORS.text,
+        marginBottom: 4,
+        textAlign: 'right',
+    },
+    userEmail: {
+        fontFamily: 'Cairo_500Medium',
+        fontSize: 14,
+        color: COLORS.textLight,
+        textAlign: 'right',
+        marginBottom: 8,
+    },
+    roleBadgeContainer: {
+        marginTop: 4,
+    },
+    statsGrid: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        marginBottom: 24,
+        gap: 12,
+    },
+    statCard: {
+        backgroundColor: COLORS.white,
+        borderRadius: 12,
+        padding: 16,
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderWidth: 1,
+        borderColor: COLORS.border,
+        // No shadows - flat minimal design
+        width: '47%',
+        minHeight: 120,
+    },
+    statIconContainer: {
+        width: 48,
+        height: 48,
+        borderRadius: 24,
+        backgroundColor: '#f1f5f9',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginBottom: 12,
+    },
+    statCount: {
+        fontFamily: 'Cairo_700Bold',
+        fontSize: 24,
+        color: COLORS.text,
+        marginBottom: 4,
+    },
+    statLabel: {
+        fontFamily: 'Cairo_500Medium',
+        fontSize: 12,
+        color: COLORS.textLight,
+        textAlign: 'center',
+    },
+});

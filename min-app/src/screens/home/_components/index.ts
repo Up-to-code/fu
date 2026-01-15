@@ -9,3 +9,14 @@ export { FeaturesSection } from './FeaturesSection';
 export { ServicesSection } from './ServicesSection';
 export { ProductListSection } from './ProductListSection';
 export { QuickActionsSection } from './QuickActionsSection';
+
+// Export types
+export type {
+    ProductListSectionProps,
+    ServiceBanner,
+    QuickAction,
+    Feature,
+    Category,
+    FeaturedProvider,
+    Slide,
+} from './types/home';

@@ -6,8 +6,10 @@ import { router, useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { Image, ScrollView, StatusBar, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Header } from '../shared';
 import { COLORS } from '../../constants/theme';
 import { getLastAIDesignPhoto } from '../../utils/storage';
+import { styles } from './StyleSheets/AIResultsScreen.styles';
 
 const GENERATED_IMAGE = 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?q=80&w=2000';
 const DETECTED_ITEMS = [
@@ -73,19 +75,19 @@ const AIResultsScreen = () => {
 
     if (isLoading) {
         return (
-            <View className="flex-1 bg-black">
-                <StatusBar barStyle="light-content" />
+            <View style={styles.loadingContainer}>
+                <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
                 {originalPhoto && (
                     <Image
                         source={{ uri: originalPhoto }}
-                        className="absolute inset-0 w-full h-full"
+                        style={styles.loadingImage}
                         resizeMode="cover"
                         blurRadius={30}
                     />
                 )}
-                <View className="absolute inset-0 bg-black/60" />
-                <SafeAreaView className="flex-1 items-center justify-center">
-                    <Text className="text-white text-3xl font-cairo-bold text-center">
+                <View style={styles.loadingOverlay} />
+                <SafeAreaView style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+                    <Text style={styles.loadingText}>
                         {LOADING_TEXTS[loadingStep]}{dots}
                     </Text>
                 </SafeAreaView>
@@ -94,53 +96,62 @@ const AIResultsScreen = () => {
     }
 
     return (
-        <View className="flex-1 bg-white">
-            <StatusBar barStyle="dark-content" />
+        <View style={styles.container}>
+            <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
+            <SafeAreaView edges={['top']} style={{ backgroundColor: '#FFFFFF' }}>
+                <Header
+                    title="نتائج التصميم"
+                    showBack
+                    onBack={handleClose}
+                />
+            </SafeAreaView>
 
             <ScrollView 
-                className="flex-1" 
+                style={{ flex: 1 }}
                 showsVerticalScrollIndicator={false}
                 contentContainerStyle={{ paddingBottom: 20 }}
             >
                 {/* Hero Image */}
-                <View className="relative h-[400px] bg-slate-100">
+                <View style={styles.heroContainer}>
                     <Image
                         source={{ uri: viewMode === 'after' ? GENERATED_IMAGE : (originalPhoto || GENERATED_IMAGE) }}
-                        className="w-full h-full"
+                        style={styles.heroImage}
                         resizeMode="cover"
                     />
                     
                     {/* Simple overlay */}
-                    <View className="absolute inset-0 bg-black/20" />
+                    <View style={styles.heroOverlay} />
 
                     {/* Interactive Pins */}
                     {viewMode === 'after' && DETECTED_ITEMS.map((item) => (
                         <TouchableOpacity
                             key={item.id}
                             onPress={() => setSelectedPin(selectedPin === item.id ? null : item.id)}
-                            className="absolute"
-                            style={{
-                                left: `${item.pinX}%`,
-                                top: `${item.pinY}%`,
-                                transform: [{ translateX: -16 }, { translateY: -16 }]
-                            }}
+                            style={[
+                                styles.pin,
+                                {
+                                    left: `${item.pinX}%`,
+                                    top: `${item.pinY}%`,
+                                    transform: [{ translateX: -16 }, { translateY: -16 }]
+                                }
+                            ]}
                         >
-                            <View className={`w-8 h-8 rounded-full items-center justify-center ${
-                                selectedPin === item.id
-                                    ? 'bg-primary'
-                                    : 'bg-white'
-                            }`}>
-                                <View className={`w-3 h-3 rounded-full ${
-                                    selectedPin === item.id ? 'bg-white' : 'bg-primary'
-                                }`} />
+                            <View style={[
+                                styles.pinButton,
+                                selectedPin === item.id ? styles.pinButtonSelected : styles.pinButtonUnselected
+                            ]}>
+                                <View style={[
+                                    styles.pinDot,
+                                    selectedPin === item.id ? styles.pinDotSelected : styles.pinDotUnselected
+                                ]} />
                             </View>
 
                             {selectedPin === item.id && (
-                                <View className="absolute -top-16 left-1/2 -ml-16 w-32 bg-white rounded-2xl p-3">
-                                    <Text className="text-xs font-cairo-bold text-slate-800 text-center mb-1">
+                                <View style={styles.pinTooltip}>
+                                    <Text style={styles.pinTooltipName}>
                                         {item.name}
                                     </Text>
-                                    <Text className="text-xs font-cairo-bold text-center" style={{ color: COLORS.primary }}>
+                                    <Text style={styles.pinTooltipPrice}>
                                         {item.price} ر.س
                                     </Text>
                                 </View>
@@ -149,39 +160,41 @@ const AIResultsScreen = () => {
                     ))}
 
                     {/* Top Controls */}
-                    <SafeAreaView className="absolute top-0 left-0 right-0" edges={['top']}>
-                        <View className="px-5 py-4 flex-row-reverse justify-between items-center">
+                    <SafeAreaView style={styles.topBar} edges={['top']}>
+                        <View style={styles.topBarContent}>
                             <TouchableOpacity
                                 onPress={handleClose}
-                                className="w-12 h-12 rounded-full bg-black/40 items-center justify-center"
+                                style={styles.topBarButton}
                                 activeOpacity={0.8}
                             >
                                 <Feather name="x" size={20} color="white" />
                             </TouchableOpacity>
 
-                            <View className="flex-row bg-black/40 rounded-2xl p-1">
+                            <View style={styles.viewModeContainer}>
                                 <TouchableOpacity
                                     onPress={() => setViewMode('before')}
-                                    className={`px-5 py-2 rounded-2xl ${
-                                        viewMode === 'before' ? 'bg-white/20' : ''
-                                    }`}
+                                    style={[
+                                        styles.viewModeButton,
+                                        viewMode === 'before' ? styles.viewModeButtonActive : null
+                                    ]}
                                     activeOpacity={0.8}
                                 >
-                                    <Text className="text-white text-sm font-cairo-bold">قبل</Text>
+                                    <Text style={styles.viewModeText}>قبل</Text>
                                 </TouchableOpacity>
                                 <TouchableOpacity
                                     onPress={() => setViewMode('after')}
-                                    className={`px-5 py-2 rounded-2xl ${
-                                        viewMode === 'after' ? 'bg-primary' : ''
-                                    }`}
+                                    style={[
+                                        styles.viewModeButton,
+                                        viewMode === 'after' ? styles.viewModeButtonSelected : null
+                                    ]}
                                     activeOpacity={0.8}
                                 >
-                                    <Text className="text-white text-sm font-cairo-bold">بعد</Text>
+                                    <Text style={styles.viewModeText}>بعد</Text>
                                 </TouchableOpacity>
                             </View>
 
                             <TouchableOpacity 
-                                className="w-12 h-12 rounded-full bg-black/40 items-center justify-center"
+                                style={styles.topBarButton}
                                 activeOpacity={0.8}
                             >
                                 <Feather name="share" size={18} color="white" />
@@ -191,16 +204,16 @@ const AIResultsScreen = () => {
                 </View>
 
                 {/* Content */}
-                <View className="bg-white px-5 pt-6">
-                    <Text className="text-xl font-cairo-bold text-slate-800 text-right mb-2">
+                <View style={styles.contentContainer}>
+                    <Text style={styles.title}>
                         التصميم الجديد
                     </Text>
-                    <Text className="text-sm font-cairo-medium text-slate-500 text-right mb-6">
+                    <Text style={styles.description}>
                         اضغط على النقاط في الصورة لرؤية التفاصيل
                     </Text>
 
                     {/* Products */}
-                    <View className="mb-6">
+                    <View style={styles.itemsContainer}>
                         {DETECTED_ITEMS.map((item, index) => {
                             const finalPrice = item.discount 
                                 ? Math.round(item.price * (1 - item.discount / 100))
@@ -210,35 +223,35 @@ const AIResultsScreen = () => {
                                 <TouchableOpacity
                                     key={item.id}
                                     onPress={() => setSelectedPin(item.id)}
-                                    className={`flex-row-reverse items-center bg-slate-50 rounded-2xl p-4 ${
-                                        index < DETECTED_ITEMS.length - 1 ? 'mb-3' : ''
-                                    }`}
+                                    style={[
+                                        styles.itemCard,
+                                        index < DETECTED_ITEMS.length - 1 && { marginBottom: 12 }
+                                    ]}
                                     activeOpacity={0.8}
                                 >
                                     <Image
                                         source={{ uri: item.image }}
-                                        className="w-20 h-20 rounded-2xl bg-slate-200"
+                                        style={styles.itemImage}
                                         resizeMode="cover"
                                     />
-                                    <View className="flex-1 mr-4">
-                                        <Text className="text-base font-cairo-bold text-slate-800 text-right mb-2">
+                                    <View style={styles.itemDetails}>
+                                        <Text style={styles.itemName}>
                                             {item.name}
                                         </Text>
-                                        <View className="flex-row-reverse items-center gap-3">
+                                        <View style={{ flexDirection: 'row-reverse', alignItems: 'center', gap: 12 }}>
                                             <Text 
-                                                className="text-base font-cairo-bold"
-                                                style={{ color: COLORS.primary }}
+                                                style={[styles.itemPrice, { color: COLORS.primary }]}
                                             >
                                                 {finalPrice} ر.س
                                             </Text>
                                             {item.discount && (
-                                                <Text className="text-xs font-cairo-medium text-slate-400 line-through">
+                                                <Text style={styles.itemDiscount}>
                                                     {item.price}
                                                 </Text>
                                             )}
                                         </View>
                                     </View>
-                                    <View className="w-10 h-10 rounded-full bg-primary/10 items-center justify-center">
+                                    <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: '#f0f9ff', alignItems: 'center', justifyContent: 'center' }}>
                                         <Feather name="plus" size={20} color={COLORS.primary} />
                                     </View>
                                 </TouchableOpacity>
@@ -246,25 +259,37 @@ const AIResultsScreen = () => {
                         })}
                     </View>
 
-                    {/* Actions */}
-                    <TouchableOpacity
-                        className="w-full py-4 rounded-2xl flex-row-reverse justify-center items-center gap-3 bg-primary mb-4"
-                        activeOpacity={0.8}
-                    >
-                        <Text className="text-white text-base font-cairo-bold">
-                            أضف الكل للسلة ({Math.round(totalPrice)} ر.س)
-                        </Text>
-                        <Feather name="shopping-cart" size={20} color="white" />
-                    </TouchableOpacity>
+                    {/* Total */}
+                    <View style={styles.totalContainer}>
+                        <View style={styles.totalRow}>
+                            <Text style={styles.totalLabel}>المجموع</Text>
+                            <Text style={styles.totalValue}>
+                                {Math.round(totalPrice)} ر.س
+                            </Text>
+                        </View>
+                    </View>
 
-                    <TouchableOpacity
-                        onPress={handleTryAgain}
-                        className="w-full py-4 rounded-2xl flex-row-reverse justify-center items-center gap-3 bg-slate-100"
-                        activeOpacity={0.8}
-                    >
-                        <Text className="text-slate-700 text-base font-cairo-bold">جرب صورة أخرى</Text>
-                        <Feather name="refresh-cw" size={20} color={COLORS.text} />
-                    </TouchableOpacity>
+                    {/* Actions */}
+                    <View style={styles.actionsContainer}>
+                        <TouchableOpacity
+                            style={[styles.actionButton, styles.actionButtonPrimary]}
+                            activeOpacity={0.8}
+                        >
+                            <Text style={[styles.actionButtonText, styles.actionButtonTextPrimary]}>
+                                أضف الكل للسلة ({Math.round(totalPrice)} ر.س)
+                            </Text>
+                            <Feather name="shopping-cart" size={20} color="white" />
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                            onPress={handleTryAgain}
+                            style={[styles.actionButton, styles.actionButtonSecondary]}
+                            activeOpacity={0.8}
+                        >
+                            <Text style={[styles.actionButtonText, styles.actionButtonTextSecondary]}>جرب صورة أخرى</Text>
+                            <Feather name="refresh-cw" size={20} color={COLORS.text} />
+                        </TouchableOpacity>
+                    </View>
                 </View>
             </ScrollView>
         </View>

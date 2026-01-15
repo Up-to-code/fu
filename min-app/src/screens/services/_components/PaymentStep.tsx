@@ -5,12 +5,8 @@ import { Feather } from '@expo/vector-icons';
 import React from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 import { COLORS } from '../../../constants/theme';
-
-interface PaymentMethod {
-    id: string;
-    label: string;
-    icon: string;
-}
+import { PaymentMethod, PaymentStepProps } from './types/services';
+import { styles } from './StyleSheets/PaymentStep.styles';
 
 const PAYMENT_METHODS: PaymentMethod[] = [
     { id: 'card', label: 'بطاقة ائتمانية', icon: 'credit-card' },
@@ -18,39 +14,35 @@ const PAYMENT_METHODS: PaymentMethod[] = [
     { id: 'cash', label: 'نقدي', icon: 'dollar-sign' },
 ];
 
-interface PaymentStepProps {
-    selectedMethod: string;
-    onSelectMethod: (id: string) => void;
-    totalAmount?: number;
-}
-
 export const PaymentStep: React.FC<PaymentStepProps> = ({
     selectedMethod,
     onSelectMethod,
     totalAmount,
 }) => {
     return (
-        <View className="px-5 py-5">
-            <Text className="font-cairo-bold text-slate-900 text-lg text-right mb-4">
+        <View style={styles.container}>
+            <Text style={styles.title}>
                 طريقة الدفع
             </Text>
-            <View className="gap-3 mb-6">
+            <View style={styles.methodsContainer}>
                 {PAYMENT_METHODS.map((method) => {
                     const isSelected = selectedMethod === method.id;
                     return (
                         <TouchableOpacity
                             key={method.id}
                             onPress={() => onSelectMethod(method.id)}
-                            className={`flex-row-reverse items-center justify-between p-4 rounded-2xl ${
-                                isSelected ? 'bg-primary/10' : 'bg-slate-50'
-                            }`}
+                            style={[
+                                styles.methodButton,
+                                isSelected ? styles.methodButtonSelected : styles.methodButtonUnselected
+                            ]}
                             activeOpacity={0.8}
                         >
-                            <View className="flex-row-reverse items-center gap-3">
+                            <View style={styles.methodLeft}>
                                 <View
-                                    className={`w-10 h-10 rounded-full items-center justify-center ${
-                                        isSelected ? 'bg-primary' : 'bg-white'
-                                    }`}
+                                    style={[
+                                        styles.iconContainer,
+                                        isSelected ? styles.iconContainerSelected : styles.iconContainerUnselected
+                                    ]}
                                 >
                                     <Feather
                                         name={method.icon as any}
@@ -59,15 +51,16 @@ export const PaymentStep: React.FC<PaymentStepProps> = ({
                                     />
                                 </View>
                                 <Text
-                                    className={`font-cairo-bold text-base ${
-                                        isSelected ? 'text-primary' : 'text-slate-800'
-                                    }`}
+                                    style={[
+                                        styles.methodLabel,
+                                        isSelected ? styles.methodLabelSelected : styles.methodLabelUnselected
+                                    ]}
                                 >
                                     {method.label}
                                 </Text>
                             </View>
                             {isSelected && (
-                                <View className="w-6 h-6 rounded-full bg-primary items-center justify-center">
+                                <View style={styles.checkIcon}>
                                     <Feather name="check" size={14} color="white" />
                                 </View>
                             )}
@@ -76,10 +69,10 @@ export const PaymentStep: React.FC<PaymentStepProps> = ({
                 })}
             </View>
             {totalAmount && (
-                <View className="bg-slate-50 rounded-2xl p-4">
-                    <View className="flex-row-reverse justify-between items-center">
-                        <Text className="font-cairo-bold text-slate-900 text-lg">المجموع</Text>
-                        <Text className="font-cairo-bold text-lg" style={{ color: COLORS.primary }}>
+                <View style={styles.totalContainer}>
+                    <View style={styles.totalRow}>
+                        <Text style={styles.totalLabel}>المجموع</Text>
+                        <Text style={styles.totalAmount}>
                             {totalAmount} ر.س
                         </Text>
                     </View>
