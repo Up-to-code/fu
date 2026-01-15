@@ -61,15 +61,73 @@ target 'fuapp' do
     )
 
     installer.pods_project.targets.each do |target|
-      if target.name == 'RCT-Folly'
-        target.build_configurations.each do |config|
-          config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] ||= ['$(inherited)']
-          config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] << 'FOLLY_NO_CONFIG=1'
-          config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] << 'FOLLY_MOBILE=1'
-          config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] << 'FOLLY_USE_LIBCPP=1'
-          config.build_settings['OTHER_CPLUSPLUSFLAGS'] ||= ['$(inherited)']
+      target.build_configurations.each do |config|
+        # Apply Folly coroutines fix to all targets
+        config.build_settings['OTHER_CPLUSPLUSFLAGS'] ||= ['$(inherited)']
+        if config.build_settings['OTHER_CPLUSPLUSFLAGS'].is_a?(String)
+          config.build_settings['OTHER_CPLUSPLUSFLAGS'] = [config.build_settings['OTHER_CPLUSPLUSFLAGS']]
+        end
+        unless config.build_settings['OTHER_CPLUSPLUSFLAGS'].include?('-DFOLLY_CFG_NO_COROUTINES=1')
           config.build_settings['OTHER_CPLUSPLUSFLAGS'] << '-DFOLLY_CFG_NO_COROUTINES=1'
         end
+        
+        # Additional Folly fixes for RCT-Folly target
+        if target.name == 'RCT-Folly'
+          config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] ||= ['$(inherited)']
+          if config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'].is_a?(String)
+            config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] = [config.build_settings['GCC_PREPROCESSOR_DEFINITIONS']]
+          end
+          config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] << 'FOLLY_NO_CONFIG=1' unless config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'].include?('FOLLY_NO_CONFIG=1')
+          config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] << 'FOLLY_MOBILE=1' unless config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'].include?('FOLLY_MOBILE=1')
+          config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] << 'FOLLY_USE_LIBCPP=1' unless config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'].include?('FOLLY_USE_LIBCPP=1')
+        end
+      end
+    end
+    
+    # Fix react-native-reanimated override error
+    reanimated_header_path = File.join(installer.sandbox.root, 'Headers/Private/RNReanimated/reanimated/Fabric/ReanimatedMountHook.h')
+    if File.exist?(reanimated_header_path)
+      header_content = File.read(reanimated_header_path)
+      # Remove the override keyword from shadowTreeDidMount to fix the compilation error
+      fixed_content = header_content.gsub(
+        /void shadowTreeDidMount\(\s*RootShadowNode::Shared const &rootShadowNode,\s*double mountTime\) noexcept override;/,
+        'void shadowTreeDidMount(RootShadowNode::Shared const &rootShadowNode, double mountTime) noexcept;'
+      )
+      if fixed_content != header_content
+        File.write(reanimated_header_path, fixed_content)
+        puts "✅ Fixed react-native-reanimated ReanimatedMountHook.h"
+      end
+    end
+    
+    # Fix react-native-reanimated LayoutAnimationsUtils.cpp and LayoutAnimationsProxy.cpp parentShadowView errors
+    project_root = File.expand_path('..', installer.sandbox.root)
+    reanimated_path = File.join(project_root, 'node_modules/react-native-reanimated/Common/cpp/reanimated/LayoutAnimations')
+    
+    # Fix LayoutAnimationsUtils.cpp
+    layout_utils_path = File.join(reanimated_path, 'LayoutAnimationsUtils.cpp')
+    if File.exist?(layout_utils_path)
+      cpp_content = File.read(layout_utils_path)
+      # Fix: parentShadowView was removed in RN 0.81.5, check mutation type instead
+      fixed_cpp = cpp_content.gsub(
+        /if \(tag != mutation\.parentShadowView\.tag\)/,
+        'if (mutation.type == ShadowViewMutation::Insert && tag != mutation.newChildShadowView.parentTag) || (mutation.type != ShadowViewMutation::Insert && tag != mutation.oldChildShadowView.parentTag)'
+      )
+      if fixed_cpp != cpp_content
+        File.write(layout_utils_path, fixed_cpp)
+        puts "✅ Fixed react-native-reanimated LayoutAnimationsUtils.cpp"
+      end
+    end
+    
+    # Fix LayoutAnimationsProxy.cpp
+    layout_proxy_path = File.join(reanimated_path, 'LayoutAnimationsProxy.cpp')
+    if File.exist?(layout_proxy_path)
+      proxy_content = File.read(layout_proxy_path)
+      # Fix multiple parentShadowView references
+      fixed_proxy = proxy_content.gsub(/mutation\.parentShadowView\.tag/, 'mutation.newChildShadowView.parentTag')
+      fixed_proxy = fixed_proxy.gsub(/mutation\.parentShadowView/, 'mutation.newChildShadowView')
+      if fixed_proxy != proxy_content
+        File.write(layout_proxy_path, fixed_proxy)
+        puts "✅ Fixed react-native-reanimated LayoutAnimationsProxy.cpp"
       end
     end
     

@@ -9,7 +9,15 @@
     "ios": "expo run:ios",
     "web": "expo start --web",
     "lint": "expo lint",
-    "bundle:analyze": "react-native bundle --platform android --dev false --entry-file index.js --bundle-output /tmp/bundle.js --sourcemap-output /tmp/bundle.map && du -h /tmp/bundle.js"
+    "bundle:analyze": "react-native bundle --platform android --dev false --entry-file index.js --bundle-output /tmp/bundle.js --sourcemap-output /tmp/bundle.map && du -h /tmp/bundle.js",
+    "build:ios": "expo run:ios",
+    "build:android": "expo run:android",
+    "prebuild": "expo prebuild",
+    "prebuild:clean": "expo prebuild --clean",
+    "prebuild:ios": "expo prebuild --platform ios",
+    "prebuild:android": "expo prebuild --platform android",
+    "pod:install": "cd ios && pod install",
+    "pod:update": "cd ios && pod update"
   },
   "dependencies": {
     "@appandflow/expo-camera-characteristics": "^1.2.0",
@@ -49,13 +57,12 @@
     "react": "19.1.0",
     "react-native": "0.81.5",
     "react-native-gesture-handler": "~2.28.0",
-    "react-native-reanimated": "~3.16.1",
+    "react-native-reanimated": "~3.19.0",
     "react-native-safe-area-context": "~5.6.0",
     "react-native-screens": "~4.16.0",
     "react-native-svg": "^15.15.1",
     "react-native-torch": "^1.2.0",
     "react-native-worklets": "^0.7.1",
-    "react-native-worklets-core": "^1.6.2",
     "tailwindcss": "3.4.17"
   },
   "devDependencies": {
