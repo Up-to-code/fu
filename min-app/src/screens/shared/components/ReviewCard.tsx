@@ -22,7 +22,7 @@ const ReviewCardComponent: React.FC<ReviewCardProps> = ({
     
     // Handle different property names between product and service reviews
     const userName = 'userName' in review ? review.userName : review.customerName;
-    const userAvatar = 'userAvatar' in review ? review.userAvatar : review.avatar;
+    const userAvatar = 'userAvatar' in review ? review.userAvatar : ('avatar' in review ? review.avatar : undefined);
 
     return (
         <View style={styles.container}>
@@ -55,7 +55,7 @@ const ReviewCardComponent: React.FC<ReviewCardProps> = ({
                                     name="star"
                                     size={14}
                                     color="#F59E0B"
-                                    fill="#F59E0B"
+                                    fill={undefined}
                                 />
                             );
                         } else if (index === fullStars && hasHalf) {
@@ -65,7 +65,7 @@ const ReviewCardComponent: React.FC<ReviewCardProps> = ({
                                     name="star"
                                     size={14}
                                     color="#F59E0B"
-                                    fill="#F59E0B"
+                                    fill={undefined}
                                 />
                             );
                         } else {
@@ -75,6 +75,7 @@ const ReviewCardComponent: React.FC<ReviewCardProps> = ({
                                     name="star"
                                     size={14}
                                     color="#E5E7EB"
+                                    fill="#F59E0B"
                                 />
                             );
                         }
@@ -100,7 +101,7 @@ export const ReviewCard = React.memo(ReviewCardComponent, (prevProps, nextProps)
     const nextReview = nextProps.review;
     return (
         prevProps.variant === nextProps.variant &&
-        ('id' in prevReview ? prevReview.id : prevReview.reviewId) === ('id' in nextReview ? nextReview.id : nextReview.reviewId) &&
+        prevReview.id === nextReview.id &&
         prevReview.rating === nextReview.rating &&
         prevReview.comment === nextReview.comment &&
         ('userName' in prevReview ? prevReview.userName : prevReview.customerName) === ('userName' in nextReview ? nextReview.userName : nextReview.customerName)

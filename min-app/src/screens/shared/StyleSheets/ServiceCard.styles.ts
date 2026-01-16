@@ -16,7 +16,7 @@ export const getStyles = (isRTL: boolean = true, getSize: GetSizeFunction) => St
         borderColor: '#e2e8f0',
     },
     content: {
-        flexDirection: (isRTL ? 'row-reverse' : 'row') as const,
+        flexDirection: isRTL ? 'row-reverse' : 'row',
         gap: 12,
     },
     avatarContainer: {
@@ -39,7 +39,7 @@ export const getStyles = (isRTL: boolean = true, getSize: GetSizeFunction) => St
         flex: 1,
     },
     header: {
-        flexDirection: (isRTL ? 'row-reverse' : 'row') as const,
+        flexDirection: isRTL ? 'row-reverse' : 'row',
         justifyContent: 'space-between',
         alignItems: 'flex-start',
         marginBottom: 8,

@@ -6,7 +6,12 @@ import { COLORS } from '../../../constants/theme';
 
 type GetSizeFunction = (small: number, medium: number, large: number, tablet: number, desktop: number) => number;
 
-export const getStyles = (isRTL: boolean = true, getSize: GetSizeFunction) => {
+export const getStyles = (
+    isRTL: boolean = true,
+    getSize: GetSizeFunction,
+    fontSize?: { xs: number; sm: number; base: number; lg: number; xl: number; '2xl': number; '3xl': number },
+    iconSize?: { sm: number; md: number; lg: number; xl: number }
+) => {
     return StyleSheet.create({
     container: {
         flex: 1,

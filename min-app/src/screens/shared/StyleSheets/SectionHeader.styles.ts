@@ -6,7 +6,7 @@ import { COLORS } from '../../../constants/theme';
 
 export const getStyles = (isRTL: boolean = true) => StyleSheet.create({
     container: {
-        flexDirection: (isRTL ? 'row-reverse' : 'row') as const,
+        flexDirection: isRTL ? 'row-reverse' : 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
         paddingHorizontal: 20,
@@ -18,7 +18,7 @@ export const getStyles = (isRTL: boolean = true) => StyleSheet.create({
         color: '#1e293b',
     },
     viewAllButton: {
-        flexDirection: (isRTL ? 'row-reverse' : 'row') as const,
+        flexDirection: isRTL ? 'row-reverse' : 'row',
         alignItems: 'center',
         gap: 4,
     },

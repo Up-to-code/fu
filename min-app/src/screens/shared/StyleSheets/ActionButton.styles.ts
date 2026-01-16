@@ -9,7 +9,7 @@ type GetSizeFunction = (small: number, medium: number, large: number, tablet: nu
 export const getStyles = (variant: 'primary' | 'secondary' | 'outline' | 'danger', disabled: boolean, fullWidth: boolean, isRTL: boolean = true, getSize: GetSizeFunction) => {
     const baseButtonStyle = {
         borderRadius: 16,
-        flexDirection: (isRTL ? 'row-reverse' : 'row') as const,
+        flexDirection: isRTL ? 'row-reverse' : 'row',
         justifyContent: 'center' as const,
         alignItems: 'center' as const,
         gap: 12,

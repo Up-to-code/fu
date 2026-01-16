@@ -40,7 +40,7 @@ export default function SearchScreen() {
         <SafeAreaView style={styles.container} edges={['top']}>
             {/* Header with Search Bar and Back Button */}
             <View style={styles.header}>
-                <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+                <TouchableOpacity onPress={() => router.push('/(tabs)/home' as any)} style={styles.backButton}>
                     <Feather name={isRTL ? "arrow-right" : "arrow-left"} size={24} color={COLORS.text} />
                 </TouchableOpacity>
                 <View style={styles.searchContainer}>

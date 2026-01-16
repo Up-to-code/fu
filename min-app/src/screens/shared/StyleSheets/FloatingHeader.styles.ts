@@ -1,16 +1,25 @@
 // File: src/screens/shared/StyleSheets/FloatingHeader.styles.ts
 // Purpose: Styles for FloatingHeader component
 
-import { StyleSheet } from 'react-native';
+import { StyleSheet, ViewStyle } from 'react-native';
 
 type GetSizeFunction = (small: number, medium: number, large: number, tablet: number, desktop: number) => number;
 
-export const getStyles = (transparent: boolean, isRTL: boolean = true, getSize: GetSizeFunction) => {
+type FloatingHeaderStyles = {
+    container: ViewStyle;
+    content: ViewStyle;
+    button: ViewStyle;
+    spacer: ViewStyle;
+    buttonSize: number;
+    iconSize: number;
+};
+
+export const getStyles = (transparent: boolean, isRTL: boolean = true, getSize: GetSizeFunction): FloatingHeaderStyles => {
     const buttonSize = getSize(40, 44, 48, 48, 52);
     const iconSize = getSize(20, 22, 24, 24, 26);
     const bgColor = transparent ? 'rgba(255,255,255,0.9)' : 'white';
 
-    return StyleSheet.create({
+    const styleSheet = StyleSheet.create({
         container: {
             position: 'absolute',
             top: 0,
@@ -19,7 +28,7 @@ export const getStyles = (transparent: boolean, isRTL: boolean = true, getSize: 
             zIndex: 10,
         },
         content: {
-            flexDirection: (isRTL ? 'row-reverse' : 'row') as const,
+            flexDirection: isRTL ? 'row-reverse' : 'row',
             justifyContent: 'space-between',
             alignItems: 'center',
             paddingHorizontal: getSize(16, 20, 24, 32, 40),
@@ -36,7 +45,11 @@ export const getStyles = (transparent: boolean, isRTL: boolean = true, getSize: 
         spacer: {
             width: buttonSize,
         },
+    });
+
+    return {
+        ...styleSheet,
         buttonSize,
         iconSize,
-    });
+    };
 };

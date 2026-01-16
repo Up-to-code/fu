@@ -5,13 +5,13 @@ import { StyleSheet } from 'react-native';
 
 export const getStyles = (isRTL: boolean = true) => StyleSheet.create({
     container: {
-        flexDirection: (isRTL ? 'row-reverse' : 'row') as const,
+        flexDirection: isRTL ? 'row-reverse' : 'row',
         alignItems: 'center',
         gap: 12,
     },
     inputContainer: {
         flex: 1,
-        flexDirection: (isRTL ? 'row-reverse' : 'row') as const,
+        flexDirection: isRTL ? 'row-reverse' : 'row',
         alignItems: 'center',
         backgroundColor: '#f1f5f9',
         borderRadius: 12,
@@ -24,7 +24,7 @@ export const getStyles = (isRTL: boolean = true) => StyleSheet.create({
         fontFamily: 'Cairo_500Medium',
         fontSize: 15,
         color: '#1e293b',
-        textAlign: (isRTL ? 'right' : 'left') as const,
+        textAlign: isRTL ? 'right' : 'left',
     },
     clearButton: {
         padding: 4,

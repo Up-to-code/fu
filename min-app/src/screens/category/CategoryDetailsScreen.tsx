@@ -62,7 +62,7 @@ export default function CategoryDetailsScreen({ id, name, fromSearch, searchQuer
                             name={isFavorite ? 'heart' : 'heart'}
                             size={iconSize.md}
                             color={isFavorite ? COLORS.primary : COLORS.text}
-                            fill={isFavorite ? COLORS.primary : 'none'}
+                            fill={isFavorite ? undefined : COLORS.primary}
                         />
                     </TouchableOpacity>
                 }

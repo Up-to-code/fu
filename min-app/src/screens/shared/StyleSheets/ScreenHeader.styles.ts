@@ -17,6 +17,6 @@ export const getStyles = (isRTL: boolean = true) => StyleSheet.create({
         fontFamily: 'Cairo_500Medium',
         fontSize: 13,
         color: '#64748b',
-        textAlign: (isRTL ? 'right' : 'left') as const,
+        textAlign: isRTL ? 'right' : 'left',
     },
 });

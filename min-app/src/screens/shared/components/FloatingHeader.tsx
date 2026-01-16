@@ -60,7 +60,7 @@ const FloatingHeaderComponent: React.FC<FloatingHeaderProps> = ({
                             name="heart"
                             size={styles.iconSize}
                             color={isFavorite ? '#EF4444' : COLORS.text}
-                            fill={isFavorite ? '#EF4444' : 'none'}
+                            fill={isFavorite ? undefined : '#EF4444'}
                         />
                     </TouchableOpacity>
                 ) : (

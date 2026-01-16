@@ -13,7 +13,7 @@ export const getStyles = (isRTL: boolean = true, getSize: GetSizeFunction) => St
         padding: getSize(16, 18, 20, 20, 24),
     },
     row: {
-        flexDirection: (isRTL ? 'row-reverse' : 'row') as const,
+        flexDirection: isRTL ? 'row-reverse' : 'row',
         justifyContent: 'space-between',
         paddingVertical: 8,
     },
@@ -40,7 +40,7 @@ export const getStyles = (isRTL: boolean = true, getSize: GetSizeFunction) => St
         color: '#10B981',
     },
     totalRow: {
-        flexDirection: (isRTL ? 'row-reverse' : 'row') as const,
+        flexDirection: isRTL ? 'row-reverse' : 'row',
         justifyContent: 'space-between',
         paddingTop: getSize(16, 18, 20, 20, 24),
         marginTop: 8,

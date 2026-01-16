@@ -161,7 +161,7 @@ export default function SearchResultsScreen() {
         <SafeAreaView style={styles.container} edges={['top']}>
             {/* Header with Search Bar and Filter Button */}
             <View style={styles.header}>
-                <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+                <TouchableOpacity onPress={() => router.push('/search' as any)} style={styles.backButton}>
                     <Feather name={isRTL ? "arrow-right" : "arrow-left"} size={24} color={COLORS.text} />
                 </TouchableOpacity>
                 <View style={styles.searchContainer}>

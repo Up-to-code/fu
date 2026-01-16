@@ -19,7 +19,7 @@ export const getStyles = (size: 'sm' | 'md' | 'lg', isRTL: boolean = true, getSi
 
     return StyleSheet.create({
         container: {
-            flexDirection: (isRTL ? 'row-reverse' : 'row') as const,
+            flexDirection: isRTL ? 'row-reverse' : 'row',
             alignItems: 'center',
             gap: 4,
         },

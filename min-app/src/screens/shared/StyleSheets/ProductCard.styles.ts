@@ -63,16 +63,16 @@ export const getStyles = (isRTL: boolean = true, getSize: GetSizeFunction) => St
         color: '#1e293b',
         fontFamily: 'Cairo_700Bold',
         fontSize: getSize(12, 14, 16, 16, 18),
-        textAlign: (isRTL ? 'right' : 'left') as const,
+        textAlign: isRTL ? 'right' : 'left',
         lineHeight: getSize(18, 20, 22, 22, 24),
     },
     priceRow: {
-        flexDirection: (isRTL ? 'row-reverse' : 'row') as const,
+        flexDirection: isRTL ? 'row-reverse' : 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
     },
     priceContainer: {
-        flexDirection: (isRTL ? 'row-reverse' : 'row') as const,
+        flexDirection: isRTL ? 'row-reverse' : 'row',
         alignItems: 'baseline',
         gap: 4,
     },
@@ -132,7 +132,7 @@ export const getStyles = (isRTL: boolean = true, getSize: GetSizeFunction) => St
         color: '#1e293b',
         fontFamily: 'Cairo_500Medium',
         fontSize: getSize(11, 12, 13, 13, 15),
-        textAlign: (isRTL ? 'right' : 'left') as const,
+        textAlign: isRTL ? 'right' : 'left',
         lineHeight: getSize(18, 19, 20, 20, 22),
     },
     horizontalPrice: {

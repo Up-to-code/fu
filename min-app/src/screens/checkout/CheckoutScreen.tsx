@@ -6,10 +6,11 @@ import { useRouter } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
 import { Alert, Animated, Image, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { SwipeToConfirm } from '../shared';
+import { SwipeToConfirm, AddressSelector } from '../shared';
 import { Header } from '../shared';
 import { useCheckout, usePaymentMethods } from './_hooks';
 import { useCart } from '../cart/_hooks';
+import { useAddresses, Address } from '../account/_hooks';
 import { COLORS } from '../../constants/theme';
 import { useRTL } from '../../hooks/useRTL';
 import { useResponsive } from '../../hooks/useResponsive';
@@ -28,30 +29,23 @@ const DELIVERY_TIMES = [
     { id: '4', label: 'بعد غد', time: '10:00 ص - 2:00 م', available: false },
 ];
 
-// Mock addresses
-const ADDRESSES = [
-    { id: '1', name: 'المنزل', address: 'شارع الملك فهد، حي النخيل، الرياض', phone: '0501234567', isDefault: true },
-    { id: '2', name: 'العمل', address: 'برج المملكة، الطابق 15، الرياض', phone: '0509876543', isDefault: false },
-];
-
 export default function CheckoutScreen() {
     const router = useRouter();
     const { isRTL } = useRTL();
-    const { getSize } = useResponsive();
-    const styles = getStyles(isRTL, getSize);
+    const { getSize, fontSize, iconSize } = useResponsive();
+    const styles = getStyles(isRTL, getSize, fontSize, iconSize);
     const { cartItems, cartTotal } = useCart(CART_ITEMS);
     const { formState, handleChange, handleSubmit, isLoading, errors } = useCheckout();
     const { paymentMethods, selectedMethod, setSelectedMethod } = usePaymentMethods();
+    const { addresses, isLoading: addressesLoading } = useAddresses();
     const [selectedTime, setSelectedTime] = useState<string>('1');
-    const [selectedAddress, setSelectedAddress] = useState<string>('1');
-    const [showAddressMenu, setShowAddressMenu] = useState(false);
+    const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
     const [promoCode, setPromoCode] = useState('');
     const [promoApplied, setPromoApplied] = useState(false);
 
     // Animations
     const fadeAnim = useRef(new Animated.Value(0)).current;
     const slideAnim = useRef(new Animated.Value(30)).current;
-    const addressMenuAnim = useRef(new Animated.Value(0)).current;
 
     useEffect(() => {
         Animated.parallel([
@@ -68,16 +62,10 @@ export default function CheckoutScreen() {
         ]).start();
     }, []);
 
-    // Toggle address menu animation
-    useEffect(() => {
-        Animated.timing(addressMenuAnim, {
-            toValue: showAddressMenu ? 1 : 0,
-            duration: 200,
-            useNativeDriver: true,
-        }).start();
-    }, [showAddressMenu]);
-
-    const currentAddress = ADDRESSES.find(a => a.id === selectedAddress) || ADDRESSES[0];
+    const handleSelectAddress = (address: Address) => {
+        setSelectedAddressId(address.id);
+        handleChange('shippingAddress', `${address.street}, ${address.city}`);
+    };
 
     // Calculate totals
     const subtotal = CART_ITEMS.reduce((sum, item) => {
@@ -123,105 +111,14 @@ export default function CheckoutScreen() {
                             }
                         ]}
                     >
-                        <View style={styles.sectionHeader}>
-                            <Text style={styles.sectionTitle}>
-                                عنوان التوصيل
-                            </Text>
-                            <TouchableOpacity 
-                                onPress={() => setShowAddressMenu(!showAddressMenu)}
-                                style={styles.changeButton}
-                            >
-                                <Text style={styles.changeText}>
-                                    تغيير
-                                </Text>
-                                <Feather name="chevron-down" size={16} color={COLORS.primary} />
-                            </TouchableOpacity>
-                        </View>
-                        
-                        {/* Current Address Card */}
-                        <View style={styles.addressCard}>
-                            <View style={styles.addressCardContent}>
-                                <View style={styles.addressIcon}>
-                                    <Feather name="map-pin" size={20} color={COLORS.primary} />
-                                </View>
-                                <View style={styles.addressDetails}>
-                                    <Text style={styles.addressName}>
-                                        {currentAddress.name}
-                                    </Text>
-                                    <Text style={styles.addressText}>
-                                        {currentAddress.address}
-                                    </Text>
-                                    <Text style={styles.addressPhone}>
-                                        {currentAddress.phone}
-                                    </Text>
-                                </View>
-                            </View>
-                        </View>
-
-                        {/* Address Selection Menu */}
-                        {showAddressMenu && (
-                            <Animated.View 
-                                style={[
-                                    styles.addressMenu,
-                                    {
-                                        opacity: addressMenuAnim,
-                                        transform: [{
-                                            translateY: addressMenuAnim.interpolate({
-                                                inputRange: [0, 1],
-                                                outputRange: [-10, 0],
-                                            })
-                                        }]
-                                    }
-                                ]}
-                            >
-                                {ADDRESSES.map((addr, index) => (
-                                    <TouchableOpacity
-                                        key={addr.id}
-                                        onPress={() => {
-                                            setSelectedAddress(addr.id);
-                                            setShowAddressMenu(false);
-                                        }}
-                                        style={[
-                                            styles.addressMenuItem,
-                                            index < ADDRESSES.length - 1 && styles.addressMenuItemBorder
-                                        ]}
-                                    >
-                                        <View style={[
-                                            styles.addressRadio,
-                                            selectedAddress === addr.id ? styles.addressRadioSelected : styles.addressRadioUnselected
-                                        ]}>
-                                            {selectedAddress === addr.id && (
-                                                <View style={styles.addressRadioDot} />
-                                            )}
-                                        </View>
-                                        <View style={styles.addressMenuItemDetails}>
-                                            <Text style={styles.addressMenuItemName}>
-                                                {addr.name}
-                                            </Text>
-                                            <Text style={styles.addressMenuItemText}>
-                                                {addr.address}
-                                            </Text>
-                                        </View>
-                                    </TouchableOpacity>
-                                ))}
-                                
-                                {/* Add New Address */}
-                                <TouchableOpacity
-                                    onPress={() => {
-                                        setShowAddressMenu(false);
-                                        router.push('/account/addresses' as any);
-                                    }}
-                                    style={styles.addAddressButton}
-                                >
-                                    <View style={styles.addAddressIcon}>
-                                        <Feather name="plus" size={14} color={COLORS.primary} />
-                                    </View>
-                                    <Text style={styles.addAddressText}>
-                                        إضافة عنوان جديد
-                                    </Text>
-                                </TouchableOpacity>
-                            </Animated.View>
-                        )}
+                        <AddressSelector
+                            addresses={addresses}
+                            selectedAddressId={selectedAddressId}
+                            onSelectAddress={handleSelectAddress}
+                            isLoading={addressesLoading}
+                            title="عنوان التوصيل"
+                            showChangeButton={true}
+                        />
                     </Animated.View>
 
                     <View style={styles.divider} />

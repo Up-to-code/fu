@@ -58,7 +58,7 @@ const ServiceCardComponent: React.FC<ServiceCardProps> = ({
                                     name="heart"
                                     size={18}
                                     color={isFavorite ? '#EF4444' : '#94a3b8'}
-                                    fill={isFavorite ? '#EF4444' : 'none'}
+                                    fill={isFavorite ? undefined : '#EF4444'}
                                 />
                             </TouchableOpacity>
                         )}

@@ -35,3 +35,4 @@ export { BottomBar } from './BottomBar';
 export { FloatingHeader } from './FloatingHeader';
 export { PriceTable } from './PriceTable';
 export { StarRating } from './StarRating';
+export { AddressSelector } from './AddressSelector';

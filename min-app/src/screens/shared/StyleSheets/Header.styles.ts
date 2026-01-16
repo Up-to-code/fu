@@ -8,7 +8,7 @@ type GetSizeFunction = (small: number, medium: number, large: number, tablet: nu
 
 export const getStyles = (isRTL: boolean = true, getSize: GetSizeFunction) => StyleSheet.create({
     header: {
-        flexDirection: (isRTL ? 'row-reverse' : 'row') as const,
+        flexDirection: isRTL ? 'row-reverse' : 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
         paddingHorizontal: getSize(12, 16, 20, 24, 32),
@@ -28,7 +28,7 @@ export const getStyles = (isRTL: boolean = true, getSize: GetSizeFunction) => St
     backButtonText: {
         fontFamily: 'Cairo_600SemiBold',
         color: COLORS.text,
-        textAlign: (isRTL ? 'right' : 'left') as const,
+        textAlign: isRTL ? 'right' : 'left',
         fontSize: getSize(14, 15, 16, 16, 18),
     },
     headerTitle: {

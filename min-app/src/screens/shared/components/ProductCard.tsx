@@ -50,7 +50,7 @@ const ProductCardComponent: React.FC<ProductCardProps> = ({
                                 name="heart"
                                 size={iconSize.sm}
                                 color={product.isFavorite ? '#EF4444' : '#94a3b8'}
-                                fill={product.isFavorite ? '#EF4444' : 'none'}
+                                fill={product.isFavorite ? undefined : '#EF4444'}
                             />
                         </TouchableOpacity>
                     )}
@@ -116,7 +116,7 @@ const ProductCardComponent: React.FC<ProductCardProps> = ({
                             name="heart"
                             size={isTablet ? 18 : 16}
                             color={product.isFavorite ? '#EF4444' : '#94a3b8'}
-                            fill={product.isFavorite ? '#EF4444' : 'none'}
+                            fill={product.isFavorite ? undefined : '#EF4444'}
                         />
                     </TouchableOpacity>
                 )}

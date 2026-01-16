@@ -16,7 +16,7 @@ export const getStyles = (isRTL: boolean = true, getSize: GetSizeFunction) => St
         borderColor: '#e2e8f0',
     },
     header: {
-        flexDirection: (isRTL ? 'row-reverse' : 'row') as const,
+        flexDirection: isRTL ? 'row-reverse' : 'row',
         justifyContent: 'space-between',
         alignItems: 'flex-start',
         marginBottom: 12,
@@ -72,12 +72,12 @@ export const getStyles = (isRTL: boolean = true, getSize: GetSizeFunction) => St
         color: 'white',
     },
     footer: {
-        flexDirection: (isRTL ? 'row-reverse' : 'row') as const,
+        flexDirection: isRTL ? 'row-reverse' : 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
     },
     totalSection: {
-        flexDirection: (isRTL ? 'row-reverse' : 'row') as const,
+        flexDirection: isRTL ? 'row-reverse' : 'row',
         alignItems: 'baseline',
         gap: 8,
     },

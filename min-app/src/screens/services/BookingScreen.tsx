@@ -3,15 +3,20 @@
 
 import { Feather } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { ScrollView, Text, TextInput, TouchableOpacity, View, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Header, FormInput, PrimaryButton, SwipeToConfirm } from '../shared';
+import { Header, FormInput, PrimaryButton, SwipeToConfirm, AddressSelector } from '../shared';
 import { useServiceBooking } from './_hooks';
 import { COLORS } from '../../constants/theme';
+import { useAuth } from '../../hooks/useAuth';
+import { useRTL } from '../../hooks/useRTL';
 import { useResponsive } from '../../hooks/useResponsive';
+import { useUserProfile } from '../../hooks/useUserProfile';
+import { useAddresses, Address } from '../account/_hooks';
 import { ServiceBookingStatus } from '../../types/orders';
 import { BookingLocation } from './types/services';
+import { getStyles } from './StyleSheets/BookingScreen.styles';
 
 // Mock provider data (in real app, fetch by ID)
 const PROVIDERS = {
@@ -44,18 +49,22 @@ const PROVIDERS = {
 
 export default function BookingScreen() {
     const { id } = useLocalSearchParams();
+    const { isRTL } = useRTL();
     const { getSize, fontSize, iconSize } = useResponsive();
-    const styles = getStyles(getSize, fontSize, iconSize);
+    const styles = getStyles(isRTL, getSize, fontSize, iconSize);
     const provider = PROVIDERS[id as keyof typeof PROVIDERS];
+    const { user } = useAuth();
+    const { profile, phone: userPhone } = useUserProfile(user?.id || null);
+    const { addresses, isLoading: addressesLoading } = useAddresses();
 
     // If provider not found, show error
     if (!provider) {
         return (
             <View style={styles.container}>
-                <SafeAreaView style={styles.safeArea}>
+                <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
                     <View style={styles.header}>
                         <TouchableOpacity onPress={() => router.back()} style={{ width: 40, height: 40, alignItems: 'center', justifyContent: 'center' }}>
-                            <Feather name="arrow-right" size={24} color="#333" />
+                            <Feather name={isRTL ? "arrow-right" : "arrow-left"} size={24} color="#333" />
                         </TouchableOpacity>
                         <Text style={styles.headerTitle}>حجز خدمة</Text>
                         <View style={{ width: 24 }} />
@@ -82,8 +91,32 @@ export default function BookingScreen() {
     const [selectedTime, setSelectedTime] = useState<string>('');
     const [location, setLocation] = useState<BookingLocation>('home');
     const [address, setAddress] = useState('');
+    const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
+    const [useManualAddress, setUseManualAddress] = useState(false);
     const [phone, setPhone] = useState('');
     const [description, setDescription] = useState('');
+
+    // Pre-fill phone from user profile
+    useEffect(() => {
+        if (userPhone && !phone) {
+            setPhone(userPhone);
+        }
+    }, [userPhone]);
+
+    // Auto-select default address if available, otherwise use manual input
+    useEffect(() => {
+        if (addresses.length > 0 && !selectedAddressId && !useManualAddress) {
+            const defaultAddress = addresses.find(addr => addr.isDefault) || addresses[0];
+            if (defaultAddress) {
+                setSelectedAddressId(defaultAddress.id);
+                setAddress(`${defaultAddress.street}, ${defaultAddress.city}`);
+                setUseManualAddress(false);
+            }
+        } else if (addresses.length === 0 && !useManualAddress) {
+            // If no addresses, default to manual input
+            setUseManualAddress(true);
+        }
+    }, [addresses, selectedAddressId, useManualAddress]);
 
     // Generate date options (next 14 days)
     const dates = useMemo(() => {
@@ -127,11 +160,15 @@ export default function BookingScreen() {
     };
 
     const isFormValid = () => {
+        const hasAddress = location !== 'home' || 
+            (useManualAddress && address.trim()) || 
+            (!useManualAddress && selectedAddressId !== null);
+        
         return (
             selectedServices.length > 0 &&
             selectedDate &&
             selectedTime &&
-            (location !== 'home' || address.trim()) &&
+            hasAddress &&
             phone.trim()
         );
     };
@@ -141,6 +178,19 @@ export default function BookingScreen() {
             Alert.alert('تنبيه', 'يرجى ملء جميع الحقول المطلوبة');
             return;
         }
+
+        // Get selected address details if available
+        const selectedAddress = selectedAddressId 
+            ? addresses.find(addr => addr.id === selectedAddressId)
+            : null;
+        
+        const finalAddress = location === 'home' 
+            ? (useManualAddress 
+                ? address 
+                : selectedAddress 
+                    ? `${selectedAddress.street}, ${selectedAddress.city}`
+                    : '')
+            : '';
 
         // In real app, this would create a booking with status: ServiceBookingStatus.PENDING
         const booking = {
@@ -152,7 +202,8 @@ export default function BookingScreen() {
             date: selectedDate,
             time: selectedTime,
             location,
-            address: location === 'home' ? address : '',
+            address: finalAddress,
+            addressId: selectedAddressId,
             phone,
             description,
             estimatedPrice: calculateTotal(),
@@ -183,11 +234,11 @@ export default function BookingScreen() {
 
     return (
         <View style={styles.container}>
-            <SafeAreaView style={styles.safeArea} edges={['top']}>
+            <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right']}>
                 {/* Header */}
                 <View style={styles.header}>
                     <TouchableOpacity onPress={() => router.back()}>
-                        <Feather name="arrow-right" size={24} color={COLORS.text} />
+                        <Feather name={isRTL ? "arrow-right" : "arrow-left"} size={24} color={COLORS.text} />
                     </TouchableOpacity>
                     <Text style={styles.headerTitle}>حجز خدمة</Text>
                     <View style={{ width: 24 }} />
@@ -354,29 +405,62 @@ export default function BookingScreen() {
                     {/* Address (if home service) */}
                     {location === 'home' && (
                         <View style={styles.section}>
-                            <Text style={styles.sectionTitle}>العنوان *</Text>
-                            <TextInput
-                                style={styles.input}
-                                placeholder="أدخل العنوان الكامل"
-                                value={address}
-                                onChangeText={setAddress}
-                                multiline
-                                textAlign="right"
+                            <AddressSelector
+                                addresses={addresses}
+                                selectedAddressId={selectedAddressId}
+                                onSelectAddress={(addr) => {
+                                    setSelectedAddressId(addr.id);
+                                    setAddress(`${addr.street}, ${addr.city}`);
+                                    setUseManualAddress(false);
+                                }}
+                                useManualAddress={useManualAddress}
+                                onToggleManualAddress={() => {
+                                    setUseManualAddress(!useManualAddress);
+                                    if (!useManualAddress) {
+                                        setSelectedAddressId(null);
+                                        setAddress('');
+                                    }
+                                }}
+                                manualAddress={address}
+                                onManualAddressChange={setAddress}
+                                isLoading={addressesLoading}
+                                showManualToggle={true}
+                                title="العنوان *"
+                                showChangeButton={false}
                             />
                         </View>
                     )}
 
                     {/* Phone */}
                     <View style={styles.section}>
-                        <Text style={styles.sectionTitle}>رقم الجوال *</Text>
+                        <View style={styles.fieldHeader}>
+                            <Text style={styles.sectionTitle}>رقم الجوال *</Text>
+                            {!userPhone && (
+                                <TouchableOpacity
+                                    onPress={() => router.push('/account/edit' as any)}
+                                    style={styles.addNewButton}
+                                >
+                                    <Feather name="plus" size={iconSize.sm} color={COLORS.primary} />
+                                    <Text style={styles.addNewButtonText}>إضافة جديد</Text>
+                                </TouchableOpacity>
+                            )}
+                        </View>
                         <TextInput
                             style={styles.input}
                             placeholder="05XXXXXXXX"
                             value={phone}
                             onChangeText={setPhone}
                             keyboardType="phone-pad"
-                            textAlign="right"
+                            textAlign={isRTL ? 'right' : 'left'}
                         />
+                        {userPhone && phone !== userPhone && (
+                            <TouchableOpacity
+                                onPress={() => setPhone(userPhone)}
+                                style={styles.useSavedButton}
+                            >
+                                <Text style={styles.useSavedButtonText}>استخدام الرقم المحفوظ: {userPhone}</Text>
+                            </TouchableOpacity>
+                        )}
                     </View>
 
                     {/* Description */}
@@ -424,235 +508,3 @@ export default function BookingScreen() {
         </View>
     );
 }
-
-const getStyles = (
-    getSize: (small: number, medium: number, large: number, tablet: number, desktop: number) => number,
-    fontSize: { xs: number; sm: number; base: number; lg: number; xl: number; '2xl': number; '3xl': number },
-    iconSize: { sm: number; md: number; lg: number; xl: number }
-) => {
-    const { StyleSheet } = require('react-native');
-    return StyleSheet.create({
-        container: { flex: 1, backgroundColor: '#f8fafc' },
-        safeArea: { flex: 1 },
-        header: {
-            flexDirection: 'row-reverse',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            paddingHorizontal: getSize(14, 15, 16, 20, 24),
-            paddingVertical: getSize(10, 11, 12, 14, 16),
-            backgroundColor: 'white',
-            borderBottomWidth: 1,
-            borderBottomColor: '#f1f5f9',
-        },
-        headerTitle: { fontFamily: 'Cairo_700Bold', fontSize: fontSize.base, color: '#1e293b' },
-        scrollView: { flex: 1 },
-        scrollContent: { padding: getSize(14, 15, 16, 20, 24), paddingBottom: getSize(18, 19, 20, 24, 28) },
-        section: {
-            backgroundColor: 'white',
-            borderRadius: getSize(10, 11, 12, 14, 16),
-            padding: getSize(14, 15, 16, 20, 24),
-            marginBottom: getSize(10, 11, 12, 14, 16),
-            borderWidth: 1,
-            borderColor: '#f1f5f9',
-        },
-        sectionTitle: {
-            fontFamily: 'Cairo_700Bold',
-            fontSize: fontSize.sm,
-            color: '#1e293b',
-            textAlign: 'right',
-            marginBottom: getSize(10, 11, 12, 14, 16),
-        },
-        providerName: {
-            fontFamily: 'Cairo_700Bold',
-            fontSize: fontSize.base,
-            color: '#1e293b',
-            textAlign: 'right',
-            marginBottom: 4,
-        },
-        providerCategory: {
-            fontFamily: 'Cairo_500Medium',
-            fontSize: fontSize.xs,
-            color: '#64748b',
-            textAlign: 'right',
-        },
-        serviceItem: {
-            flexDirection: 'row-reverse',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            paddingVertical: getSize(10, 11, 12, 14, 16),
-            paddingHorizontal: getSize(10, 11, 12, 14, 16),
-            borderRadius: getSize(6, 7, 8, 10, 12),
-            borderWidth: 1,
-            borderColor: '#e2e8f0',
-            marginBottom: getSize(6, 7, 8, 10, 12),
-        },
-        serviceItemSelected: {
-            borderColor: COLORS.primary,
-            backgroundColor: `${COLORS.primary}08`,
-        },
-        serviceInfo: { flex: 1 },
-        serviceLabel: {
-            fontFamily: 'Cairo_600SemiBold',
-            fontSize: fontSize.sm,
-            color: '#1e293b',
-            textAlign: 'right',
-            marginBottom: 4,
-        },
-        serviceLabelSelected: { color: COLORS.primary },
-        servicePrice: {
-            fontFamily: 'Cairo_500Medium',
-            fontSize: fontSize.xs,
-            color: '#64748b',
-            textAlign: 'right',
-        },
-        checkbox: {
-            width: getSize(22, 23, 24, 28, 32),
-            height: getSize(22, 23, 24, 28, 32),
-            borderRadius: getSize(5, 5.5, 6, 7, 8),
-            borderWidth: 2,
-            borderColor: '#e2e8f0',
-            alignItems: 'center',
-            justifyContent: 'center',
-        },
-        checkboxSelected: {
-            borderColor: COLORS.primary,
-            backgroundColor: COLORS.primary,
-        },
-        datesContainer: {
-            flexDirection: 'row-reverse',
-            gap: getSize(6, 7, 8, 10, 12),
-        },
-        dateCard: {
-            width: getSize(66, 68, 70, 80, 90),
-            padding: getSize(10, 11, 12, 14, 16),
-            borderRadius: getSize(10, 11, 12, 14, 16),
-            borderWidth: 1,
-            borderColor: '#e2e8f0',
-            alignItems: 'center',
-        },
-        dateCardSelected: {
-            borderColor: COLORS.primary,
-            backgroundColor: COLORS.primary,
-        },
-        dateDay: {
-            fontFamily: 'Cairo_500Medium',
-            fontSize: fontSize.xs,
-            color: '#64748b',
-            marginBottom: 4,
-        },
-        dateNumber: {
-            fontFamily: 'Cairo_700Bold',
-            fontSize: fontSize.base,
-            color: '#1e293b',
-            marginBottom: 2,
-        },
-        dateMonth: {
-            fontFamily: 'Cairo_500Medium',
-            fontSize: fontSize.xs,
-            color: '#64748b',
-        },
-        dateTextSelected: { color: 'white' },
-        timeSlotsGrid: {
-            flexDirection: 'row-reverse',
-            flexWrap: 'wrap',
-            gap: getSize(6, 7, 8, 10, 12),
-        },
-        timeSlot: {
-            width: '48%',
-            paddingVertical: getSize(10, 11, 12, 14, 16),
-            borderRadius: getSize(6, 7, 8, 10, 12),
-            borderWidth: 1,
-            borderColor: '#e2e8f0',
-            alignItems: 'center',
-        },
-        timeSlotSelected: {
-            borderColor: COLORS.primary,
-            backgroundColor: COLORS.primary,
-        },
-        timeSlotText: {
-            fontFamily: 'Cairo_600SemiBold',
-            fontSize: fontSize.sm,
-            color: '#1e293b',
-        },
-        timeSlotTextSelected: { color: 'white' },
-        locationOptions: {
-            flexDirection: 'row-reverse',
-            gap: getSize(6, 7, 8, 10, 12),
-        },
-        locationOption: {
-            flex: 1,
-            flexDirection: 'row-reverse',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: getSize(6, 7, 8, 10, 12),
-            paddingVertical: getSize(10, 11, 12, 14, 16),
-            borderRadius: getSize(6, 7, 8, 10, 12),
-            borderWidth: 1,
-            borderColor: '#e2e8f0',
-        },
-        locationOptionSelected: {
-            borderColor: COLORS.primary,
-            backgroundColor: `${COLORS.primary}08`,
-        },
-        locationOptionText: {
-            fontFamily: 'Cairo_600SemiBold',
-            fontSize: fontSize.sm,
-            color: '#64748b',
-        },
-        locationOptionTextSelected: { color: COLORS.primary },
-        input: {
-            backgroundColor: '#f8fafc',
-            borderWidth: 1,
-            borderColor: '#e2e8f0',
-            borderRadius: getSize(6, 7, 8, 10, 12),
-            paddingHorizontal: getSize(10, 11, 12, 14, 16),
-            paddingVertical: getSize(10, 11, 12, 14, 16),
-            fontFamily: 'Cairo_500Medium',
-            fontSize: fontSize.sm,
-            color: '#1e293b',
-        },
-        textArea: {
-            minHeight: getSize(90, 95, 100, 120, 140),
-            textAlignVertical: 'top',
-        },
-        summarySection: {
-            backgroundColor: '#f8fafc',
-            borderRadius: getSize(10, 11, 12, 14, 16),
-            padding: getSize(14, 15, 16, 20, 24),
-            borderWidth: 1,
-            borderColor: '#e2e8f0',
-            marginBottom: getSize(10, 11, 12, 14, 16),
-        },
-        summaryRow: {
-            flexDirection: 'row-reverse',
-            justifyContent: 'space-between',
-            marginBottom: getSize(6, 7, 8, 10, 12),
-        },
-        summaryLabel: {
-            fontFamily: 'Cairo_600SemiBold',
-            fontSize: fontSize.sm,
-            color: '#64748b',
-        },
-        summaryValue: {
-            fontFamily: 'Cairo_700Bold',
-            fontSize: fontSize.base,
-            color: COLORS.primary,
-        },
-        summaryNote: {
-            fontFamily: 'Cairo_500Medium',
-            fontSize: fontSize.xs,
-            color: '#94a3b8',
-            textAlign: 'right',
-            lineHeight: getSize(14, 15, 16, 18, 20),
-        },
-        bottomContainer: {
-            backgroundColor: 'white',
-            borderTopWidth: 1,
-            borderTopColor: '#f1f5f9',
-        },
-        bottomContent: {
-            paddingHorizontal: getSize(18, 19, 20, 24, 28),
-            paddingVertical: getSize(14, 15, 16, 20, 24),
-        },
-    });
-};
