@@ -6,7 +6,9 @@ import { ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-nativ
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Header, FilterChip, PrimaryButton } from '../shared';
 import { COLORS } from '../../constants/theme';
-import { styles } from './StyleSheets/FilterScreen.styles';
+import { useRTL } from '../../hooks/useRTL';
+import { useResponsive } from '../../hooks/useResponsive';
+import { getStyles } from './StyleSheets/FilterScreen.styles';
 
 const TYPES = ['الكل', 'كنب', 'طاولات', 'كراسي', 'أسرة', 'إضاءة', 'ديكور'];
 const BRANDS = ['ايكيا', 'هوم سنتر', 'بوتري بارن', 'ويست إلم', 'زارا هوم'];
@@ -14,6 +16,9 @@ const SORT_OPTIONS = ['الأحدث', 'السعر: الأقل', 'السعر: ا�
 
 export default function FilterScreen() {
     const router = useRouter();
+    const { isRTL, textAlign } = useRTL();
+    const { getSize } = useResponsive();
+    const styles = getStyles(isRTL, getSize);
     const [minPrice, setMinPrice] = useState('');
     const [maxPrice, setMaxPrice] = useState('');
     const [selectedType, setSelectedType] = useState('الكل');

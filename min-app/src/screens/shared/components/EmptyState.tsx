@@ -3,13 +3,10 @@
 
 import { Feather } from '@expo/vector-icons';
 import React from 'react';
-import { Dimensions, Text, TouchableOpacity, View } from 'react-native';
-import { getResponsiveValue } from '../../../utils/responsive';
+import { Text, TouchableOpacity, View } from 'react-native';
+import { useResponsive } from '../../../hooks/useResponsive';
 import { EmptyStateProps } from '../types/ui';
-import { styles } from '../StyleSheets/EmptyState.styles';
-
-const { width } = Dimensions.get('window');
-const isTablet = width >= 768;
+import { getStyles } from '../StyleSheets/EmptyState.styles';
 
 const EmptyStateComponent: React.FC<EmptyStateProps> = ({
     icon,
@@ -19,10 +16,13 @@ const EmptyStateComponent: React.FC<EmptyStateProps> = ({
     onAction,
     iconColor = '#CBD5E1',
 }) => {
+    const { getSize, iconSize } = useResponsive();
+    const styles = getStyles(getSize);
+    
     return (
         <View style={styles.container}>
             <View style={styles.iconContainer}>
-                <Feather name={icon} size={getResponsiveValue(40, 56)} color={iconColor} />
+                <Feather name={icon} size={iconSize.xl} color={iconColor} />
             </View>
 
             <Text style={styles.title}>{title}</Text>

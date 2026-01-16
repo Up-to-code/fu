@@ -2,21 +2,20 @@
 // Purpose: Bottom action bar with SafeAreaView
 
 import React from 'react';
-import { Dimensions, View } from 'react-native';
+import { View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { getResponsiveValue } from '../../../utils/responsive';
+import { useResponsive } from '../../../hooks/useResponsive';
 import { BottomBarProps } from '../types/ui';
 import { getStyles } from '../StyleSheets/BottomBar.styles';
 
-const { width } = Dimensions.get('window');
-const isTablet = width >= 768;
-
 const BottomBarComponent: React.FC<BottomBarProps> = ({
     children,
-    maxWidth = isTablet ? 700 : undefined,
+    maxWidth,
     inTabs = false,
 }) => {
-    const styles = getStyles(maxWidth);
+    const { getSize, width, isTablet } = useResponsive();
+    const defaultMaxWidth = isTablet ? 700 : undefined;
+    const styles = getStyles(maxWidth || defaultMaxWidth, width, getSize);
 
     const content = (
         <View style={styles.content}>

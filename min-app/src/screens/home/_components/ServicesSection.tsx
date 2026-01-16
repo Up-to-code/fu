@@ -4,16 +4,14 @@
 import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React from 'react';
-import { Dimensions, Text, TouchableOpacity, View } from 'react-native';
+import { Text, TouchableOpacity, View } from 'react-native';
 import { Image } from 'expo-image';
 import { FlashList } from '@shopify/flash-list';
 import { COLORS } from '../../../constants/theme';
+import { useRTL } from '../../../hooks/useRTL';
+import { useResponsive } from '../../../hooks/useResponsive';
 import { FeaturedProvider } from './types/home';
-import { styles } from './StyleSheets/ServicesSection.styles';
-
-const { width } = Dimensions.get('window');
-const isTablet = width >= 768;
-const ESTIMATED_ITEM_SIZE = 96;
+import { getStyles } from './StyleSheets/ServicesSection.styles';
 
 const FEATURED_PROVIDERS: FeaturedProvider[] = [
     {
@@ -55,6 +53,10 @@ const FEATURED_PROVIDERS: FeaturedProvider[] = [
 
 const ServicesSectionComponent = () => {
     const router = useRouter();
+    const { isRTL } = useRTL();
+    const { getSize, padding } = useResponsive();
+    const styles = getStyles(isRTL, getSize);
+    const ESTIMATED_ITEM_SIZE = getSize(88, 92, 96, 104, 112);
 
     const handleServicePress = React.useCallback((serviceId: string) => {
         router.push(`/services/${serviceId}` as any);
@@ -83,7 +85,7 @@ const ServicesSectionComponent = () => {
                     </View>
                     <View style={styles.ratingBadge}>
                         <Text style={styles.ratingText}>{item.rating}</Text>
-                        <Feather name="star" size={8} color="#F59E0B" fill="#F59E0B" />
+                        <Feather name="star" size={getSize(7, 7.5, 8, 9, 10)} color="#F59E0B" fill="#F59E0B" />
                     </View>
                 </View>
                 <Text style={styles.serviceName} numberOfLines={1}>
@@ -110,9 +112,8 @@ const ServicesSectionComponent = () => {
                     renderItem={renderItem}
                     keyExtractor={(item) => item.id}
                     horizontal
-                    estimatedItemSize={ESTIMATED_ITEM_SIZE}
                     showsHorizontalScrollIndicator={false}
-                    contentContainerStyle={{ paddingHorizontal: 20 }}
+                    contentContainerStyle={{ paddingHorizontal: padding }}
                 />
             </View>
         </View>

@@ -4,8 +4,9 @@
 import { Feather } from '@expo/vector-icons';
 import React from 'react';
 import { Text, TextInput, View } from 'react-native';
+import { useRTL } from '../../../hooks/useRTL';
 import { FormInputProps } from '../types/form';
-import { styles } from '../StyleSheets/FormInput.styles';
+import { getStyles } from '../StyleSheets/FormInput.styles';
 
 export const FormInput: React.FC<FormInputProps> = ({
     label,
@@ -16,6 +17,9 @@ export const FormInput: React.FC<FormInputProps> = ({
     style,
     ...textInputProps
 }) => {
+    const { isRTL, textAlign } = useRTL();
+    const styles = getStyles(isRTL);
+    
     return (
         <View style={styles.inputGroup}>
             <Text style={styles.label}>
@@ -32,7 +36,7 @@ export const FormInput: React.FC<FormInputProps> = ({
                     style={[styles.input, disabled && styles.inputDisabledText, style]}
                     editable={!disabled}
                     placeholderTextColor="#94a3b8"
-                    textAlign="right"
+                    textAlign={textAlign}
                     {...textInputProps}
                 />
             </View>

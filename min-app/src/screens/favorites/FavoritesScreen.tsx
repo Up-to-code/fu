@@ -4,19 +4,14 @@
 import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { Dimensions, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { EmptyState } from '../shared';
 import { Header, TabBar, ProductGrid } from '../shared';
 import { useFavorites, useFavoriteProducts, useFavoriteServices } from './_hooks';
 import { COLORS } from '../../constants/theme';
+import { useResponsive } from '../../hooks/useResponsive';
 import { TabType } from './types/favorites';
-
-const { width } = Dimensions.get('window');
-const numColumns = 2; // Changed from 3 to 2 for better visibility
-const gap = 12; // Increased gap
-const padding = 20;
-const itemSize = (width - (padding * 2) - (gap * (numColumns - 1))) / numColumns;
 
 const FAVORITE_PRODUCTS = [
     { id: '1', name: 'صوفا مودرن مريحة', price: 2499, image: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=500&q=80' },
@@ -52,6 +47,12 @@ const FAVORITE_SERVICES = [
 export default function FavoritesScreen() {
     const router = useRouter();
     const [activeTab, setActiveTab] = useState<TabType>('products');
+    const { getSize, width, fontSize, iconSize } = useResponsive();
+    const numColumns = 2;
+    const gap = getSize(10, 11, 12, 16, 20);
+    const padding = getSize(16, 18, 20, 24, 32);
+    const itemSize = (width - (padding * 2) - (gap * (numColumns - 1))) / numColumns;
+    const styles = getStyles(getSize, fontSize, iconSize, gap, padding, itemSize);
 
     const TabButton = ({ tab, label, count }: { tab: TabType; label: string; count: number }) => (
         <TouchableOpacity
@@ -247,45 +248,54 @@ export default function FavoritesScreen() {
     );
 }
 
-const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#f8fafc' },
-    safeArea: { flex: 1 },
+const getStyles = (
+    getSize: (small: number, medium: number, large: number, tablet: number, desktop: number) => number,
+    fontSize: { xs: number; sm: number; base: number; lg: number; xl: number; '2xl': number; '3xl': number },
+    iconSize: { sm: number; md: number; lg: number; xl: number },
+    gap: number,
+    padding: number,
+    itemSize: number
+) => {
+    const { StyleSheet } = require('react-native');
+    return StyleSheet.create({
+        container: { flex: 1, backgroundColor: '#f8fafc' },
+        safeArea: { flex: 1 },
     header: {
         flexDirection: 'row-reverse',
         alignItems: 'center',
         justifyContent: 'space-between',
-        paddingHorizontal: 20,
-        paddingVertical: 16,
+        paddingHorizontal: getSize(16, 18, 20, 24, 32),
+        paddingVertical: getSize(12, 14, 16, 20, 24),
         backgroundColor: 'white',
         borderBottomWidth: 1,
         borderBottomColor: '#f1f5f9',
     },
     headerTitle: {
         fontFamily: 'Cairo_700Bold',
-        fontSize: 20,
+        fontSize: getSize(18, 19, 20, 22, 24),
         color: '#0f172a',
     },
     headerBadge: {
         backgroundColor: '#f1f5f9',
-        paddingHorizontal: 10,
-        paddingVertical: 4,
-        borderRadius: 12,
+        paddingHorizontal: getSize(8, 9, 10, 12, 14),
+        paddingVertical: getSize(3, 3.5, 4, 5, 6),
+        borderRadius: getSize(10, 11, 12, 14, 16),
     },
     headerBadgeText: {
         fontFamily: 'Cairo_700Bold',
-        fontSize: 14,
+        fontSize: fontSize.base,
         color: '#64748b',
     },
     tabsContainer: {
         flexDirection: 'row-reverse',
         backgroundColor: 'white',
-        paddingHorizontal: 20,
+        paddingHorizontal: getSize(16, 18, 20, 24, 32),
         borderBottomWidth: 1,
         borderBottomColor: '#f1f5f9',
     },
     tabButton: {
         flex: 1,
-        paddingVertical: 14,
+        paddingVertical: getSize(12, 13, 14, 16, 18),
         alignItems: 'center',
         borderBottomWidth: 2,
         borderBottomColor: 'transparent',
@@ -295,7 +305,7 @@ const styles = StyleSheet.create({
     },
     tabText: {
         fontFamily: 'Cairo_600SemiBold',
-        fontSize: 14,
+        fontSize: fontSize.base,
         color: '#64748b',
     },
     activeTabText: {
@@ -304,8 +314,8 @@ const styles = StyleSheet.create({
     },
     scrollView: { flex: 1 },
     scrollContent: {
-        padding: 20,
-        paddingBottom: 40,
+        padding: padding,
+        paddingBottom: getSize(32, 36, 40, 48, 56),
     },
     // Products Grid
     productsGrid: {
@@ -315,7 +325,7 @@ const styles = StyleSheet.create({
     },
     productCard: {
         width: itemSize,
-        borderRadius: 12,
+        borderRadius: getSize(10, 11, 12, 14, 16),
         backgroundColor: 'white',
         borderWidth: 1,
         borderColor: '#f1f5f9',
@@ -334,12 +344,12 @@ const styles = StyleSheet.create({
     },
     favoriteBadge: {
         position: 'absolute',
-        top: 8,
-        right: 8,
-        width: 28,
-        height: 28,
+        top: getSize(6, 7, 8, 10, 12),
+        right: getSize(6, 7, 8, 10, 12),
+        width: getSize(26, 27, 28, 32, 36),
+        height: getSize(26, 27, 28, 32, 36),
         backgroundColor: 'white',
-        borderRadius: 14,
+        borderRadius: getSize(13, 13.5, 14, 16, 18),
         alignItems: 'center',
         justifyContent: 'center',
         zIndex: 10,
@@ -348,24 +358,24 @@ const styles = StyleSheet.create({
     },
     discountBadge: {
         position: 'absolute',
-        top: 8,
-        left: 8,
+        top: getSize(6, 7, 8, 10, 12),
+        left: getSize(6, 7, 8, 10, 12),
         backgroundColor: '#EF4444',
-        paddingHorizontal: 6,
-        paddingVertical: 2,
-        borderRadius: 4,
+        paddingHorizontal: getSize(5, 5.5, 6, 7, 8),
+        paddingVertical: getSize(2, 2.5, 3, 3.5, 4),
+        borderRadius: getSize(3, 3.5, 4, 5, 6),
     },
     discountText: {
         color: 'white',
         fontFamily: 'Cairo_700Bold',
-        fontSize: 10,
+        fontSize: fontSize.xs,
     },
     productInfo: {
-        padding: 10,
+        padding: getSize(8, 9, 10, 12, 14),
     },
     productName: {
         fontFamily: 'Cairo_700Bold',
-        fontSize: 13,
+        fontSize: fontSize.sm,
         color: '#1e293b',
         textAlign: 'right',
         marginBottom: 4,
@@ -377,42 +387,42 @@ const styles = StyleSheet.create({
     },
     productPrice: {
         fontFamily: 'Cairo_700Bold',
-        fontSize: 13,
+        fontSize: fontSize.sm,
         color: COLORS.primary,
         textAlign: 'right',
     },
     addToCartBtn: {
-        width: 28,
-        height: 28,
-        borderRadius: 14,
+        width: getSize(26, 27, 28, 32, 36),
+        height: getSize(26, 27, 28, 32, 36),
+        borderRadius: getSize(13, 13.5, 14, 16, 18),
         backgroundColor: '#f0f9ff',
         alignItems: 'center',
         justifyContent: 'center',
     },
     // Services List - Updated
     servicesList: {
-        gap: 12,
+        gap: getSize(10, 11, 12, 16, 20),
     },
     serviceCard: {
         backgroundColor: 'white',
-        borderRadius: 20,
-        padding: 16,
+        borderRadius: getSize(18, 19, 20, 22, 24),
+        padding: getSize(14, 15, 16, 20, 24),
         borderWidth: 1,
         borderColor: '#f1f5f9',
     },
     serviceContent: {
         flexDirection: 'row-reverse',
         gap: 12,
-        marginBottom: 16,
+        marginBottom: getSize(12, 14, 16, 20, 24),
     },
     avatarContainer: {
         position: 'relative',
-        marginBottom: 8, // Make space for the overlapping badge
+        marginBottom: getSize(6, 7, 8, 10, 12), // Make space for the overlapping badge
     },
     avatar: {
-        width: 60,
-        height: 60,
-        borderRadius: 30,
+        width: getSize(56, 58, 60, 72, 80),
+        height: getSize(56, 58, 60, 72, 80),
+        borderRadius: getSize(28, 29, 30, 36, 40),
         backgroundColor: '#f1f5f9',
     },
     verifiedBadge: {
@@ -420,11 +430,11 @@ const styles = StyleSheet.create({
         bottom: -6, // Halfway out (approx)
         alignSelf: 'center', // Center horizontally
         left: '50%',
-        marginLeft: -10, // Half of width (20/2) to center exact
-        width: 20,
-        height: 20,
+        marginLeft: getSize(-9, -9.5, -10, -11, -12), // Half of width to center exact
+        width: getSize(18, 19, 20, 22, 24),
+        height: getSize(18, 19, 20, 22, 24),
         backgroundColor: 'white', // White background for contrast
-        borderRadius: 10, // Circular
+        borderRadius: getSize(9, 9.5, 10, 11, 12), // Circular
         alignItems: 'center',
         justifyContent: 'center',
         shadowColor: '#000',
@@ -444,14 +454,14 @@ const styles = StyleSheet.create({
     },
     providerName: {
         fontFamily: 'Cairo_700Bold',
-        fontSize: 15,
+        fontSize: fontSize.base,
         color: '#0f172a',
         textAlign: 'right',
         marginBottom: 2,
     },
     serviceCategory: {
         fontFamily: 'Cairo_500Medium',
-        fontSize: 12,
+        fontSize: fontSize.xs,
         color: '#64748b',
         textAlign: 'right',
     },
@@ -462,7 +472,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row-reverse',
         alignItems: 'center',
         justifyContent: 'flex-start',
-        marginTop: 8,
+        marginTop: getSize(6, 7, 8, 10, 12),
         gap: 12,
     },
     ratingContainer: {
@@ -472,12 +482,12 @@ const styles = StyleSheet.create({
     },
     ratingText: {
         fontFamily: 'Cairo_700Bold',
-        fontSize: 13,
+        fontSize: fontSize.sm,
         color: '#0f172a',
     },
     servicePrice: {
         fontFamily: 'Cairo_700Bold',
-        fontSize: 13,
+        fontSize: fontSize.sm,
         color: '#0f172a',
     },
     cardBottomRow: {
@@ -488,8 +498,8 @@ const styles = StyleSheet.create({
     bookButton: {
         flex: 1,
         backgroundColor: '#f0f9ff',
-        borderRadius: 12,
-        height: 44,
+        borderRadius: getSize(10, 11, 12, 14, 16),
+        height: getSize(40, 42, 44, 48, 52),
         flexDirection: 'row-reverse',
         alignItems: 'center',
         justifyContent: 'center',
@@ -497,7 +507,8 @@ const styles = StyleSheet.create({
     },
     bookButtonText: {
         fontFamily: 'Cairo_700Bold',
-        fontSize: 14,
+        fontSize: fontSize.base,
         color: '#0f172a',
     },
-});
+    });
+};

@@ -11,6 +11,7 @@ import { api } from '../../../convex/_generated/api';
 import { COLORS } from '../../constants/theme';
 import { useAuth } from '../../hooks/useAuth';
 import { useUserProfile } from '../../hooks/useUserProfile';
+import { useRTL } from '../../hooks/useRTL';
 import { Header } from '../shared';
 import { RoleBadge, SimpleModal } from '../shared';
 import { useSettings } from './_hooks';
@@ -24,7 +25,10 @@ const SettingItem = ({
     isDestructive = false,
     hasToggle = false,
     toggleValue = false,
-    onToggle = () => { }
+    onToggle = () => { },
+    flexDirection,
+    textAlign,
+    getMarginStart,
 }: {
     icon: string;
     label: string;
@@ -35,9 +39,18 @@ const SettingItem = ({
     hasToggle?: boolean;
     toggleValue?: boolean;
     onToggle?: (value: boolean) => void;
-}) => (
+    flexDirection?: 'row' | 'row-reverse';
+    textAlign?: 'left' | 'right';
+    getMarginStart?: (value: number) => { marginLeft?: number; marginRight?: number };
+}) => {
+    const { flexDirection: rtlFlexDirection, textAlign: rtlTextAlign, getMarginStart: rtlGetMarginStart } = useRTL();
+    const finalFlexDirection = flexDirection || rtlFlexDirection;
+    const finalTextAlign = textAlign || rtlTextAlign;
+    const finalGetMarginStart = getMarginStart || rtlGetMarginStart;
+    
+    return (
     <TouchableOpacity
-        style={[styles.settingItem, isDestructive && styles.destructiveItem]}
+        style={[styles.settingItem, { flexDirection: finalFlexDirection }, isDestructive && styles.destructiveItem]}
         onPress={onPress}
         activeOpacity={0.7}
         disabled={hasToggle}
@@ -53,18 +66,18 @@ const SettingItem = ({
                 />
             ) : (
                 <Feather
-                    name="chevron-left"
+                    name={finalFlexDirection === 'row-reverse' ? 'chevron-left' : 'chevron-right'}
                     size={20}
                     color={isDestructive ? '#EF4444' : '#94a3b8'}
                 />
             )}
         </View>
 
-        <View style={styles.settingContent}>
-            <Text style={[styles.settingLabel, isDestructive && styles.destructiveText]}>
+        <View style={[styles.settingContent, finalGetMarginStart(16)]}>
+            <Text style={[styles.settingLabel, { textAlign: finalTextAlign }, isDestructive && styles.destructiveText]}>
                 {label}
             </Text>
-            {subLabel && <Text style={styles.settingSubLabel}>{subLabel}</Text>}
+            {subLabel && <Text style={[styles.settingSubLabel, { textAlign: finalTextAlign }]}>{subLabel}</Text>}
         </View>
 
         <View style={[
@@ -74,12 +87,14 @@ const SettingItem = ({
             <Feather name={icon as any} size={20} color={isDestructive ? '#EF4444' : color} />
         </View>
     </TouchableOpacity>
-);
+    );
+};
 
 export default function SettingsScreen() {
     const router = useRouter();
     const { logout, user } = useAuth();
     const { role } = useUserProfile(user?.id);
+    const { isRTL, direction, userPreference, toggleDirection, flexDirection, textAlign, getMarginStart } = useRTL();
     const softDeleteAccount = useMutation(api.users.softDeleteAccount);
     const { settings, updateSetting } = useSettings();
     const [logoutModalVisible, setLogoutModalVisible] = useState(false);
@@ -136,12 +151,12 @@ export default function SettingsScreen() {
                     {user && (
                         <View style={styles.userInfoSection}>
                             <View style={styles.userInfoCard}>
-                                <View style={styles.userInfoContent}>
+                                <View style={[styles.userInfoContent, { flexDirection }]}>
                                     <View style={styles.userInfoText}>
-                                        <Text style={styles.userInfoName}>
+                                        <Text style={[styles.userInfoName, { textAlign }]}>
                                             {user.name || 'الاسم غير متوفر'}
                                         </Text>
-                                    <Text style={styles.userInfoEmail}>
+                                    <Text style={[styles.userInfoEmail, { textAlign }]}>
                                         {user.email || 'البريد الإلكتروني غير متوفر'}
                                     </Text>
                                 </View>
@@ -155,7 +170,7 @@ export default function SettingsScreen() {
 
                     {/* General Settings */}
                     <View style={styles.section}>
-                        <Text style={styles.sectionTitle}>الإعدادات العامة</Text>
+                        <Text style={[styles.sectionTitle, { textAlign }, getMarginStart(4)]}>الإعدادات العامة</Text>
                         <View style={styles.sectionContent}>
                             <SettingItem
                                 icon="bell"
@@ -170,6 +185,17 @@ export default function SettingsScreen() {
                                 label="اللغة"
                                 subLabel="العربية"
                                 onPress={() => router.push('/account/language' as any)}
+                            />
+                            <View style={styles.divider} />
+                            <SettingItem
+                                icon="layout"
+                                label="اتجاه الواجهة"
+                                subLabel={direction === 'rtl' ? 'من اليمين لليسار' : 'من اليسار لليمين'}
+                                hasToggle
+                                toggleValue={isRTL}
+                                onToggle={async () => {
+                                    await toggleDirection();
+                                }}
                             />
                         </View>
                     </View>
@@ -278,9 +304,7 @@ const styles = StyleSheet.create({
         fontFamily: 'Cairo_700Bold',
         fontSize: 16,
         color: '#1e293b',
-        textAlign: 'right',
         marginBottom: 12,
-        marginRight: 4,
     },
     sectionContent: {
         backgroundColor: 'white',
@@ -290,7 +314,6 @@ const styles = StyleSheet.create({
         overflow: 'hidden',
     },
     settingItem: {
-        flexDirection: 'row',
         alignItems: 'center',
         paddingVertical: 14,
         paddingHorizontal: 16,
@@ -306,19 +329,16 @@ const styles = StyleSheet.create({
     settingContent: {
         flex: 1,
         alignItems: 'flex-end',
-        paddingRight: 16,
     },
     settingLabel: {
         fontFamily: 'Cairo_600SemiBold',
         fontSize: 14,
         color: '#1e293b',
-        textAlign: 'right',
     },
     settingSubLabel: {
         fontFamily: 'Cairo_500Medium',
         fontSize: 12,
         color: '#94a3b8',
-        textAlign: 'right',
         marginTop: 2,
     },
     destructiveText: { 
@@ -355,7 +375,6 @@ const styles = StyleSheet.create({
         borderColor: COLORS.border,
     },
     userInfoContent: {
-        flexDirection: 'row-reverse',
         alignItems: 'center',
         justifyContent: 'space-between',
     },
@@ -367,12 +386,10 @@ const styles = StyleSheet.create({
         fontSize: 16,
         color: COLORS.text,
         marginBottom: 4,
-        textAlign: 'right',
     },
     userInfoEmail: {
         fontFamily: 'Cairo_500Medium',
         fontSize: 14,
         color: COLORS.textLight,
-        textAlign: 'right',
     },
 });

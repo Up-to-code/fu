@@ -11,6 +11,8 @@ import { api } from '../../../convex/_generated/api';
 import { COLORS } from '../../constants/theme';
 import { useAuth } from '../../hooks/useAuth';
 import { useUserProfile } from '../../hooks/useUserProfile';
+import { useRTL } from '../../hooks/useRTL';
+import { getFlexDirection, getTextAlign, getLeftOrRight } from '../../utils/direction';
 import { Header, FormInput, PrimaryButton, LoadingSpinner } from '../shared';
 import { RoleBadge, CountryCodePicker } from '../shared';
 import { useProfileImage } from './_hooks';
@@ -84,6 +86,8 @@ export default function ProfileEditScreen() {
     const router = useRouter();
     const { user } = useAuth();
     const { role } = useUserProfile(user?.id);
+    const { isRTL, textAlign } = useRTL();
+    const styles = getStyles(isRTL);
     const updateUserProfile = useMutation(api.users.updateUserProfile);
     const { localImageBase64, pickImage, isUploading } = useProfileImage();
 
@@ -245,7 +249,7 @@ export default function ProfileEditScreen() {
                                         placeholder="user@example.com"
                                         keyboardType="email-address"
                                         autoCapitalize="none"
-                                        textAlign="right"
+                                        textAlign={textAlign}
                                     />
                                 </View>
                                 <Text style={styles.helperText}>لا يمكن تغيير البريد الإلكتروني</Text>
@@ -263,7 +267,7 @@ export default function ProfileEditScreen() {
                                         onChangeText={setPhone1}
                                         placeholder="05XXXXXXXX"
                                         keyboardType="phone-pad"
-                                        textAlign="right"
+                                        textAlign={textAlign}
                                     />
                                     <CountryCodePicker
                                         selectedCode={phone1CountryCode}
@@ -286,7 +290,7 @@ export default function ProfileEditScreen() {
                                         onChangeText={setPhone2}
                                         placeholder="05XXXXXXXX"
                                         keyboardType="phone-pad"
-                                        textAlign="right"
+                                        textAlign={textAlign}
                                     />
                                     <CountryCodePicker
                                         selectedCode={phone2CountryCode}
@@ -312,7 +316,7 @@ export default function ProfileEditScreen() {
     );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (isRTL: boolean) => StyleSheet.create({
     container: { flex: 1, backgroundColor: '#f8fafc' },
     safeArea: { flex: 1 },
     scrollView: { flex: 1 },
@@ -342,7 +346,7 @@ const styles = StyleSheet.create({
     changePhotoBtn: {
         position: 'absolute',
         bottom: 0,
-        right: 0,
+        ...getLeftOrRight(isRTL, 0),
         backgroundColor: COLORS.primary,
         width: 40,
         height: 40,
@@ -359,7 +363,7 @@ const styles = StyleSheet.create({
         marginBottom: 12,
     },
     roleBadgeContainer: {
-        flexDirection: 'row-reverse',
+        flexDirection: getFlexDirection(isRTL),
         alignItems: 'center',
         gap: 8,
         marginTop: 8,
@@ -379,11 +383,11 @@ const styles = StyleSheet.create({
         fontFamily: 'Cairo_700Bold',
         fontSize: 14,
         color: '#1e293b',
-        textAlign: 'right',
-        marginRight: 4,
+        textAlign: getTextAlign(isRTL),
+        ...(isRTL ? { marginRight: 4 } : { marginLeft: 4 }),
     },
     inputContainer: {
-        flexDirection: 'row-reverse',
+        flexDirection: getFlexDirection(isRTL),
         alignItems: 'center',
         backgroundColor: 'white',
         borderRadius: 12,
@@ -403,9 +407,9 @@ const styles = StyleSheet.create({
         fontFamily: 'Cairo_500Medium',
         fontSize: 15,
         color: '#1e293b',
-        textAlign: 'right',
+        textAlign: getTextAlign(isRTL),
         height: '100%',
-        paddingLeft: 16,
+        ...(isRTL ? { paddingLeft: 16 } : { paddingRight: 16 }),
     },
     inputDisabled: {
         backgroundColor: '#f1f5f9',
@@ -418,9 +422,9 @@ const styles = StyleSheet.create({
         fontFamily: 'Cairo_400Regular',
         fontSize: 12,
         color: '#94a3b8',
-        textAlign: 'right',
+        textAlign: getTextAlign(isRTL),
         marginTop: 4,
-        marginRight: 4,
+        ...(isRTL ? { marginRight: 4 } : { marginLeft: 4 }),
     },
     footer: {
         padding: 20,
@@ -429,7 +433,7 @@ const styles = StyleSheet.create({
         borderTopColor: '#f1f5f9',
     },
     deleteAccountButton: {
-        flexDirection: 'row-reverse',
+        flexDirection: getFlexDirection(isRTL),
         alignItems: 'center',
         justifyContent: 'center',
         gap: 8,

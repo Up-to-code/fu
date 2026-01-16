@@ -4,9 +4,9 @@
 import { StyleSheet } from 'react-native';
 import { COLORS } from '../../../constants/theme';
 
-export const styles = StyleSheet.create({
+export const getStyles = (isRTL: boolean = true) => StyleSheet.create({
     container: {
-        flexDirection: 'row-reverse',
+        flexDirection: (isRTL ? 'row-reverse' : 'row') as const,
         alignItems: 'center',
         justifyContent: 'space-between',
         paddingHorizontal: 20,
@@ -18,7 +18,7 @@ export const styles = StyleSheet.create({
         color: '#1e293b',
     },
     viewAllButton: {
-        flexDirection: 'row-reverse',
+        flexDirection: (isRTL ? 'row-reverse' : 'row') as const,
         alignItems: 'center',
         gap: 4,
     },

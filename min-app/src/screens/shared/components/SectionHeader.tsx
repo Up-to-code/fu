@@ -6,8 +6,9 @@ import { Link } from 'expo-router';
 import React from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 import { COLORS } from '../../../constants/theme';
+import { useRTL } from '../../../hooks/useRTL';
 import { SectionHeaderProps } from '../types/ui';
-import { styles } from '../StyleSheets/SectionHeader.styles';
+import { getStyles } from '../StyleSheets/SectionHeader.styles';
 
 export const SectionHeader: React.FC<SectionHeaderProps> = ({
     title,
@@ -15,15 +16,20 @@ export const SectionHeader: React.FC<SectionHeaderProps> = ({
     viewAllLink,
     onViewAllPress,
 }) => {
+    const { isRTL } = useRTL();
+    const styles = getStyles(isRTL);
+    
     const renderViewAll = () => {
         if (!showViewAll) return null;
+
+        const chevronIcon = isRTL ? 'chevron-left' : 'chevron-right';
 
         if (viewAllLink) {
             return (
                 <Link href={viewAllLink as any} asChild>
                     <TouchableOpacity style={styles.viewAllButton}>
                         <Text style={styles.viewAllText}>عرض الكل</Text>
-                        <Feather name="chevron-left" size={16} color={COLORS.textLight} />
+                        <Feather name={chevronIcon} size={16} color={COLORS.textLight} />
                     </TouchableOpacity>
                 </Link>
             );
@@ -33,7 +39,7 @@ export const SectionHeader: React.FC<SectionHeaderProps> = ({
             return (
                 <TouchableOpacity onPress={onViewAllPress} style={styles.viewAllButton}>
                     <Text style={styles.viewAllText}>عرض الكل</Text>
-                    <Feather name="chevron-left" size={16} color={COLORS.textLight} />
+                    <Feather name={chevronIcon} size={16} color={COLORS.textLight} />
                 </TouchableOpacity>
             );
         }

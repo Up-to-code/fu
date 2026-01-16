@@ -5,16 +5,15 @@ import { Feather } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { Dimensions, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Header } from '../shared';
 import { useServiceDetails } from './_hooks';
 import { COLORS } from '../../constants/theme';
+import { useResponsive } from '../../hooks/useResponsive';
 import { ServicesOfferedSection } from './_components/ServicesOfferedSection';
 import { ReviewsSection } from './_components/ReviewsSection';
 import { ProviderData } from './types/services';
-
-const { width } = Dimensions.get('window');
 
 const PROVIDER_DATA: Record<string, ProviderData> = {
     '1': {
@@ -113,6 +112,8 @@ export default function ServiceDetailScreen() {
     const { id } = useLocalSearchParams<{ id: string }>();
     const provider = PROVIDER_DATA[id || '1'] || DEFAULT_PROVIDER;
     const [isSaved, setIsSaved] = useState(false);
+    const { getSize, fontSize, iconSize } = useResponsive();
+    const styles = getStyles(getSize, fontSize, iconSize);
 
     const toggleSave = () => {
         setIsSaved(prev => !prev);
@@ -267,7 +268,13 @@ export default function ServiceDetailScreen() {
     );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (
+    getSize: (small: number, medium: number, large: number, tablet: number, desktop: number) => number,
+    fontSize: { xs: number; sm: number; base: number; lg: number; xl: number; '2xl': number; '3xl': number },
+    iconSize: { sm: number; md: number; lg: number; xl: number }
+) => {
+    const { StyleSheet } = require('react-native');
+    return StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: 'white',
@@ -277,7 +284,7 @@ const styles = StyleSheet.create({
     },
     heroSection: {
         position: 'relative',
-        height: 340,
+        height: getSize(300, 320, 340, 400, 460),
     },
     heroImage: {
         width: '100%',
@@ -289,14 +296,14 @@ const styles = StyleSheet.create({
         width: '100%',
         flexDirection: 'row',
         justifyContent: 'space-between',
-        paddingHorizontal: 16,
-        paddingTop: 8,
+        paddingHorizontal: getSize(14, 15, 16, 20, 24),
+        paddingTop: getSize(6, 7, 8, 10, 12),
     },
     headerButton: {
-        width: 40,
-        height: 40,
+        width: getSize(36, 38, 40, 44, 48),
+        height: getSize(36, 38, 40, 44, 48),
         backgroundColor: 'rgba(0,0,0,0.3)',
-        borderRadius: 20,
+        borderRadius: getSize(18, 19, 20, 22, 24),
         alignItems: 'center',
         justifyContent: 'center',
     },
@@ -304,8 +311,8 @@ const styles = StyleSheet.create({
         position: 'absolute',
         bottom: 0,
         width: '100%',
-        paddingHorizontal: 16,
-        paddingBottom: 24,
+        paddingHorizontal: getSize(14, 15, 16, 20, 24),
+        paddingBottom: getSize(20, 22, 24, 32, 40),
     },
     heroContent: {
         flexDirection: 'row',
@@ -318,54 +325,54 @@ const styles = StyleSheet.create({
     },
     heroTitle: {
         fontFamily: 'Cairo_700Bold',
-        fontSize: 22,
+        fontSize: getSize(20, 21, 22, 24, 28),
         color: 'white',
         textAlign: 'right',
-        marginBottom: 8,
+        marginBottom: getSize(6, 7, 8, 10, 12),
     },
     badgesRow: {
         flexDirection: 'row-reverse',
         justifyContent: 'flex-start',
         gap: 8,
-        marginBottom: 8,
+        marginBottom: getSize(6, 7, 8, 10, 12),
     },
     premiumBadge: {
         backgroundColor: '#F59E0B',
-        paddingHorizontal: 12,
-        paddingVertical: 4,
-        borderRadius: 12,
+        paddingHorizontal: getSize(10, 11, 12, 16, 20),
+        paddingVertical: getSize(3, 3.5, 4, 5, 6),
+        borderRadius: getSize(10, 11, 12, 14, 16),
     },
     premiumBadgeText: {
         fontFamily: 'Cairo_600SemiBold',
         color: 'white',
-        fontSize: 12,
+        fontSize: fontSize.xs,
         textAlign: 'right',
     },
     typeBadge: {
         backgroundColor: 'rgba(255,255,255,0.25)',
-        paddingHorizontal: 12,
-        paddingVertical: 4,
-        borderRadius: 12,
+        paddingHorizontal: getSize(10, 11, 12, 16, 20),
+        paddingVertical: getSize(3, 3.5, 4, 5, 6),
+        borderRadius: getSize(10, 11, 12, 14, 16),
     },
     typeBadgeText: {
         fontFamily: 'Cairo_600SemiBold',
         color: 'white',
-        fontSize: 12,
+        fontSize: fontSize.xs,
         textAlign: 'right',
     },
     heroCategoryLocation: {
         fontFamily: 'Cairo_500Medium',
         color: 'rgba(255,255,255,0.9)',
-        fontSize: 13,
+        fontSize: fontSize.sm,
         textAlign: 'right',
     },
     avatarContainer: {
         position: 'relative',
     },
     avatar: {
-        width: 80,
-        height: 80,
-        borderRadius: 16,
+        width: getSize(72, 76, 80, 96, 112),
+        height: getSize(72, 76, 80, 96, 112),
+        borderRadius: getSize(14, 15, 16, 20, 24),
         backgroundColor: '#3b82f6',
         overflow: 'hidden',
         borderWidth: 3,
@@ -379,10 +386,10 @@ const styles = StyleSheet.create({
         position: 'absolute',
         bottom: -4,
         right: -4,
-        width: 26,
-        height: 26,
+        width: getSize(24, 25, 26, 30, 34),
+        height: getSize(24, 25, 26, 30, 34),
         backgroundColor: '#3b82f6',
-        borderRadius: 13,
+        borderRadius: getSize(12, 12.5, 13, 15, 17),
         alignItems: 'center',
         justifyContent: 'center',
         borderWidth: 2,
@@ -391,8 +398,8 @@ const styles = StyleSheet.create({
     statsRow: {
         flexDirection: 'row-reverse',
         backgroundColor: 'white',
-        paddingHorizontal: 20,
-        paddingVertical: 24,
+        paddingHorizontal: getSize(16, 18, 20, 24, 32),
+        paddingVertical: getSize(20, 22, 24, 32, 40),
         justifyContent: 'space-around',
         borderBottomWidth: 1,
         borderBottomColor: '#f1f5f9',
@@ -402,14 +409,14 @@ const styles = StyleSheet.create({
     },
     statNumber: {
         fontFamily: 'Cairo_700Bold',
-        fontSize: 24,
+        fontSize: getSize(20, 22, 24, 28, 32),
         color: '#1e293b',
         marginBottom: 4,
     },
     statLabel: {
         fontFamily: 'Cairo_500Medium',
         color: '#64748b',
-        fontSize: 12,
+        fontSize: fontSize.xs,
     },
     ratingValue: {
         flexDirection: 'row-reverse',
@@ -419,14 +426,14 @@ const styles = StyleSheet.create({
     },
     statDivider: {
         width: 1,
-        height: 50,
+        height: getSize(44, 47, 50, 60, 70),
         backgroundColor: '#f1f5f9',
     },
     quickInfo: {
         flexDirection: 'row-reverse',
-        paddingHorizontal: 20,
-        paddingVertical: 16,
-        gap: 24,
+        paddingHorizontal: getSize(16, 18, 20, 24, 32),
+        paddingVertical: getSize(12, 14, 16, 20, 24),
+        gap: getSize(20, 22, 24, 32, 40),
         justifyContent: 'center',
         borderBottomWidth: 1,
         borderBottomColor: '#f1f5f9',
@@ -439,24 +446,24 @@ const styles = StyleSheet.create({
     quickInfoText: {
         fontFamily: 'Cairo_500Medium',
         color: '#64748b',
-        fontSize: 14,
+        fontSize: fontSize.base,
     },
     section: {
-        paddingHorizontal: 20,
-        paddingVertical: 24,
+        paddingHorizontal: getSize(16, 18, 20, 24, 32),
+        paddingVertical: getSize(20, 22, 24, 32, 40),
     },
     sectionTitle: {
         fontFamily: 'Cairo_700Bold',
         color: '#1e293b',
-        fontSize: 18,
+        fontSize: fontSize.lg,
         textAlign: 'right',
-        marginBottom: 12,
+        marginBottom: getSize(10, 11, 12, 16, 20),
     },
     description: {
         fontFamily: 'Cairo_500Medium',
         color: '#64748b',
-        fontSize: 14,
-        lineHeight: 24,
+        fontSize: fontSize.base,
+        lineHeight: getSize(20, 22, 24, 28, 32),
         textAlign: 'right',
     },
     ctaContainer: {
@@ -468,11 +475,11 @@ const styles = StyleSheet.create({
         borderTopColor: '#f1f5f9',
     },
     ctaContent: {
-        paddingHorizontal: 20,
-        paddingVertical: 16,
+        paddingHorizontal: getSize(16, 18, 20, 24, 32),
+        paddingVertical: getSize(12, 14, 16, 20, 24),
         flexDirection: 'row-reverse',
         alignItems: 'center',
-        gap: 16,
+        gap: getSize(12, 14, 16, 20, 24),
     },
     priceContainer: {
         flex: 1,
@@ -480,19 +487,19 @@ const styles = StyleSheet.create({
     priceLabel: {
         fontFamily: 'Cairo_500Medium',
         color: '#94a3b8',
-        fontSize: 12,
+        fontSize: fontSize.xs,
         textAlign: 'right',
     },
     priceValue: {
         fontFamily: 'Cairo_700Bold',
         color: '#1e293b',
-        fontSize: 16,
+        fontSize: fontSize.base,
         textAlign: 'right',
     },
     bookButton: {
         flex: 2,
-        paddingVertical: 14,
-        borderRadius: 12,
+        paddingVertical: getSize(12, 13, 14, 16, 18),
+        borderRadius: getSize(10, 11, 12, 14, 16),
         flexDirection: 'row-reverse',
         alignItems: 'center',
         justifyContent: 'center',
@@ -501,6 +508,7 @@ const styles = StyleSheet.create({
     bookButtonText: {
         fontFamily: 'Cairo_700Bold',
         color: 'white',
-        fontSize: 16,
+        fontSize: fontSize.base,
     },
-});
+    });
+};

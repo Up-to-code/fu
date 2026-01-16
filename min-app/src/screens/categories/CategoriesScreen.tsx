@@ -3,14 +3,11 @@
 
 import { useRouter } from 'expo-router';
 import React from 'react';
-import { Dimensions, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Header, LoadingSpinner } from '../shared';
 import { useCategories } from './_hooks';
-
-const { width } = Dimensions.get('window');
-const isTablet = width >= 768;
-const cardWidth = isTablet ? '31%' : '48%';
+import { useResponsive } from '../../hooks/useResponsive';
 
 const CATEGORIES = [
     { id: 1, name: 'sofas', label: 'كنب', image: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=500&q=80', count: 120 },
@@ -24,6 +21,9 @@ const CATEGORIES = [
 export default function CategoriesScreen() {
     const router = useRouter();
     const { categories, isLoading } = useCategories();
+    const { isTablet, getSize, fontSize } = useResponsive();
+    const cardWidth = isTablet ? '31%' : '48%';
+    const styles = getStyles(getSize, fontSize, cardWidth);
     // Fallback to mock data if hook returns empty
     const displayCategories = categories.length > 0 
         ? categories.map(c => ({ id: c.id, name: c.name, label: c.name, image: c.imageUrl || '', count: 0 }))
@@ -51,19 +51,19 @@ export default function CategoriesScreen() {
                                     params: { id: category.id.toString(), name: category.label }
                                 })}
                             >
-                                <View style={[styles.imageContainer, isTablet && styles.imageContainerTablet]}>
+                                <View style={styles.imageContainer}>
                                     <Image
                                         source={{ uri: category.image }}
                                         style={styles.image}
                                         resizeMode="cover"
                                     />
                                 </View>
-                                <View style={[styles.categoryInfo, isTablet && styles.categoryInfoTablet]}>
-                                    <Text style={[styles.categoryLabel, isTablet && styles.categoryLabelTablet]}>
+                                <View style={styles.categoryInfo}>
+                                    <Text style={styles.categoryLabel}>
                                         {category.label}
                                     </Text>
                                     {category.count > 0 && (
-                                        <Text style={[styles.categoryCount, isTablet && styles.categoryCountTablet]}>
+                                        <Text style={styles.categoryCount}>
                                             {category.count} منتج
                                         </Text>
                                     )}
@@ -77,65 +77,61 @@ export default function CategoriesScreen() {
     );
 }
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: 'white',
-    },
-    scrollView: {
-        flex: 1,
-    },
-    scrollContent: {
-        paddingBottom: 20,
-        paddingHorizontal: 20,
-        paddingTop: 16,
-    },
-    grid: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        justifyContent: 'space-between',
-    },
-    categoryCard: {
-        marginBottom: 16,
-        backgroundColor: 'white',
-        borderRadius: 16,
-        borderWidth: 1,
-        borderColor: '#e2e8f0',
-        overflow: 'hidden',
-    },
-    imageContainer: {
-        height: 128,
-        backgroundColor: '#f1f5f9',
-    },
-    imageContainerTablet: {
-        height: 176,
-    },
-    image: {
-        width: '100%',
-        height: '100%',
-    },
-    categoryInfo: {
-        alignItems: 'flex-end',
-        padding: 16,
-    },
-    categoryInfoTablet: {
-        padding: 20,
-    },
-    categoryLabel: {
-        fontFamily: 'Cairo_700Bold',
-        fontSize: 16,
-        color: '#1e293b',
-        marginBottom: 4,
-    },
-    categoryLabelTablet: {
-        fontSize: 18,
-    },
-    categoryCount: {
-        fontFamily: 'Cairo_500Medium',
-        fontSize: 12,
-        color: '#64748b',
-    },
-    categoryCountTablet: {
-        fontSize: 14,
-    },
-});
+const getStyles = (
+    getSize: (small: number, medium: number, large: number, tablet: number, desktop: number) => number,
+    fontSize: { xs: number; sm: number; base: number; lg: number; xl: number; '2xl': number; '3xl': number },
+    cardWidth: string
+) => {
+    const { StyleSheet } = require('react-native');
+    return StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: 'white',
+        },
+        scrollView: {
+            flex: 1,
+        },
+        scrollContent: {
+            paddingBottom: getSize(16, 18, 20, 24, 32),
+            paddingHorizontal: getSize(16, 18, 20, 24, 32),
+            paddingTop: getSize(12, 14, 16, 20, 24),
+        },
+        grid: {
+            flexDirection: 'row',
+            flexWrap: 'wrap',
+            justifyContent: 'space-between',
+        },
+        categoryCard: {
+            marginBottom: getSize(12, 14, 16, 20, 24),
+            backgroundColor: 'white',
+            borderRadius: getSize(14, 15, 16, 18, 20),
+            borderWidth: 1,
+            borderColor: '#e2e8f0',
+            overflow: 'hidden',
+            width: cardWidth,
+        },
+        imageContainer: {
+            height: getSize(112, 120, 128, 176, 224),
+            backgroundColor: '#f1f5f9',
+        },
+        image: {
+            width: '100%',
+            height: '100%',
+        },
+        categoryInfo: {
+            alignItems: 'flex-end',
+            padding: getSize(14, 15, 16, 20, 24),
+        },
+        categoryLabel: {
+            fontFamily: 'Cairo_700Bold',
+            fontSize: getSize(14, 15, 16, 18, 20),
+            color: '#1e293b',
+            marginBottom: 4,
+        },
+        categoryCount: {
+            fontFamily: 'Cairo_500Medium',
+            fontSize: getSize(11, 11.5, 12, 14, 16),
+            color: '#64748b',
+        },
+    });
+};

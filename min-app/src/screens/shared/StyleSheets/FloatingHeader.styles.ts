@@ -1,15 +1,13 @@
 // File: src/screens/shared/StyleSheets/FloatingHeader.styles.ts
 // Purpose: Styles for FloatingHeader component
 
-import { Dimensions, StyleSheet } from 'react-native';
-import { getResponsiveValue } from '../../../utils/responsive';
+import { StyleSheet } from 'react-native';
 
-const { width } = Dimensions.get('window');
-const isTablet = width >= 768;
+type GetSizeFunction = (small: number, medium: number, large: number, tablet: number, desktop: number) => number;
 
-export const getStyles = (transparent: boolean) => {
-    const buttonSize = getResponsiveValue(40, 48);
-    const iconSize = getResponsiveValue(20, 24);
+export const getStyles = (transparent: boolean, isRTL: boolean = true, getSize: GetSizeFunction) => {
+    const buttonSize = getSize(40, 44, 48, 48, 52);
+    const iconSize = getSize(20, 22, 24, 24, 26);
     const bgColor = transparent ? 'rgba(255,255,255,0.9)' : 'white';
 
     return StyleSheet.create({
@@ -21,14 +19,14 @@ export const getStyles = (transparent: boolean) => {
             zIndex: 10,
         },
         content: {
-            flexDirection: 'row-reverse',
+            flexDirection: (isRTL ? 'row-reverse' : 'row') as const,
             justifyContent: 'space-between',
             alignItems: 'center',
-            paddingHorizontal: getResponsiveValue(16, 32),
-            paddingVertical: getResponsiveValue(8, 16),
+            paddingHorizontal: getSize(16, 20, 24, 32, 40),
+            paddingVertical: getSize(8, 10, 12, 16, 20),
         },
         button: {
-            borderRadius: getResponsiveValue(20, 24),
+            borderRadius: getSize(20, 22, 24, 24, 28),
             alignItems: 'center',
             justifyContent: 'center',
             width: buttonSize,

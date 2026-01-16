@@ -2,14 +2,12 @@
 // Purpose: Responsive product grid wrapper with FlashList for performance
 
 import React, { useCallback, useMemo } from 'react';
-import { Dimensions, View } from 'react-native';
+import { View } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
-import { isTablet } from '../../../utils/responsive';
+import { useResponsive } from '../../../hooks/useResponsive';
 import { ProductCard } from './ProductCard';
 import { ProductGridProps, ProductHorizontalListProps, IProductCardProps } from '../types/card';
-import { styles } from '../StyleSheets/ProductGrid.styles';
-
-const { width } = Dimensions.get('window');
+import { getStyles } from '../StyleSheets/ProductGrid.styles';
 
 export const ProductGrid: React.FC<ProductGridProps> = ({
     products,
@@ -17,14 +15,16 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
     onFavorite,
     numColumns,
 }) => {
+    const { width, isTablet, padding, getSize } = useResponsive();
+    const styles = getStyles(getSize);
     const columns = numColumns || (isTablet ? 3 : 2);
     const cardWidth = useMemo(() => columns === 3 ? '31%' : '48%', [columns]);
     
     // Calculate estimated item size based on screen width and columns
     const estimatedItemSize = useMemo(() => {
-        const itemWidth = (width - 40) / columns; // Account for padding
+        const itemWidth = (width - padding * 2) / columns; // Account for padding
         return itemWidth * 1.5; // Approximate height (width * aspect ratio)
-    }, [columns]);
+    }, [columns, width, padding]);
 
     const renderItem = useCallback(({ item }: { item: IProductCardProps }) => (
         <View style={[styles.cardWrapper, { width: cardWidth }]}>
@@ -57,7 +57,8 @@ export const ProductHorizontalList: React.FC<ProductHorizontalListProps> = ({
     onProductPress,
     onFavorite,
 }) => {
-    const estimatedItemSize = useMemo(() => isTablet ? 200 : 170, []);
+    const { getSize, isTablet } = useResponsive();
+    const estimatedItemSize = useMemo(() => getSize(150, 170, 180, 200, 220), [getSize]);
 
     const renderItem = useCallback(({ item }: { item: IProductCardProps }) => (
         <View style={[styles.horizontalCardWrapper, { transform: [{ scaleX: -1 }] }]}>

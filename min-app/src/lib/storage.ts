@@ -103,3 +103,21 @@ export const getSearchHistory = async (): Promise<string[]> => {
 export const clearSearchHistory = async (): Promise<void> => {
   return removePreference('search_history');
 };
+
+/**
+ * Direction preference helpers
+ */
+export const saveDirectionPreference = async (direction: 'ltr' | 'rtl' | null): Promise<void> => {
+  if (direction === null) {
+    return removePreference('direction');
+  }
+  return savePreference('direction', direction);
+};
+
+export const getDirectionPreference = async (): Promise<'ltr' | 'rtl' | null> => {
+  const value = await getPreference('direction');
+  if (value === 'ltr' || value === 'rtl') {
+    return value;
+  }
+  return null;
+};

@@ -1,24 +1,27 @@
 // File: src/screens/shared/components/SwipeToConfirm.tsx
-// Purpose: Swipe-to-confirm button component (RTL - swipe from right to left)
+// Purpose: Swipe-to-confirm button component with RTL/LTR support
 
 import { Feather } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
-import React, { useEffect, useRef, useState } from 'react';
-import { Animated, Dimensions, Easing, PanResponder, Text, View } from 'react-native';
+import React, { useEffect, useRef, useState, useMemo } from 'react';
+import { Animated, Easing, PanResponder, Text, View, StyleSheet } from 'react-native';
 import { COLORS } from '../../../constants/theme';
+import { useRTL } from '../../../hooks/useRTL';
+import { useResponsive } from '../../../hooks/useResponsive';
 import { SwipeToConfirmProps } from '../types/ui';
-import { styles } from '../StyleSheets/SwipeToConfirm.styles';
-
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
+import { getStyles } from '../StyleSheets/SwipeToConfirm.styles';
 
 const SwipeToConfirmComponent: React.FC<SwipeToConfirmProps> = ({
     onConfirm,
     label = 'اسحب لتأكيد الطلب',
     disabled = false,
 }) => {
-    const BUTTON_WIDTH = SCREEN_WIDTH - 40;
-    const THUMB_SIZE = 56;
-    const PADDING = 4;
+    const { isRTL, swipeMultiplier, flexDirection } = useRTL();
+    const { getSize, width, padding } = useResponsive();
+    const styles = getStyles(getSize);
+    const BUTTON_WIDTH = width - padding * 2;
+    const THUMB_SIZE = getSize(52, 54, 56, 56, 60);
+    const PADDING = getSize(4, 4, 4, 6, 8);
     const MAX_TRANSLATE = BUTTON_WIDTH - THUMB_SIZE - PADDING * 2;
 
     const translateX = useRef(new Animated.Value(0)).current;
@@ -65,8 +68,8 @@ const SwipeToConfirmComponent: React.FC<SwipeToConfirmProps> = ({
         }
     }, [disabled, isConfirmed, shimmerAnim, arrowAnim]);
 
-    const panResponder = useRef(
-        PanResponder.create({
+    const panResponder = useMemo(
+        () => PanResponder.create({
             onStartShouldSetPanResponder: (evt, gestureState) => {
                 // Always claim responder if not disabled/confirmed
                 return !disabled && !isConfirmed;
@@ -81,12 +84,14 @@ const SwipeToConfirmComponent: React.FC<SwipeToConfirmProps> = ({
                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
             },
             onPanResponderMove: (_, gestureState) => {
-                // RTL: negative dx means swiping left (which is forward in RTL)
-                const newValue = Math.max(0, Math.min(-gestureState.dx, MAX_TRANSLATE));
+                // Direction-aware swipe: RTL swipes right-to-left (negative dx), LTR swipes left-to-right (positive dx)
+                const directionAwareDx = gestureState.dx * swipeMultiplier;
+                const newValue = Math.max(0, Math.min(Math.abs(directionAwareDx), MAX_TRANSLATE));
                 translateX.setValue(newValue);
             },
             onPanResponderRelease: (_, gestureState) => {
-                const swipeDistance = -gestureState.dx;
+                const directionAwareDx = gestureState.dx * swipeMultiplier;
+                const swipeDistance = Math.abs(directionAwareDx);
 
                 if (swipeDistance > MAX_TRANSLATE * 0.7) {
                     // Complete the swipe
@@ -120,8 +125,9 @@ const SwipeToConfirmComponent: React.FC<SwipeToConfirmProps> = ({
                     friction: 8,
                 }).start();
             },
-        })
-    ).current;
+        }),
+        [disabled, isConfirmed, swipeMultiplier]
+    );
 
     // Calculate opacity for the text based on swipe progress
     const textOpacity = translateX.interpolate({
@@ -130,23 +136,23 @@ const SwipeToConfirmComponent: React.FC<SwipeToConfirmProps> = ({
         extrapolate: 'clamp',
     });
 
-    // Calculate thumb position (RTL - moves from right to left)
+    // Calculate thumb position (direction-aware)
     const thumbTransform = translateX.interpolate({
         inputRange: [0, MAX_TRANSLATE],
-        outputRange: [0, -MAX_TRANSLATE],
+        outputRange: isRTL ? [0, -MAX_TRANSLATE] : [0, MAX_TRANSLATE],
         extrapolate: 'clamp',
     });
 
-    // Shimmer effect position (right to left)
+    // Shimmer effect position (direction-aware)
     const shimmerTranslate = shimmerAnim.interpolate({
         inputRange: [0, 1],
-        outputRange: [BUTTON_WIDTH, -100],
+        outputRange: isRTL ? [BUTTON_WIDTH, -100] : [-100, BUTTON_WIDTH],
     });
 
-    // Arrow bounce effect
+    // Arrow bounce effect (direction-aware)
     const arrowTranslateX = arrowAnim.interpolate({
         inputRange: [0, 1],
-        outputRange: [0, -8],
+        outputRange: isRTL ? [0, -8] : [0, 8],
     });
 
     const containerBackgroundColor = disabled
@@ -154,6 +160,37 @@ const SwipeToConfirmComponent: React.FC<SwipeToConfirmProps> = ({
         : isConfirmed
             ? '#10B981'
             : COLORS.primary;
+
+    // Dynamic styles based on direction
+    const dynamicStyles = useMemo(() => StyleSheet.create({
+        textContainer: {
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            flexDirection,
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 8,
+        },
+        thumb: {
+            position: 'absolute',
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: 'white',
+            borderRadius: 12,
+            borderWidth: 1,
+            borderColor: '#f1f5f9',
+            width: THUMB_SIZE,
+            height: THUMB_SIZE,
+            top: PADDING,
+            ...(isRTL ? { right: PADDING } : { left: PADDING }),
+        },
+    }), [flexDirection, isRTL]);
+
+    const arrowIcon = isRTL ? 'chevrons-left' : 'chevrons-right';
+    const thumbArrowIcon = isRTL ? 'arrow-left' : 'arrow-right';
 
     return (
         <View
@@ -173,13 +210,13 @@ const SwipeToConfirmComponent: React.FC<SwipeToConfirmProps> = ({
             )}
 
             {/* Background Text */}
-            <Animated.View style={[styles.textContainer, { opacity: textOpacity }]}>
+            <Animated.View style={[dynamicStyles.textContainer, { opacity: textOpacity }]}>
                 <Text style={[styles.label, { color: disabled ? '#94a3b8' : 'white' }]}>
                     {isConfirmed ? 'تم التأكيد ✓' : label}
                 </Text>
                 {!isConfirmed && (
                     <Animated.View style={{ transform: [{ translateX: arrowTranslateX }] }}>
-                        <Feather name="chevrons-left" size={20} color={disabled ? '#94a3b8' : 'white'} />
+                        <Feather name={arrowIcon} size={getSize(18, 20, 22, 22, 24)} color={disabled ? '#94a3b8' : 'white'} />
                     </Animated.View>
                 )}
             </Animated.View>
@@ -189,19 +226,15 @@ const SwipeToConfirmComponent: React.FC<SwipeToConfirmProps> = ({
                 <Animated.View
                     {...panResponder.panHandlers}
                     style={[
-                        styles.thumb,
+                        dynamicStyles.thumb,
                         {
-                            width: THUMB_SIZE,
-                            height: THUMB_SIZE,
-                            top: PADDING,
-                            right: PADDING,
                             transform: [{ translateX: thumbTransform }],
                         },
                     ]}
                 >
                     <Feather
-                        name="arrow-left"
-                        size={24}
+                        name={thumbArrowIcon}
+                        size={getSize(20, 22, 24, 24, 26)}
                         color={disabled ? '#94a3b8' : COLORS.primary}
                     />
                 </Animated.View>

@@ -1,22 +1,19 @@
 // File: src/screens/shared/StyleSheets/PriceTable.styles.ts
 // Purpose: Styles for PriceTable component
 
-import { Dimensions, StyleSheet } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { COLORS } from '../../../constants/theme';
-import { getResponsiveValue, isSmallScreen } from '../../../utils/responsive';
 
-const { width } = Dimensions.get('window');
-const isTablet = width >= 768;
-const isLarge = width >= 1024;
+type GetSizeFunction = (small: number, medium: number, large: number, tablet: number, desktop: number) => number;
 
-export const styles = StyleSheet.create({
+export const getStyles = (isRTL: boolean = true, getSize: GetSizeFunction) => StyleSheet.create({
     container: {
         backgroundColor: '#f8fafc',
         borderRadius: 16,
-        padding: getResponsiveValue(16, 20),
+        padding: getSize(16, 18, 20, 20, 24),
     },
     row: {
-        flexDirection: 'row-reverse',
+        flexDirection: (isRTL ? 'row-reverse' : 'row') as const,
         justifyContent: 'space-between',
         paddingVertical: 8,
     },
@@ -27,11 +24,11 @@ export const styles = StyleSheet.create({
     label: {
         fontFamily: 'Cairo_500Medium',
         color: '#475569',
-        fontSize: getResponsiveValue(isSmallScreen ? 13 : 14, isLarge ? 18 : 16),
+        fontSize: getSize(13, 14, 15, 16, 18),
     },
     value: {
         fontFamily: 'Cairo_700Bold',
-        fontSize: getResponsiveValue(isSmallScreen ? 13 : 14, isLarge ? 18 : 16),
+        fontSize: getSize(13, 14, 15, 16, 18),
     },
     valueNormal: {
         color: '#334155',
@@ -43,9 +40,9 @@ export const styles = StyleSheet.create({
         color: '#10B981',
     },
     totalRow: {
-        flexDirection: 'row-reverse',
+        flexDirection: (isRTL ? 'row-reverse' : 'row') as const,
         justifyContent: 'space-between',
-        paddingTop: 16,
+        paddingTop: getSize(16, 18, 20, 20, 24),
         marginTop: 8,
         borderTopWidth: 2,
         borderTopColor: '#e2e8f0',
@@ -53,11 +50,11 @@ export const styles = StyleSheet.create({
     totalLabel: {
         fontFamily: 'Cairo_700Bold',
         color: '#1e293b',
-        fontSize: getResponsiveValue(isSmallScreen ? 16 : 18, isLarge ? 24 : 20),
+        fontSize: getSize(16, 18, 20, 20, 24),
     },
     totalValue: {
         fontFamily: 'Cairo_700Bold',
         color: COLORS.primary,
-        fontSize: getResponsiveValue(isSmallScreen ? 16 : 18, isLarge ? 24 : 20),
+        fontSize: getSize(16, 18, 20, 20, 24),
     },
 });

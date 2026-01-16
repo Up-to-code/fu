@@ -7,7 +7,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { SearchBar, FilterChip } from '../shared';
 import { useSearchHistory } from './_hooks';
 import { COLORS } from '../../constants/theme';
-import { styles } from './StyleSheets/SearchScreen.styles';
+import { useRTL } from '../../hooks/useRTL';
+import { useResponsive } from '../../hooks/useResponsive';
+import { getStyles } from './StyleSheets/SearchScreen.styles';
 
 const RECENT = ['صوفا مودرن', 'طاولة قهوة', 'كرسي مكتب'];
 const POPULAR = ['كنب زاوية', 'سرير ملكي', 'مكتب خشب', 'إضاءة ذكية'];
@@ -22,6 +24,9 @@ const CATEGORIES = [
 export default function SearchScreen() {
     const router = useRouter();
     const { q } = useLocalSearchParams<{ q?: string }>();
+    const { isRTL } = useRTL();
+    const { getSize } = useResponsive();
+    const styles = getStyles(isRTL, getSize);
     const [query, setQuery] = useState(q || '');
     const { recentSearches, addSearch, clearHistory } = useSearchHistory();
 
@@ -36,7 +41,7 @@ export default function SearchScreen() {
             {/* Header with Search Bar and Back Button */}
             <View style={styles.header}>
                 <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-                    <Feather name="arrow-right" size={24} color={COLORS.text} />
+                    <Feather name={isRTL ? "arrow-right" : "arrow-left"} size={24} color={COLORS.text} />
                 </TouchableOpacity>
                 <View style={styles.searchContainer}>
                     <SearchBar

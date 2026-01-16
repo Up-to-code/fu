@@ -1,24 +1,22 @@
 // File: src/screens/shared/StyleSheets/OrderCard.styles.ts
 // Purpose: Styles for OrderCard component
 
-import { Dimensions, StyleSheet } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { COLORS } from '../../../constants/theme';
-import { getResponsiveValue, isSmallScreen } from '../../../utils/responsive';
 
-const { width } = Dimensions.get('window');
-const isTablet = width >= 768;
+type GetSizeFunction = (small: number, medium: number, large: number, tablet: number, desktop: number) => number;
 
-export const styles = StyleSheet.create({
+export const getStyles = (isRTL: boolean = true, getSize: GetSizeFunction) => StyleSheet.create({
     card: {
         backgroundColor: 'white',
-        borderRadius: getResponsiveValue(12, 16),
-        padding: getResponsiveValue(isSmallScreen ? 12 : 16, 20),
-        marginBottom: getResponsiveValue(12, 16),
+        borderRadius: getSize(12, 14, 16, 16, 20),
+        padding: getSize(12, 14, 16, 20, 24),
+        marginBottom: getSize(12, 14, 16, 16, 20),
         borderWidth: 1,
         borderColor: '#e2e8f0',
     },
     header: {
-        flexDirection: 'row-reverse',
+        flexDirection: (isRTL ? 'row-reverse' : 'row') as const,
         justifyContent: 'space-between',
         alignItems: 'flex-start',
         marginBottom: 12,
@@ -28,31 +26,31 @@ export const styles = StyleSheet.create({
     },
     orderNumber: {
         fontFamily: 'Cairo_700Bold',
-        fontSize: getResponsiveValue(isSmallScreen ? 14 : 15, 17),
+        fontSize: getSize(14, 14.5, 15, 17, 19),
         color: '#1e293b',
         marginBottom: 4,
     },
     orderDate: {
         fontFamily: 'Cairo_500Medium',
-        fontSize: getResponsiveValue(isSmallScreen ? 11 : 12, 14),
+        fontSize: getSize(11, 11.5, 12, 14, 16),
         color: '#64748b',
     },
     statusBadge: {
-        paddingHorizontal: getResponsiveValue(12, 16),
-        paddingVertical: getResponsiveValue(6, 8),
-        borderRadius: getResponsiveValue(8, 10),
+        paddingHorizontal: getSize(12, 13, 14, 16, 20),
+        paddingVertical: getSize(6, 6.5, 7, 8, 10),
+        borderRadius: getSize(8, 9, 10, 10, 12),
     },
     statusText: {
         fontFamily: 'Cairo_600SemiBold',
-        fontSize: getResponsiveValue(isSmallScreen ? 11 : 12, 14),
+        fontSize: getSize(11, 11.5, 12, 14, 16),
     },
     imageContainer: {
         position: 'relative',
         width: '100%',
-        height: getResponsiveValue(isSmallScreen ? 100 : 120, 140),
-        borderRadius: getResponsiveValue(8, 10),
+        height: getSize(100, 110, 120, 140, 160),
+        borderRadius: getSize(8, 9, 10, 10, 12),
         overflow: 'hidden',
-        marginBottom: getResponsiveValue(12, 16),
+        marginBottom: getSize(12, 13, 14, 16, 20),
         backgroundColor: '#f1f5f9',
     },
     image: {
@@ -74,23 +72,23 @@ export const styles = StyleSheet.create({
         color: 'white',
     },
     footer: {
-        flexDirection: 'row-reverse',
+        flexDirection: (isRTL ? 'row-reverse' : 'row') as const,
         justifyContent: 'space-between',
         alignItems: 'center',
     },
     totalSection: {
-        flexDirection: 'row-reverse',
+        flexDirection: (isRTL ? 'row-reverse' : 'row') as const,
         alignItems: 'baseline',
         gap: 8,
     },
     totalLabel: {
         fontFamily: 'Cairo_500Medium',
-        fontSize: getResponsiveValue(isSmallScreen ? 12 : 13, 15),
+        fontSize: getSize(12, 12.5, 13, 15, 17),
         color: '#64748b',
     },
     totalAmount: {
         fontFamily: 'Cairo_700Bold',
-        fontSize: getResponsiveValue(isSmallScreen ? 15 : 16, 18),
+        fontSize: getSize(15, 15.5, 16, 18, 20),
         color: COLORS.primary,
     },
 });

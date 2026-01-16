@@ -1,13 +1,13 @@
 // File: src/screens/landing/StyleSheets/LandingScreen.styles.ts
 // Purpose: Styles for LandingScreen component
 
-import { StyleSheet, Dimensions } from 'react-native';
+import { StyleSheet } from 'react-native';
 
-const { width } = Dimensions.get('window');
-const isTablet = width >= 768;
+type GetSizeFunction = (small: number, medium: number, large: number, tablet: number, desktop: number) => number;
 
-export const styles = StyleSheet.create({
-    container: {
+export const getStyles = (getSize: GetSizeFunction) => {
+    return StyleSheet.create({
+        container: {
         flex: 1,
         backgroundColor: 'black',
     },
@@ -16,29 +16,29 @@ export const styles = StyleSheet.create({
         justifyContent: 'flex-end',
     },
     contentContainer: {
-        maxWidth: isTablet ? 500 : '100%',
+        maxWidth: getSize(400, 450, 500, 600, 700),
         alignSelf: 'center',
         width: '100%',
-        paddingHorizontal: isTablet ? 48 : 32,
-        paddingBottom: isTablet ? 64 : 48,
+        paddingHorizontal: getSize(28, 30, 32, 48, 64),
+        paddingBottom: getSize(40, 44, 48, 64, 80),
     },
     logo: {
         backgroundColor: '#1E3A5F',
-        borderRadius: 16,
+        borderRadius: getSize(14, 15, 16, 18, 20),
         alignItems: 'center',
         justifyContent: 'center',
-        marginBottom: 32,
+        marginBottom: getSize(28, 30, 32, 40, 48),
         alignSelf: 'flex-end',
-        width: isTablet ? 80 : 64,
-        height: isTablet ? 80 : 64,
+        width: getSize(56, 60, 64, 80, 96),
+        height: getSize(56, 60, 64, 80, 96),
     },
     headline: {
         color: 'white',
         fontFamily: 'Cairo_700Bold',
         textAlign: 'right',
-        marginBottom: 16,
-        lineHeight: isTablet ? 60 : 48,
-        fontSize: isTablet ? 48 : 36,
+        marginBottom: getSize(12, 14, 16, 20, 24),
+        lineHeight: getSize(42, 45, 48, 60, 72),
+        fontSize: getSize(32, 34, 36, 48, 56),
     },
     headlineAccent: {
         color: '#1E3A5F',
@@ -47,48 +47,49 @@ export const styles = StyleSheet.create({
         color: '#9CA3AF',
         fontFamily: 'Cairo_500Medium',
         textAlign: 'right',
-        marginBottom: 40,
-        lineHeight: isTablet ? 28 : 24,
-        fontSize: isTablet ? 18 : 16,
+        marginBottom: getSize(32, 36, 40, 48, 56),
+        lineHeight: getSize(20, 22, 24, 28, 32),
+        fontSize: getSize(14, 15, 16, 18, 20),
     },
     buttonsContainer: {
-        gap: 16,
+        gap: getSize(12, 14, 16, 20, 24),
     },
     primaryButton: {
         width: '100%',
         backgroundColor: '#1E3A5F',
-        borderRadius: 16,
+        borderRadius: getSize(14, 15, 16, 18, 20),
         alignItems: 'center',
-        paddingVertical: isTablet ? 20 : 16,
+        paddingVertical: getSize(14, 15, 16, 20, 24),
     },
     primaryButtonText: {
         color: 'white',
         fontFamily: 'Cairo_700Bold',
-        fontSize: isTablet ? 20 : 18,
+        fontSize: getSize(16, 17, 18, 20, 22),
     },
     secondaryButton: {
         width: '100%',
         backgroundColor: 'rgba(255, 255, 255, 0.1)',
         borderWidth: 1,
         borderColor: 'rgba(255, 255, 255, 0.2)',
-        borderRadius: 16,
+        borderRadius: getSize(14, 15, 16, 18, 20),
         alignItems: 'center',
-        paddingVertical: isTablet ? 20 : 16,
+        paddingVertical: getSize(14, 15, 16, 20, 24),
     },
     secondaryButtonText: {
         color: 'white',
         fontFamily: 'Cairo_700Bold',
-        fontSize: isTablet ? 20 : 18,
+        fontSize: getSize(16, 17, 18, 20, 22),
     },
     guestButton: {
         width: '100%',
-        paddingVertical: 8,
+        paddingVertical: getSize(6, 7, 8, 10, 12),
         alignItems: 'center',
     },
     guestButtonText: {
         color: '#6B7280',
         fontFamily: 'Cairo_500Medium',
         textDecorationLine: 'underline',
-        fontSize: isTablet ? 16 : 14,
+        fontSize: getSize(13, 13.5, 14, 16, 18),
     },
-});
+    });
+};

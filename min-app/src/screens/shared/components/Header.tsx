@@ -4,14 +4,12 @@
 import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React from 'react';
-import { Dimensions, Text, TouchableOpacity, View } from 'react-native';
+import { Text, TouchableOpacity, View } from 'react-native';
 import { COLORS } from '../../../constants/theme';
-import { useLanguage } from '../../account/_hooks';
+import { useRTL } from '../../../hooks/useRTL';
+import { useResponsive } from '../../../hooks/useResponsive';
 import { HeaderProps } from '../types/interfaces';
-import { styles } from '../StyleSheets/Header.styles';
-
-const { width } = Dimensions.get('window');
-const isTablet = width >= 768;
+import { getStyles } from '../StyleSheets/Header.styles';
 
 export const Header: React.FC<HeaderProps> = ({
     title,
@@ -21,9 +19,10 @@ export const Header: React.FC<HeaderProps> = ({
     backButtonText,
 }) => {
     const router = useRouter();
-    const { selectedLanguage } = useLanguage();
-    const isRTL = selectedLanguage === 'ar';
-    const backIcon = isRTL ? 'arrow-left' : 'arrow-right';
+    const { isRTL, flexDirection } = useRTL();
+    const { getSize, iconSize } = useResponsive();
+    const styles = getStyles(isRTL, getSize);
+    const backIcon = isRTL ? 'arrow-right' : 'arrow-left';
 
     const handleBack = () => {
         if (onBack) {
@@ -45,11 +44,11 @@ export const Header: React.FC<HeaderProps> = ({
         return (
             <TouchableOpacity onPress={handleBack} style={styles.backButton}>
                 {showText ? (
-                    <Text style={[styles.backButtonText, { fontSize: isTablet ? 16 : 14 }]}>
+                    <Text style={styles.backButtonText}>
                         {backText}
                     </Text>
                 ) : (
-                    <Feather name={backIcon} size={isTablet ? 26 : 24} color={COLORS.text} />
+                    <Feather name={backIcon} size={iconSize.md} color={COLORS.text} />
                 )}
             </TouchableOpacity>
         );
@@ -58,7 +57,7 @@ export const Header: React.FC<HeaderProps> = ({
     return (
         <View style={styles.header}>
             {renderBackButton()}
-            <Text style={[styles.headerTitle, { fontSize: isTablet ? 18 : 16 }]}>{title}</Text>
+            <Text style={styles.headerTitle}>{title}</Text>
             {rightAction || <View style={styles.backButton} />}
         </View>
     );

@@ -4,17 +4,14 @@
 import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useCallback, useRef, useState } from 'react';
-import { Dimensions, Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { FlashList } from '@shopify/flash-list';
 import { Header, SearchBar } from '../shared';
 import { COLORS } from '../../constants/theme';
+import { useResponsive } from '../../hooks/useResponsive';
 import { FilterBottomSheet, FilterBottomSheetRef } from '../shared';
 import { ServicesScreenProvider } from './types/services';
-
-const { width, height } = Dimensions.get('window');
-const isTablet = width >= 768;
-const isSmallScreen = width < 375;
 
 const TYPE_FILTERS = [
     { id: 'all', label: 'الكل' },
@@ -102,6 +99,8 @@ const PROVIDERS = [
 export default function ServicesScreen() {
     const router = useRouter();
     const bottomSheetRef = useRef<FilterBottomSheetRef>(null);
+    const { getSize, fontSize, iconSize, isTablet } = useResponsive();
+    const styles = getStyles(getSize, fontSize, iconSize);
 
     const [savedProviders, setSavedProviders] = useState<Set<string>>(new Set());
     const [activeTypeFilter, setActiveTypeFilter] = useState('all');
@@ -165,7 +164,7 @@ export default function ServicesScreen() {
                 />
                 {provider.verified && (
                     <View style={styles.verifiedBadge}>
-                        <Feather name="check" size={isTablet ? 12 : 10} color="white" />
+                        <Feather name="check" size={iconSize.xs} color="white" />
                     </View>
                 )}
             </View>
@@ -188,7 +187,7 @@ export default function ServicesScreen() {
                     >
                         <Feather
                             name="heart"
-                            size={isTablet ? 20 : 18}
+                            size={iconSize.md}
                             color={savedProviders.has(provider.id) ? "#EF4444" : COLORS.textLight}
                             fill={savedProviders.has(provider.id) ? "#EF4444" : "none"}
                         />
@@ -197,7 +196,7 @@ export default function ServicesScreen() {
                 <View style={styles.bottomRow}>
                     <View style={styles.ratingPriceRow}>
                         <View style={styles.ratingRow}>
-                            <Feather name="star" size={isTablet ? 16 : 14} color="#F59E0B" fill="#F59E0B" />
+                            <Feather name="star" size={iconSize.sm} color="#F59E0B" fill="#F59E0B" />
                             <Text style={styles.ratingText}>{provider.rating}</Text>
                             <Text style={styles.reviewCount}>({provider.reviews})</Text>
                         </View>
@@ -223,7 +222,7 @@ export default function ServicesScreen() {
                         onPress={openFilterSheet}
                         style={styles.filterButton}
                     >
-                        <Feather name="sliders" size={20} color={COLORS.text} />
+                        <Feather name="sliders" size={iconSize.md} color={COLORS.text} />
                     </TouchableOpacity>
                 </View>
 
@@ -267,7 +266,7 @@ export default function ServicesScreen() {
                         contentContainerStyle={{ paddingBottom: 16 }}
                         ListEmptyComponent={
                             <View style={styles.emptyState}>
-                                <Feather name="search" size={48} color="#cbd5e1" />
+                                <Feather name="search" size={iconSize.xl} color="#cbd5e1" />
                                 <Text style={styles.emptyTitle}>لا توجد نتائج</Text>
                                 <Text style={styles.emptySubtitle}>جرب تغيير معايير البحث</Text>
                             </View>
@@ -294,7 +293,13 @@ export default function ServicesScreen() {
     );
 }
 
-const getStyles = () => StyleSheet.create({
+const getStyles = (
+    getSize: (small: number, medium: number, large: number, tablet: number, desktop: number) => number,
+    fontSize: { xs: number; sm: number; base: number; lg: number; xl: number; '2xl': number; '3xl': number },
+    iconSize: { sm: number; md: number; lg: number; xl: number }
+) => {
+    const { StyleSheet } = require('react-native');
+    return StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#f8fafc',
@@ -307,60 +312,60 @@ const getStyles = () => StyleSheet.create({
         flexDirection: 'row-reverse',
         alignItems: 'center',
         justifyContent: 'space-between',
-        paddingHorizontal: isTablet ? 24 : 16,
-        paddingVertical: isTablet ? 16 : 12,
+        paddingHorizontal: getSize(14, 15, 16, 24, 32),
+        paddingVertical: getSize(10, 11, 12, 16, 20),
         borderBottomWidth: 1,
         borderBottomColor: '#f1f5f9',
     },
     headerTitle: {
         fontFamily: 'Cairo_700Bold',
-        fontSize: isTablet ? 22 : isSmallScreen ? 16 : 18,
+        fontSize: getSize(16, 17, 18, 22, 26),
         color: '#1e293b',
     },
     searchContainer: {
         flexDirection: 'row-reverse',
         alignItems: 'center',
-        gap: isTablet ? 12 : 8,
-        paddingHorizontal: isTablet ? 24 : 16,
-        paddingTop: isTablet ? 16 : 12,
-        paddingBottom: isTablet ? 16 : 12,
+        gap: getSize(8, 10, 12, 16, 20),
+        paddingHorizontal: getSize(14, 15, 16, 24, 32),
+        paddingTop: getSize(10, 11, 12, 16, 20),
+        paddingBottom: getSize(10, 11, 12, 16, 20),
     },
     searchInputContainer: {
         flex: 1,
         flexDirection: 'row-reverse',
         alignItems: 'center',
         backgroundColor: '#f8fafc',
-        borderRadius: isTablet ? 12 : 8,
-        paddingHorizontal: isTablet ? 16 : 12,
-        paddingVertical: isTablet ? 14 : 10,
+        borderRadius: getSize(8, 10, 12, 14, 16),
+        paddingHorizontal: getSize(12, 14, 16, 20, 24),
+        paddingVertical: getSize(10, 12, 14, 16, 20),
     },
     searchInput: {
         flex: 1,
         textAlign: 'right',
         fontFamily: 'Cairo_500Medium',
         color: '#1e293b',
-        marginRight: isTablet ? 12 : 8,
-        fontSize: isTablet ? 16 : isSmallScreen ? 13 : 14,
+        marginRight: getSize(8, 10, 12, 16, 20),
+        fontSize: getSize(13, 14, 15, 16, 18),
     },
     filterButton: {
-        width: isTablet ? 52 : 44,
-        height: isTablet ? 52 : 44,
+        width: getSize(40, 42, 44, 52, 60),
+        height: getSize(40, 42, 44, 52, 60),
         backgroundColor: '#f8fafc',
-        borderRadius: isTablet ? 12 : 8,
+        borderRadius: getSize(8, 10, 12, 14, 16),
         alignItems: 'center',
         justifyContent: 'center',
     },
     typeFiltersContainer: {
-        marginBottom: isTablet ? 12 : 8,
+        marginBottom: getSize(6, 7, 8, 12, 16),
     },
     typeFilterChip: {
-        paddingHorizontal: isTablet ? 20 : 16,
-        paddingVertical: isTablet ? 10 : 8,
-        borderRadius: isTablet ? 10 : 8,
+        paddingHorizontal: getSize(14, 15, 16, 20, 24),
+        paddingVertical: getSize(6, 7, 8, 10, 12),
+        borderRadius: getSize(8, 9, 10, 12, 14),
     },
     typeFilterText: {
         fontFamily: 'Cairo_700Bold',
-        fontSize: isTablet ? 15 : isSmallScreen ? 12 : 13,
+        fontSize: getSize(12, 13, 14, 15, 16),
     },
     listContainer: {
         flex: 1,
@@ -368,29 +373,29 @@ const getStyles = () => StyleSheet.create({
     providerItem: {
         flexDirection: 'row-reverse',
         alignItems: 'center',
-        paddingHorizontal: isTablet ? 24 : 16,
-        paddingVertical: isTablet ? 18 : 14,
+        paddingHorizontal: getSize(14, 15, 16, 24, 32),
+        paddingVertical: getSize(12, 13, 14, 18, 22),
         borderBottomWidth: 1,
         borderBottomColor: '#f1f5f9',
         backgroundColor: 'white',
     },
     avatarWrapper: {
         position: 'relative',
-        marginLeft: isTablet ? 16 : 12,
+        marginLeft: getSize(10, 11, 12, 16, 20),
     },
     profileAvatar: {
-        width: isTablet ? 72 : isSmallScreen ? 50 : 56,
-        height: isTablet ? 72 : isSmallScreen ? 50 : 56,
-        borderRadius: isTablet ? 36 : isSmallScreen ? 25 : 28,
+        width: getSize(50, 53, 56, 72, 88),
+        height: getSize(50, 53, 56, 72, 88),
+        borderRadius: getSize(25, 26.5, 28, 36, 44),
         backgroundColor: '#f1f5f9',
     },
     verifiedBadge: {
         position: 'absolute',
         bottom: -2,
         right: -2,
-        width: isTablet ? 22 : 18,
-        height: isTablet ? 22 : 18,
-        borderRadius: isTablet ? 11 : 9,
+        width: getSize(16, 17, 18, 22, 26),
+        height: getSize(16, 17, 18, 22, 26),
+        borderRadius: getSize(8, 8.5, 9, 11, 13),
         backgroundColor: '#3b82f6',
         alignItems: 'center',
         justifyContent: 'center',
@@ -404,7 +409,7 @@ const getStyles = () => StyleSheet.create({
         flexDirection: 'row-reverse',
         alignItems: 'flex-start',
         justifyContent: 'space-between',
-        marginBottom: isTablet ? 8 : 6,
+        marginBottom: getSize(5, 5.5, 6, 8, 10),
     },
     nameContainer: {
         flex: 1,
@@ -412,7 +417,7 @@ const getStyles = () => StyleSheet.create({
     providerName: {
         fontFamily: 'Cairo_700Bold',
         color: '#1e293b',
-        fontSize: isTablet ? 18 : isSmallScreen ? 14 : 16,
+        fontSize: getSize(14, 15, 16, 18, 20),
         textAlign: 'right',
         marginBottom: 4,
     },
@@ -423,18 +428,18 @@ const getStyles = () => StyleSheet.create({
     providerCategory: {
         fontFamily: 'Cairo_500Medium',
         color: '#64748b',
-        fontSize: isTablet ? 15 : isSmallScreen ? 12 : 13,
+        fontSize: getSize(12, 13, 14, 15, 16),
         textAlign: 'right',
     },
     categorySeparator: {
         fontFamily: 'Cairo_500Medium',
         color: '#94a3b8',
-        fontSize: isTablet ? 15 : isSmallScreen ? 12 : 13,
+        fontSize: getSize(12, 13, 14, 15, 16),
     },
     providerLocation: {
         fontFamily: 'Cairo_500Medium',
         color: '#64748b',
-        fontSize: isTablet ? 15 : isSmallScreen ? 12 : 13,
+        fontSize: getSize(12, 13, 14, 15, 16),
         textAlign: 'right',
     },
     bottomRow: {
@@ -445,7 +450,7 @@ const getStyles = () => StyleSheet.create({
     ratingPriceRow: {
         flexDirection: 'row-reverse',
         alignItems: 'center',
-        gap: isTablet ? 16 : 12,
+        gap: getSize(10, 11, 12, 16, 20),
         flex: 1,
     },
     ratingRow: {
@@ -456,16 +461,16 @@ const getStyles = () => StyleSheet.create({
     ratingText: {
         fontFamily: 'Cairo_700Bold',
         color: '#1e293b',
-        fontSize: isTablet ? 16 : isSmallScreen ? 12 : 14,
+        fontSize: getSize(12, 13, 14, 16, 18),
     },
     reviewCount: {
         fontFamily: 'Cairo_500Medium',
         color: '#94a3b8',
-        fontSize: isTablet ? 14 : isSmallScreen ? 10 : 12,
+        fontSize: getSize(10, 11, 12, 14, 16),
     },
     price: {
         fontFamily: 'Cairo_700Bold',
-        fontSize: isTablet ? 17 : isSmallScreen ? 13 : 15,
+        fontSize: getSize(13, 14, 15, 17, 19),
         color: COLORS.primary,
     },
     saveButton: {
@@ -475,20 +480,19 @@ const getStyles = () => StyleSheet.create({
     emptyState: {
         alignItems: 'center',
         justifyContent: 'center',
-        paddingVertical: 80,
+        paddingVertical: getSize(60, 70, 80, 100, 120),
     },
     emptyTitle: {
         fontFamily: 'Cairo_700Bold',
         color: '#94a3b8',
-        fontSize: 18,
-        marginTop: 16,
+        fontSize: fontSize.lg,
+        marginTop: getSize(12, 14, 16, 20, 24),
     },
     emptySubtitle: {
         fontFamily: 'Cairo_500Medium',
         color: '#94a3b8',
-        fontSize: 14,
-        marginTop: 8,
+        fontSize: fontSize.base,
+        marginTop: getSize(6, 7, 8, 10, 12),
     },
-});
-
-const styles = getStyles();
+    });
+};

@@ -4,8 +4,9 @@
 import { Link } from 'expo-router';
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { Image, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { useResponsive } from '../../../hooks/useResponsive';
 import { ServiceBanner } from './types/home';
-import { styles, BANNER_WIDTH } from './StyleSheets/AIDesignBanner.styles';
+import { getStyles } from './StyleSheets/AIDesignBanner.styles';
 
 const SERVICE_BANNERS: ServiceBanner[] = [
     {
@@ -41,6 +42,9 @@ const SERVICE_BANNERS: ServiceBanner[] = [
 const AIDesignBannerComponent = () => {
     const scrollViewRef = useRef<ScrollView>(null);
     const [currentIndex, setCurrentIndex] = useState(0);
+    const { getSize, width, padding } = useResponsive();
+    const styles = getStyles(width, getSize);
+    const BANNER_WIDTH = width - padding * 2;
 
     useEffect(() => {
         const interval = setInterval(() => {
@@ -56,13 +60,13 @@ const AIDesignBannerComponent = () => {
         }, 5000);
 
         return () => clearInterval(interval);
-    }, []);
+    }, [BANNER_WIDTH]);
 
     const handleScroll = useCallback((event: any) => {
         const contentOffsetX = event.nativeEvent.contentOffset.x;
         const index = SERVICE_BANNERS.length - 1 - Math.round(contentOffsetX / BANNER_WIDTH);
         setCurrentIndex(index);
-    }, []);
+    }, [BANNER_WIDTH]);
 
     return (
         <View style={styles.container}>

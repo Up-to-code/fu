@@ -1,24 +1,25 @@
 // File: src/screens/shared/StyleSheets/ProductGrid.styles.ts
 // Purpose: Styles for ProductGrid component
 
-import { Dimensions, StyleSheet } from 'react-native';
+import { StyleSheet } from 'react-native';
 
-const { width } = Dimensions.get('window');
-const isTablet = width >= 768;
+type GetSizeFunction = (small: number, medium: number, large: number, tablet: number, desktop: number) => number;
 
-export const styles = StyleSheet.create({
-    gridContainer: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        justifyContent: 'space-between',
-    },
-    cardWrapper: {
-        marginBottom: isTablet ? 20 : 16,
-    },
-    horizontalScrollContainer: {
-        paddingHorizontal: isTablet ? 24 : 16,
-    },
-    horizontalCardWrapper: {
-        marginLeft: 12,
-    },
-});
+export const getStyles = (getSize: GetSizeFunction) => {
+    return StyleSheet.create({
+        gridContainer: {
+            flexDirection: 'row',
+            flexWrap: 'wrap',
+            justifyContent: 'space-between',
+        },
+        cardWrapper: {
+            marginBottom: getSize(14, 15, 16, 20, 24),
+        },
+        horizontalScrollContainer: {
+            paddingHorizontal: getSize(14, 15, 16, 24, 32),
+        },
+        horizontalCardWrapper: {
+            marginLeft: getSize(10, 11, 12, 16, 20),
+        },
+    });
+};

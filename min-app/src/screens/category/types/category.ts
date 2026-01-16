@@ -4,4 +4,6 @@
 export interface CategoryDetailsScreenProps {
     id: string;
     name: string;
+    fromSearch?: string;
+    searchQuery?: string;
 }

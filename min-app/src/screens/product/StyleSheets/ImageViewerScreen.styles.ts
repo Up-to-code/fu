@@ -3,7 +3,14 @@
 
 import { StyleSheet } from 'react-native';
 
-export const styles = StyleSheet.create({
+type GetSizeFunction = (small: number, medium: number, large: number, tablet: number, desktop: number) => number;
+
+export const getStyles = (
+    getSize: GetSizeFunction,
+    fontSize: { xs: number; sm: number; base: number; lg: number; xl: number; '2xl': number; '3xl': number },
+    iconSize: { sm: number; md: number; lg: number; xl: number }
+) => {
+    return StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: 'black',
@@ -19,24 +26,24 @@ export const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        paddingHorizontal: 16,
-        paddingVertical: 8,
+        paddingHorizontal: getSize(14, 15, 16, 20, 24),
+        paddingVertical: getSize(6, 7, 8, 10, 12),
     },
     closeButton: {
-        width: 40,
-        height: 40,
+        width: getSize(36, 38, 40, 44, 48),
+        height: getSize(36, 38, 40, 44, 48),
         backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        borderRadius: 20,
+        borderRadius: getSize(18, 19, 20, 22, 24),
         alignItems: 'center',
         justifyContent: 'center',
     },
     imageCounter: {
         color: 'white',
         fontFamily: 'Cairo_700Bold',
-        fontSize: 16,
+        fontSize: fontSize.base,
     },
     spacer: {
-        width: 40,
+        width: getSize(36, 38, 40, 44, 48),
     },
     imageContainer: {
         alignItems: 'center',
@@ -52,14 +59,14 @@ export const styles = StyleSheet.create({
         flexDirection: 'row',
     },
     thumbnailsContent: {
-        paddingHorizontal: 16,
-        paddingBottom: 16,
+        paddingHorizontal: getSize(14, 15, 16, 20, 24),
+        paddingBottom: getSize(12, 14, 16, 20, 24),
         gap: 8,
     },
     thumbnail: {
-        width: 64,
-        height: 64,
-        borderRadius: 12,
+        width: getSize(56, 60, 64, 72, 80),
+        height: getSize(56, 60, 64, 72, 80),
+        borderRadius: getSize(10, 11, 12, 14, 16),
         overflow: 'hidden',
         borderWidth: 2,
     },
@@ -82,13 +89,14 @@ export const styles = StyleSheet.create({
     },
     zoomHintContainer: {
         backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        paddingHorizontal: 16,
-        paddingVertical: 8,
-        borderRadius: 20,
+        paddingHorizontal: getSize(14, 15, 16, 20, 24),
+        paddingVertical: getSize(6, 7, 8, 10, 12),
+        borderRadius: getSize(18, 19, 20, 22, 24),
     },
     zoomHintText: {
         color: 'rgba(255, 255, 255, 0.7)',
-        fontSize: 12,
+        fontSize: fontSize.xs,
         fontFamily: 'Cairo_500Medium',
     },
-});
+    });
+};

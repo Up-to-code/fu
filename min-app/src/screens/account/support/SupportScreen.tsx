@@ -2,13 +2,12 @@
 import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { Dimensions, LayoutAnimation, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { LayoutAnimation, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Header, FormTextArea, PrimaryButton } from '../../shared';
 import { ActionButton } from '../../shared';
 import { COLORS } from '../../../constants/theme';
-
-const isTablet = Dimensions.get('window').width >= 768;
+import { useResponsive } from '../../../hooks/useResponsive';
 
 const FAQS = [
     { q: 'كيف يمكنني تتبع طلبي؟', a: 'يمكنك تتبع طلبك من خلال الذهاب إلى "طلباتي" في صفحة الحساب والنقر على الطلب لمعرفة حالته وتفاصيل التتبع.' },

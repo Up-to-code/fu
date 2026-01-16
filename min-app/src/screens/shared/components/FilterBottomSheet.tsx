@@ -3,13 +3,12 @@
 
 import { Feather } from '@expo/vector-icons';
 import React, { forwardRef, useImperativeHandle, useState } from 'react';
-import { Animated, Dimensions, Modal, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { Animated, Modal, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { COLORS } from '../../../constants/theme';
+import { useResponsive } from '../../../hooks/useResponsive';
 import { FilterBottomSheetProps, FilterBottomSheetRef, FilterOption } from '../types/ui';
-import { styles } from '../StyleSheets/FilterBottomSheet.styles';
-
-const { height: SCREEN_HEIGHT } = Dimensions.get('window');
+import { getStyles } from '../StyleSheets/FilterBottomSheet.styles';
 
 interface FilterChipProps {
     label: string;
@@ -82,8 +81,10 @@ export const FilterBottomSheet = forwardRef<FilterBottomSheetRef, FilterBottomSh
         },
         ref
     ) => {
+        const { height, getSize, iconSize } = useResponsive();
+        const styles = getStyles(getSize);
         const [visible, setVisible] = useState(false);
-        const [slideAnim] = useState(new Animated.Value(SCREEN_HEIGHT));
+        const [slideAnim] = useState(new Animated.Value(height));
 
         const open = () => {
             setVisible(true);
@@ -97,7 +98,7 @@ export const FilterBottomSheet = forwardRef<FilterBottomSheetRef, FilterBottomSh
 
         const close = () => {
             Animated.timing(slideAnim, {
-                toValue: SCREEN_HEIGHT,
+                toValue: height,
                 duration: 300,
                 useNativeDriver: true,
             }).start(() => {
@@ -134,7 +135,7 @@ export const FilterBottomSheet = forwardRef<FilterBottomSheetRef, FilterBottomSh
                         <View style={styles.header}>
                             <Text style={styles.headerTitle}>الفلاتر</Text>
                             <TouchableOpacity onPress={close} style={styles.closeButton}>
-                                <Feather name="x" size={24} color={COLORS.text} />
+                                <Feather name="x" size={iconSize.md} color={COLORS.text} />
                             </TouchableOpacity>
                         </View>
 

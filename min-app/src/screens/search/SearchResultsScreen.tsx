@@ -8,7 +8,9 @@ import { EmptyState } from '../shared';
 import { SearchBar, ProductGrid, LoadingSpinner, FilterBottomSheet, FilterBottomSheetRef, FilterOption } from '../shared';
 import { useSearch } from './_hooks';
 import { COLORS } from '../../constants/theme';
-import { styles } from './StyleSheets/SearchResultsScreen.styles';
+import { useRTL } from '../../hooks/useRTL';
+import { useResponsive } from '../../hooks/useResponsive';
+import { getStyles } from './StyleSheets/SearchResultsScreen.styles';
 
 const RESULTS = [
     { id: '1', name: 'صوفا مودرن رمادي', price: 2499, image: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=500', rating: 4.5 },
@@ -56,8 +58,14 @@ const SORT_OPTIONS: FilterOption[] = [
 
 export default function SearchResultsScreen() {
     const router = useRouter();
-    const { q } = useLocalSearchParams<{ q: string }>();
+    const { q, imageSearch } = useLocalSearchParams<{ q: string; imageSearch?: string }>();
+    const { isRTL } = useRTL();
+    const { getSize } = useResponsive();
+    const styles = getStyles(isRTL, getSize);
     const bottomSheetRef = useRef<FilterBottomSheetRef>(null);
+    
+    // Handle image search - if imageSearch param exists, show image search results
+    const isImageSearch = !!imageSearch;
     
     const {
         query,
@@ -154,7 +162,7 @@ export default function SearchResultsScreen() {
             {/* Header with Search Bar and Filter Button */}
             <View style={styles.header}>
                 <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-                    <Feather name="arrow-right" size={24} color={COLORS.text} />
+                    <Feather name={isRTL ? "arrow-right" : "arrow-left"} size={24} color={COLORS.text} />
                 </TouchableOpacity>
                 <View style={styles.searchContainer}>
                     <SearchBar
@@ -182,7 +190,10 @@ export default function SearchResultsScreen() {
             {/* Count and Sort */}
             <View style={styles.countSortContainer}>
                 <Text style={styles.countText}>
-                    {resultsCount} نتيجة لـ &quot;{q}&quot;
+                    {isImageSearch 
+                        ? `${resultsCount} نتيجة للبحث بالصورة`
+                        : `${resultsCount} نتيجة لـ "${q}"`
+                    }
                 </Text>
                 <View style={styles.sortContainer}>
                     <Text style={styles.sortLabel}>الترتيب:</Text>
@@ -226,7 +237,13 @@ export default function SearchResultsScreen() {
                 ) : resultsCount > 0 ? (
                     <ProductGrid
                         products={displayResults}
-                        onProductPress={p => router.push(`/product/${p.id}`)}
+                        onProductPress={p => router.push({
+                            pathname: `/product/${p.id}`,
+                            params: { 
+                                fromSearch: 'true',
+                                searchQuery: q
+                            }
+                        })}
                     />
                 ) : (
                     <EmptyState

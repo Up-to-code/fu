@@ -3,13 +3,13 @@
 
 import { Feather } from '@expo/vector-icons';
 import { router, useLocalSearchParams } from 'expo-router';
-import React, { useState, useMemo, useRef } from 'react';
-import { ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View, Alert, Animated, PanResponder, Dimensions } from 'react-native';
+import React, { useState, useMemo } from 'react';
+import { ScrollView, Text, TextInput, TouchableOpacity, View, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import * as Haptics from 'expo-haptics';
-import { Header, FormInput, PrimaryButton } from '../shared';
+import { Header, FormInput, PrimaryButton, SwipeToConfirm } from '../shared';
 import { useServiceBooking } from './_hooks';
 import { COLORS } from '../../constants/theme';
+import { useResponsive } from '../../hooks/useResponsive';
 import { ServiceBookingStatus } from '../../types/orders';
 import { BookingLocation } from './types/services';
 
@@ -42,183 +42,10 @@ const PROVIDERS = {
     },
 };
 
-// Custom Swipe to Confirm Component for Booking Screen
-const BookingSwipeButton: React.FC<{
-    onConfirm: () => void;
-    disabled: boolean;
-    label: string;
-}> = ({ onConfirm, disabled, label }) => {
-    const { width: SCREEN_WIDTH } = Dimensions.get('window');
-    const BUTTON_WIDTH = SCREEN_WIDTH - 40;
-    const THUMB_SIZE = 56;
-    const PADDING = 4;
-    const MAX_TRANSLATE = BUTTON_WIDTH - THUMB_SIZE - PADDING * 2;
-
-    const translateX = useRef(new Animated.Value(0)).current;
-    const [isConfirmed, setIsConfirmed] = useState(false);
-
-    const panResponder = useRef(
-        PanResponder.create({
-            onStartShouldSetPanResponder: () => !disabled && !isConfirmed,
-            onMoveShouldSetPanResponder: (_, gestureState) => {
-                // More aggressive gesture capture for horizontal swipes
-                const isHorizontal = Math.abs(gestureState.dx) > Math.abs(gestureState.dy);
-                const hasMovement = Math.abs(gestureState.dx) > 5 || Math.abs(gestureState.dy) > 5;
-                return !disabled && !isConfirmed && isHorizontal && hasMovement;
-            },
-            onPanResponderGrant: () => {
-                if (!disabled && !isConfirmed) {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                }
-            },
-            onPanResponderMove: (_, gestureState) => {
-                if (!disabled && !isConfirmed) {
-                    // RTL: negative dx means swiping left (forward in RTL)
-                    const newValue = Math.max(0, Math.min(-gestureState.dx, MAX_TRANSLATE));
-                    translateX.setValue(newValue);
-                }
-            },
-            onPanResponderRelease: (_, gestureState) => {
-                if (disabled || isConfirmed) return;
-
-                const swipeDistance = -gestureState.dx;
-                const threshold = MAX_TRANSLATE * 0.7;
-
-                if (swipeDistance > threshold) {
-                    // Complete the swipe
-                    Animated.spring(translateX, {
-                        toValue: MAX_TRANSLATE,
-                        useNativeDriver: true,
-                        tension: 50,
-                        friction: 8,
-                    }).start(() => {
-                        setIsConfirmed(true);
-                        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-                        onConfirm();
-                    });
-                } else {
-                    // Reset
-                    Animated.spring(translateX, {
-                        toValue: 0,
-                        useNativeDriver: true,
-                        tension: 50,
-                        friction: 8,
-                    }).start();
-                }
-            },
-            onPanResponderTerminationRequest: () => false,
-            onPanResponderTerminate: () => {
-                if (!disabled && !isConfirmed) {
-                    Animated.spring(translateX, {
-                        toValue: 0,
-                        useNativeDriver: true,
-                        tension: 50,
-                        friction: 8,
-                    }).start();
-                }
-            },
-        })
-    ).current;
-
-    const textOpacity = translateX.interpolate({
-        inputRange: [0, MAX_TRANSLATE * 0.5],
-        outputRange: [1, 0],
-        extrapolate: 'clamp',
-    });
-
-    const thumbTransform = translateX.interpolate({
-        inputRange: [0, MAX_TRANSLATE],
-        outputRange: [0, -MAX_TRANSLATE],
-        extrapolate: 'clamp',
-    });
-
-    const containerBackgroundColor = disabled
-        ? '#e2e8f0'
-        : isConfirmed
-            ? '#10B981'
-            : COLORS.primary;
-
-    return (
-        <View
-            style={[
-                {
-                    width: BUTTON_WIDTH,
-                    height: THUMB_SIZE + PADDING * 2,
-                    backgroundColor: containerBackgroundColor,
-                    borderRadius: 28,
-                    overflow: 'hidden',
-                    position: 'relative',
-                },
-            ]}
-        >
-            {/* Background Text */}
-            <Animated.View
-                style={[
-                    {
-                        position: 'absolute',
-                        left: 0,
-                        right: 0,
-                        top: 0,
-                        bottom: 0,
-                        flexDirection: 'row-reverse',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: 8,
-                        opacity: textOpacity,
-                    },
-                ]}
-            >
-                <Text
-                    style={{
-                        fontFamily: 'Cairo_700Bold',
-                        fontSize: 16,
-                        color: disabled ? '#94a3b8' : 'white',
-                    }}
-                >
-                    {isConfirmed ? 'تم التأكيد ✓' : label}
-                </Text>
-                {!isConfirmed && (
-                    <Feather name="chevrons-left" size={20} color={disabled ? '#94a3b8' : 'white'} />
-                )}
-            </Animated.View>
-
-            {/* Swipeable Thumb */}
-            {!isConfirmed && (
-                <Animated.View
-                    {...panResponder.panHandlers}
-                    style={[
-                        {
-                            position: 'absolute',
-                            width: THUMB_SIZE,
-                            height: THUMB_SIZE,
-                            top: PADDING,
-                            right: PADDING,
-                            backgroundColor: 'white',
-                            borderRadius: 28,
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            shadowColor: '#000',
-                            shadowOffset: { width: 0, height: 2 },
-                            shadowOpacity: 0.2,
-                            shadowRadius: 4,
-                            elevation: 4,
-                            transform: [{ translateX: thumbTransform }],
-                        },
-                    ]}
-                >
-                    <Feather
-                        name="arrow-left"
-                        size={24}
-                        color={disabled ? '#94a3b8' : COLORS.primary}
-                    />
-                </Animated.View>
-            )}
-        </View>
-    );
-};
-
 export default function BookingScreen() {
     const { id } = useLocalSearchParams();
+    const { getSize, fontSize, iconSize } = useResponsive();
+    const styles = getStyles(getSize, fontSize, iconSize);
     const provider = PROVIDERS[id as keyof typeof PROVIDERS];
 
     // If provider not found, show error
@@ -587,7 +414,7 @@ export default function BookingScreen() {
             {/* Bottom - Swipe to Confirm */}
             <SafeAreaView edges={['bottom']} style={styles.bottomContainer}>
                 <View style={styles.bottomContent}>
-                    <BookingSwipeButton
+                    <SwipeToConfirm
                         onConfirm={handleConfirmBooking}
                         disabled={!isFormValid()}
                         label="اسحب لتأكيد الحجز"
@@ -598,227 +425,234 @@ export default function BookingScreen() {
     );
 }
 
-const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#f8fafc' },
-    safeArea: { flex: 1 },
-    header: {
-        flexDirection: 'row-reverse',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingHorizontal: 16,
-        paddingVertical: 12,
-        backgroundColor: 'white',
-        borderBottomWidth: 1,
-        borderBottomColor: '#f1f5f9',
-    },
-    headerTitle: { fontFamily: 'Cairo_700Bold', fontSize: 18, color: '#1e293b' },
-    scrollView: { flex: 1 },
-    scrollContent: { padding: 16, paddingBottom: 20 },
-    section: {
-        backgroundColor: 'white',
-        borderRadius: 12,
-        padding: 16,
-        marginBottom: 12,
-        borderWidth: 1,
-        borderColor: '#f1f5f9',
-    },
-    sectionTitle: {
-        fontFamily: 'Cairo_700Bold',
-        fontSize: 14,
-        color: '#1e293b',
-        textAlign: 'right',
-        marginBottom: 12,
-    },
-    providerName: {
-        fontFamily: 'Cairo_700Bold',
-        fontSize: 18,
-        color: '#1e293b',
-        textAlign: 'right',
-        marginBottom: 4,
-    },
-    providerCategory: {
-        fontFamily: 'Cairo_500Medium',
-        fontSize: 13,
-        color: '#64748b',
-        textAlign: 'right',
-    },
-    serviceItem: {
-        flexDirection: 'row-reverse',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingVertical: 12,
-        paddingHorizontal: 12,
-        borderRadius: 8,
-        borderWidth: 1,
-        borderColor: '#e2e8f0',
-        marginBottom: 8,
-    },
-    serviceItemSelected: {
-        borderColor: COLORS.primary,
-        backgroundColor: `${COLORS.primary}08`,
-    },
-    serviceInfo: { flex: 1 },
-    serviceLabel: {
-        fontFamily: 'Cairo_600SemiBold',
-        fontSize: 14,
-        color: '#1e293b',
-        textAlign: 'right',
-        marginBottom: 4,
-    },
-    serviceLabelSelected: { color: COLORS.primary },
-    servicePrice: {
-        fontFamily: 'Cairo_500Medium',
-        fontSize: 12,
-        color: '#64748b',
-        textAlign: 'right',
-    },
-    checkbox: {
-        width: 24,
-        height: 24,
-        borderRadius: 6,
-        borderWidth: 2,
-        borderColor: '#e2e8f0',
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    checkboxSelected: {
-        borderColor: COLORS.primary,
-        backgroundColor: COLORS.primary,
-    },
-    datesContainer: {
-        flexDirection: 'row-reverse',
-        gap: 8,
-    },
-    dateCard: {
-        width: 70,
-        padding: 12,
-        borderRadius: 12,
-        borderWidth: 1,
-        borderColor: '#e2e8f0',
-        alignItems: 'center',
-    },
-    dateCardSelected: {
-        borderColor: COLORS.primary,
-        backgroundColor: COLORS.primary,
-    },
-    dateDay: {
-        fontFamily: 'Cairo_500Medium',
-        fontSize: 11,
-        color: '#64748b',
-        marginBottom: 4,
-    },
-    dateNumber: {
-        fontFamily: 'Cairo_700Bold',
-        fontSize: 18,
-        color: '#1e293b',
-        marginBottom: 2,
-    },
-    dateMonth: {
-        fontFamily: 'Cairo_500Medium',
-        fontSize: 10,
-        color: '#64748b',
-    },
-    dateTextSelected: { color: 'white' },
-    timeSlotsGrid: {
-        flexDirection: 'row-reverse',
-        flexWrap: 'wrap',
-        gap: 8,
-    },
-    timeSlot: {
-        width: '48%',
-        paddingVertical: 12,
-        borderRadius: 8,
-        borderWidth: 1,
-        borderColor: '#e2e8f0',
-        alignItems: 'center',
-    },
-    timeSlotSelected: {
-        borderColor: COLORS.primary,
-        backgroundColor: COLORS.primary,
-    },
-    timeSlotText: {
-        fontFamily: 'Cairo_600SemiBold',
-        fontSize: 13,
-        color: '#1e293b',
-    },
-    timeSlotTextSelected: { color: 'white' },
-    locationOptions: {
-        flexDirection: 'row-reverse',
-        gap: 8,
-    },
-    locationOption: {
-        flex: 1,
-        flexDirection: 'row-reverse',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: 8,
-        paddingVertical: 12,
-        borderRadius: 8,
-        borderWidth: 1,
-        borderColor: '#e2e8f0',
-    },
-    locationOptionSelected: {
-        borderColor: COLORS.primary,
-        backgroundColor: `${COLORS.primary}08`,
-    },
-    locationOptionText: {
-        fontFamily: 'Cairo_600SemiBold',
-        fontSize: 13,
-        color: '#64748b',
-    },
-    locationOptionTextSelected: { color: COLORS.primary },
-    input: {
-        backgroundColor: '#f8fafc',
-        borderWidth: 1,
-        borderColor: '#e2e8f0',
-        borderRadius: 8,
-        paddingHorizontal: 12,
-        paddingVertical: 12,
-        fontFamily: 'Cairo_500Medium',
-        fontSize: 14,
-        color: '#1e293b',
-    },
-    textArea: {
-        minHeight: 100,
-        textAlignVertical: 'top',
-    },
-    summarySection: {
-        backgroundColor: '#f8fafc',
-        borderRadius: 12,
-        padding: 16,
-        borderWidth: 1,
-        borderColor: '#e2e8f0',
-        marginBottom: 12,
-    },
-    summaryRow: {
-        flexDirection: 'row-reverse',
-        justifyContent: 'space-between',
-        marginBottom: 8,
-    },
-    summaryLabel: {
-        fontFamily: 'Cairo_600SemiBold',
-        fontSize: 14,
-        color: '#64748b',
-    },
-    summaryValue: {
-        fontFamily: 'Cairo_700Bold',
-        fontSize: 18,
-        color: COLORS.primary,
-    },
-    summaryNote: {
-        fontFamily: 'Cairo_500Medium',
-        fontSize: 11,
-        color: '#94a3b8',
-        textAlign: 'right',
-        lineHeight: 16,
-    },
-    bottomContainer: {
-        backgroundColor: 'white',
-        borderTopWidth: 1,
-        borderTopColor: '#f1f5f9',
-    },
-    bottomContent: {
-        paddingHorizontal: 20,
-        paddingVertical: 16,
-    },
-});
+const getStyles = (
+    getSize: (small: number, medium: number, large: number, tablet: number, desktop: number) => number,
+    fontSize: { xs: number; sm: number; base: number; lg: number; xl: number; '2xl': number; '3xl': number },
+    iconSize: { sm: number; md: number; lg: number; xl: number }
+) => {
+    const { StyleSheet } = require('react-native');
+    return StyleSheet.create({
+        container: { flex: 1, backgroundColor: '#f8fafc' },
+        safeArea: { flex: 1 },
+        header: {
+            flexDirection: 'row-reverse',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            paddingHorizontal: getSize(14, 15, 16, 20, 24),
+            paddingVertical: getSize(10, 11, 12, 14, 16),
+            backgroundColor: 'white',
+            borderBottomWidth: 1,
+            borderBottomColor: '#f1f5f9',
+        },
+        headerTitle: { fontFamily: 'Cairo_700Bold', fontSize: fontSize.base, color: '#1e293b' },
+        scrollView: { flex: 1 },
+        scrollContent: { padding: getSize(14, 15, 16, 20, 24), paddingBottom: getSize(18, 19, 20, 24, 28) },
+        section: {
+            backgroundColor: 'white',
+            borderRadius: getSize(10, 11, 12, 14, 16),
+            padding: getSize(14, 15, 16, 20, 24),
+            marginBottom: getSize(10, 11, 12, 14, 16),
+            borderWidth: 1,
+            borderColor: '#f1f5f9',
+        },
+        sectionTitle: {
+            fontFamily: 'Cairo_700Bold',
+            fontSize: fontSize.sm,
+            color: '#1e293b',
+            textAlign: 'right',
+            marginBottom: getSize(10, 11, 12, 14, 16),
+        },
+        providerName: {
+            fontFamily: 'Cairo_700Bold',
+            fontSize: fontSize.base,
+            color: '#1e293b',
+            textAlign: 'right',
+            marginBottom: 4,
+        },
+        providerCategory: {
+            fontFamily: 'Cairo_500Medium',
+            fontSize: fontSize.xs,
+            color: '#64748b',
+            textAlign: 'right',
+        },
+        serviceItem: {
+            flexDirection: 'row-reverse',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            paddingVertical: getSize(10, 11, 12, 14, 16),
+            paddingHorizontal: getSize(10, 11, 12, 14, 16),
+            borderRadius: getSize(6, 7, 8, 10, 12),
+            borderWidth: 1,
+            borderColor: '#e2e8f0',
+            marginBottom: getSize(6, 7, 8, 10, 12),
+        },
+        serviceItemSelected: {
+            borderColor: COLORS.primary,
+            backgroundColor: `${COLORS.primary}08`,
+        },
+        serviceInfo: { flex: 1 },
+        serviceLabel: {
+            fontFamily: 'Cairo_600SemiBold',
+            fontSize: fontSize.sm,
+            color: '#1e293b',
+            textAlign: 'right',
+            marginBottom: 4,
+        },
+        serviceLabelSelected: { color: COLORS.primary },
+        servicePrice: {
+            fontFamily: 'Cairo_500Medium',
+            fontSize: fontSize.xs,
+            color: '#64748b',
+            textAlign: 'right',
+        },
+        checkbox: {
+            width: getSize(22, 23, 24, 28, 32),
+            height: getSize(22, 23, 24, 28, 32),
+            borderRadius: getSize(5, 5.5, 6, 7, 8),
+            borderWidth: 2,
+            borderColor: '#e2e8f0',
+            alignItems: 'center',
+            justifyContent: 'center',
+        },
+        checkboxSelected: {
+            borderColor: COLORS.primary,
+            backgroundColor: COLORS.primary,
+        },
+        datesContainer: {
+            flexDirection: 'row-reverse',
+            gap: getSize(6, 7, 8, 10, 12),
+        },
+        dateCard: {
+            width: getSize(66, 68, 70, 80, 90),
+            padding: getSize(10, 11, 12, 14, 16),
+            borderRadius: getSize(10, 11, 12, 14, 16),
+            borderWidth: 1,
+            borderColor: '#e2e8f0',
+            alignItems: 'center',
+        },
+        dateCardSelected: {
+            borderColor: COLORS.primary,
+            backgroundColor: COLORS.primary,
+        },
+        dateDay: {
+            fontFamily: 'Cairo_500Medium',
+            fontSize: fontSize.xs,
+            color: '#64748b',
+            marginBottom: 4,
+        },
+        dateNumber: {
+            fontFamily: 'Cairo_700Bold',
+            fontSize: fontSize.base,
+            color: '#1e293b',
+            marginBottom: 2,
+        },
+        dateMonth: {
+            fontFamily: 'Cairo_500Medium',
+            fontSize: fontSize.xs,
+            color: '#64748b',
+        },
+        dateTextSelected: { color: 'white' },
+        timeSlotsGrid: {
+            flexDirection: 'row-reverse',
+            flexWrap: 'wrap',
+            gap: getSize(6, 7, 8, 10, 12),
+        },
+        timeSlot: {
+            width: '48%',
+            paddingVertical: getSize(10, 11, 12, 14, 16),
+            borderRadius: getSize(6, 7, 8, 10, 12),
+            borderWidth: 1,
+            borderColor: '#e2e8f0',
+            alignItems: 'center',
+        },
+        timeSlotSelected: {
+            borderColor: COLORS.primary,
+            backgroundColor: COLORS.primary,
+        },
+        timeSlotText: {
+            fontFamily: 'Cairo_600SemiBold',
+            fontSize: fontSize.sm,
+            color: '#1e293b',
+        },
+        timeSlotTextSelected: { color: 'white' },
+        locationOptions: {
+            flexDirection: 'row-reverse',
+            gap: getSize(6, 7, 8, 10, 12),
+        },
+        locationOption: {
+            flex: 1,
+            flexDirection: 'row-reverse',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: getSize(6, 7, 8, 10, 12),
+            paddingVertical: getSize(10, 11, 12, 14, 16),
+            borderRadius: getSize(6, 7, 8, 10, 12),
+            borderWidth: 1,
+            borderColor: '#e2e8f0',
+        },
+        locationOptionSelected: {
+            borderColor: COLORS.primary,
+            backgroundColor: `${COLORS.primary}08`,
+        },
+        locationOptionText: {
+            fontFamily: 'Cairo_600SemiBold',
+            fontSize: fontSize.sm,
+            color: '#64748b',
+        },
+        locationOptionTextSelected: { color: COLORS.primary },
+        input: {
+            backgroundColor: '#f8fafc',
+            borderWidth: 1,
+            borderColor: '#e2e8f0',
+            borderRadius: getSize(6, 7, 8, 10, 12),
+            paddingHorizontal: getSize(10, 11, 12, 14, 16),
+            paddingVertical: getSize(10, 11, 12, 14, 16),
+            fontFamily: 'Cairo_500Medium',
+            fontSize: fontSize.sm,
+            color: '#1e293b',
+        },
+        textArea: {
+            minHeight: getSize(90, 95, 100, 120, 140),
+            textAlignVertical: 'top',
+        },
+        summarySection: {
+            backgroundColor: '#f8fafc',
+            borderRadius: getSize(10, 11, 12, 14, 16),
+            padding: getSize(14, 15, 16, 20, 24),
+            borderWidth: 1,
+            borderColor: '#e2e8f0',
+            marginBottom: getSize(10, 11, 12, 14, 16),
+        },
+        summaryRow: {
+            flexDirection: 'row-reverse',
+            justifyContent: 'space-between',
+            marginBottom: getSize(6, 7, 8, 10, 12),
+        },
+        summaryLabel: {
+            fontFamily: 'Cairo_600SemiBold',
+            fontSize: fontSize.sm,
+            color: '#64748b',
+        },
+        summaryValue: {
+            fontFamily: 'Cairo_700Bold',
+            fontSize: fontSize.base,
+            color: COLORS.primary,
+        },
+        summaryNote: {
+            fontFamily: 'Cairo_500Medium',
+            fontSize: fontSize.xs,
+            color: '#94a3b8',
+            textAlign: 'right',
+            lineHeight: getSize(14, 15, 16, 18, 20),
+        },
+        bottomContainer: {
+            backgroundColor: 'white',
+            borderTopWidth: 1,
+            borderTopColor: '#f1f5f9',
+        },
+        bottomContent: {
+            paddingHorizontal: getSize(18, 19, 20, 24, 28),
+            paddingVertical: getSize(14, 15, 16, 20, 24),
+        },
+    });
+};

@@ -4,19 +4,24 @@
 import { Feather } from '@expo/vector-icons';
 import { Link, useRouter } from 'expo-router';
 import React, { useCallback } from 'react';
-import { Dimensions, Text, TouchableOpacity, View } from 'react-native';
+import { Text, TouchableOpacity, View } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 import { COLORS } from '../../../constants/theme';
+import { useResponsive } from '../../../hooks/useResponsive';
 import { IProductCardProps, ProductCard } from '../../shared';
 import { ProductListSectionProps } from './types/home';
-import { styles } from './StyleSheets/ProductListSection.styles';
-
-const { width } = Dimensions.get('window');
-const isTablet = width >= 768;
-const ESTIMATED_ITEM_SIZE = isTablet ? 200 : 170;
+import { getStyles } from './StyleSheets/ProductListSection.styles';
 
 const ProductListSectionComponent: React.FC<ProductListSectionProps> = ({ title, products, onToggleFavorite }) => {
     const router = useRouter();
+    const { getSize } = useResponsive();
+    const styles = getStyles(getSize);
+    const ESTIMATED_ITEM_SIZE = getSize(150, 170, 180, 200, 220);
+
+    // Safety check: don't render if title is missing
+    if (!title) {
+        return null;
+    }
 
     const handleProductPress = useCallback((productId: string) => {
         router.push(`/product/${productId}`);

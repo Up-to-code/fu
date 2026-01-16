@@ -6,13 +6,16 @@ import React from 'react';
 import { Text, View } from 'react-native';
 import { ReviewCard } from '../../shared';
 import { ReviewsSectionProps } from './types/services';
-import { styles } from './StyleSheets/ReviewsSection.styles';
+import { getStyles } from './StyleSheets/ReviewsSection.styles';
+import { useResponsive } from '../../../hooks/useResponsive';
 
 export const ReviewsSection: React.FC<ReviewsSectionProps> = ({
     averageRating,
     totalReviews,
     reviews,
 }) => {
+    const { getSize, fontSize } = useResponsive();
+    const styles = getStyles(getSize, fontSize);
     const fullStars = Math.floor(averageRating);
     const hasHalfStar = averageRating % 1 >= 0.5;
 

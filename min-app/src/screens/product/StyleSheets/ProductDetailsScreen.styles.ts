@@ -1,31 +1,21 @@
 // File: src/screens/product/StyleSheets/ProductDetailsScreen.styles.ts
 // Purpose: Styles for ProductDetailsScreen component
 
-import { StyleSheet, Dimensions } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { COLORS } from '../../../constants/theme';
 
-const { width } = Dimensions.get('window');
+type GetSizeFunction = (small: number, medium: number, large: number, tablet: number, desktop: number) => number;
 
-// Responsive breakpoints
-const isSmall = width < 375;
-const isMedium = width >= 375 && width < 428;
-const isLarge = width >= 428 && width < 768;
-const isTablet = width >= 768 && width < 1024;
-const isDesktop = width >= 1024;
+export const getStyles = (
+    isRTL: boolean = true,
+    getSize: GetSizeFunction,
+    width: number
+) => {
+    const padding = getSize(16, 20, 24, 32, 48);
+    const imageHeight = getSize(300, 350, 400, 450, 500);
+    const maxWidth = getSize(width, width, width, 700, 800);
 
-export const getSize = (small: number, medium: number, large: number, tablet: number, desktop: number) => {
-    if (isDesktop) return desktop;
-    if (isTablet) return tablet;
-    if (isLarge) return large;
-    if (isMedium) return medium;
-    return small;
-};
-
-export const padding = getSize(16, 20, 24, 32, 48);
-export const imageHeight = getSize(300, 350, 400, 450, 500);
-export const maxWidth = getSize(width, width, width, 700, 800);
-
-export const styles = StyleSheet.create({
+    return StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: 'white',
@@ -48,7 +38,7 @@ export const styles = StyleSheet.create({
     expandIcon: {
         position: 'absolute',
         bottom: 48,
-        right: 16,
+        ...(isRTL ? { right: 16 } : { left: 16 }),
         width: 40,
         height: 40,
         backgroundColor: 'rgba(0, 0, 0, 0.4)',
@@ -109,11 +99,11 @@ export const styles = StyleSheet.create({
     title: {
         fontFamily: 'Cairo_700Bold',
         color: '#1e293b',
-        textAlign: 'right',
+        textAlign: (isRTL ? 'right' : 'left') as const,
         marginBottom: 8,
     },
     discountContainer: {
-        flexDirection: 'row-reverse',
+        flexDirection: (isRTL ? 'row-reverse' : 'row') as const,
         alignItems: 'center',
         gap: 8,
         marginBottom: 12,
@@ -129,7 +119,7 @@ export const styles = StyleSheet.create({
         color: '#dc2626',
     },
     priceContainer: {
-        flexDirection: 'row-reverse',
+        flexDirection: (isRTL ? 'row-reverse' : 'row') as const,
         alignItems: 'baseline',
         gap: 12,
         marginBottom: 24,
@@ -147,7 +137,7 @@ export const styles = StyleSheet.create({
         marginBottom: 24,
     },
     sectionHeader: {
-        flexDirection: 'row-reverse',
+        flexDirection: (isRTL ? 'row-reverse' : 'row') as const,
         justifyContent: 'space-between',
         alignItems: 'center',
         marginBottom: 16,
@@ -164,7 +154,7 @@ export const styles = StyleSheet.create({
         color: COLORS.primary,
     },
     colorsContainer: {
-        flexDirection: 'row-reverse',
+        flexDirection: (isRTL ? 'row-reverse' : 'row') as const,
         flexWrap: 'wrap',
         gap: 12,
     },
@@ -184,7 +174,7 @@ export const styles = StyleSheet.create({
         borderRadius: 999,
     },
     sizesContainer: {
-        flexDirection: 'row-reverse',
+        flexDirection: (isRTL ? 'row-reverse' : 'row') as const,
         flexWrap: 'wrap',
         gap: 12,
     },
@@ -217,7 +207,7 @@ export const styles = StyleSheet.create({
         color: '#94a3b8',
     },
     quantityContainer: {
-        flexDirection: 'row-reverse',
+        flexDirection: (isRTL ? 'row-reverse' : 'row') as const,
         alignItems: 'center',
         gap: 16,
     },
@@ -246,7 +236,7 @@ export const styles = StyleSheet.create({
         gap: 12,
     },
     featureBadge: {
-        flexDirection: 'row-reverse',
+        flexDirection: (isRTL ? 'row-reverse' : 'row') as const,
         alignItems: 'center',
         gap: 8,
         backgroundColor: '#f8fafc',
@@ -261,7 +251,7 @@ export const styles = StyleSheet.create({
     descriptionText: {
         fontFamily: 'Cairo_500Medium',
         color: '#64748b',
-        textAlign: 'right',
+        textAlign: (isRTL ? 'right' : 'left') as const,
         lineHeight: 24,
     },
     similarProductsScroll: {
@@ -274,4 +264,5 @@ export const styles = StyleSheet.create({
     addToCartContainer: {
         marginTop: 24,
     },
-});
+    });
+};

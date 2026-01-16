@@ -4,14 +4,13 @@
 import { Feather, Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React from 'react';
-import { Dimensions, Image, Linking, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Image, Linking, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Header } from '../shared';
 import { useOrderDetails } from './_hooks';
 import { COLORS } from '../../constants/theme';
+import { useResponsive } from '../../hooks/useResponsive';
 import { OrderStatus, ORDER_STATUS_LABELS, ORDER_STATUS_COLORS, ProductOrder } from '../../types/orders';
-
-const { width } = Dimensions.get('window');
 
 // Mock order data - in real app, fetch by ID
 const MOCK_ORDER: ProductOrder = {
@@ -68,6 +67,8 @@ export default function OrderDetailsScreen() {
     const { id } = useLocalSearchParams();
     const { order: hookOrder, isLoading } = useOrderDetails(id as string, 'product');
     const order = hookOrder || MOCK_ORDER; // Fallback to mock if hook returns null
+    const { getSize, fontSize, iconSize } = useResponsive();
+    const styles = getStyles(getSize, fontSize, iconSize);
 
     const statusColors = ORDER_STATUS_COLORS[order.status];
     const statusLabel = ORDER_STATUS_LABELS[order.status];
@@ -244,216 +245,223 @@ export default function OrderDetailsScreen() {
     );
 }
 
-const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: 'white' },
-    safeArea: { flex: 1 },
-    header: {
-        flexDirection: 'row-reverse',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingHorizontal: 16,
-        paddingVertical: 12,
-        borderBottomWidth: 1,
-        borderBottomColor: '#f1f5f9',
-    },
-    headerTitle: { fontFamily: 'Cairo_700Bold', fontSize: 16, color: '#1e293b' },
-    scrollView: { flex: 1 },
-    scrollContent: { padding: 16 },
-    statusCard: {
-        borderRadius: 12,
-        padding: 16,
-        marginBottom: 16,
-    },
-    statusHeader: {
-        flexDirection: 'row-reverse',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 8,
-    },
-    currentStatusLabel: {
-        fontFamily: 'Cairo_700Bold',
-        fontSize: 18,
-    },
-    estimatedDelivery: {
-        fontFamily: 'Cairo_600SemiBold',
-        fontSize: 13,
-        color: '#1e293b',
-        textAlign: 'right',
-        marginBottom: 4,
-    },
-    trackingNumber: {
-        fontFamily: 'Cairo_500Medium',
-        fontSize: 12,
-        color: '#64748b',
-        textAlign: 'right',
-    },
-    section: {
-        backgroundColor: 'white',
-        borderRadius: 12,
-        padding: 16,
-        marginBottom: 12,
-        borderWidth: 1,
-        borderColor: '#f1f5f9',
-    },
-    sectionTitle: {
-        fontFamily: 'Cairo_700Bold',
-        fontSize: 15,
-        color: '#1e293b',
-        textAlign: 'right',
-        marginBottom: 12,
-    },
-    customerInfo: { gap: 12 },
-    customerRow: {
-        flexDirection: 'row-reverse',
-        alignItems: 'center',
-        gap: 8,
-    },
-    customerValue: {
-        fontFamily: 'Cairo_500Medium',
-        fontSize: 14,
-        color: '#1e293b',
-        textAlign: 'right',
-        flex: 1,
-    },
-    timelineItem: {
-        flexDirection: 'row-reverse',
-        gap: 12,
-    },
-    timelineLeft: {
-        alignItems: 'center',
-    },
-    timelineDot: {
-        width: 12,
-        height: 12,
-        borderRadius: 6,
-    },
-    timelineLine: {
-        width: 2,
-        flex: 1,
-        backgroundColor: '#e2e8f0',
-        marginVertical: 4,
-    },
-    timelineContent: {
-        flex: 1,
-    },
-    timelineStatus: {
-        fontFamily: 'Cairo_700Bold',
-        fontSize: 14,
-        color: '#1e293b',
-        textAlign: 'right',
-        marginBottom: 4,
-    },
-    timelineNote: {
-        fontFamily: 'Cairo_500Medium',
-        fontSize: 13,
-        color: '#64748b',
-        textAlign: 'right',
-        marginBottom: 4,
-    },
-    timelineDate: {
-        fontFamily: 'Cairo_500Medium',
-        fontSize: 11,
-        color: '#94a3b8',
-        textAlign: 'right',
-    },
-    productItem: {
-        flexDirection: 'row-reverse',
-        gap: 12,
-        marginBottom: 12,
-        alignItems: 'center',
-    },
-    productQuantity: {
-        width: 24,
-        height: 24,
-        borderRadius: 12,
-        backgroundColor: '#f1f5f9',
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    quantityText: {
-        fontFamily: 'Cairo_700Bold',
-        fontSize: 11,
-        color: '#64748b',
-    },
-    productImage: {
-        width: 60,
-        height: 60,
-        borderRadius: 8,
-        backgroundColor: '#f8fafc',
-    },
-    productInfo: { flex: 1 },
-    productName: {
-        fontFamily: 'Cairo_600SemiBold',
-        fontSize: 13,
-        color: '#1e293b',
-        textAlign: 'right',
-        marginBottom: 4,
-    },
-    productPrice: {
-        fontFamily: 'Cairo_500Medium',
-        fontSize: 12,
-        color: '#64748b',
-        textAlign: 'right',
-    },
-    productTotal: {
-        fontFamily: 'Cairo_700Bold',
-        fontSize: 14,
-    },
-    addressContainer: {
-        flexDirection: 'row-reverse',
-        gap: 8,
-        marginBottom: 8,
-    },
-    addressText: {
-        fontFamily: 'Cairo_500Medium',
-        fontSize: 13,
-        color: '#64748b',
-        textAlign: 'right',
-        flex: 1,
-        lineHeight: 20,
-    },
-    shippingMethod: {
-        fontFamily: 'Cairo_600SemiBold',
-        fontSize: 12,
-        color: '#1e293b',
-        textAlign: 'right',
-    },
-    totalSection: {
-        backgroundColor: '#f8fafc',
-        borderRadius: 12,
-        padding: 16,
-        borderWidth: 1,
-        borderColor: '#f1f5f9',
-    },
-    totalRow: {
-        flexDirection: 'row-reverse',
-        justifyContent: 'space-between',
-        marginBottom: 8,
-    },
-    totalLabel: {
-        fontFamily: 'Cairo_500Medium',
-        fontSize: 13,
-        color: '#64748b',
-    },
-    totalValue: {
-        fontFamily: 'Cairo_600SemiBold',
-        fontSize: 13,
-        color: '#1e293b',
-    },
-    divider: {
-        height: 1,
-        backgroundColor: '#e2e8f0',
-        marginVertical: 8,
-    },
-    finalTotal: {
-        fontSize: 16,
-        fontFamily: 'Cairo_700Bold',
-    },
-    paymentMethod: {
-        fontFamily: 'Cairo_500Medium',
-        fontSize: 12,
-        color: '#94a3b8',
-        textAlign: 'right',
-        marginTop: 8,
-    },
-});
+const getStyles = (
+    getSize: (small: number, medium: number, large: number, tablet: number, desktop: number) => number,
+    fontSize: { xs: number; sm: number; base: number; lg: number; xl: number; '2xl': number; '3xl': number },
+    iconSize: { sm: number; md: number; lg: number; xl: number }
+) => {
+    const { StyleSheet } = require('react-native');
+    return StyleSheet.create({
+        container: { flex: 1, backgroundColor: 'white' },
+        safeArea: { flex: 1 },
+        header: {
+            flexDirection: 'row-reverse',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            paddingHorizontal: getSize(14, 15, 16, 20, 24),
+            paddingVertical: getSize(10, 11, 12, 16, 20),
+            borderBottomWidth: 1,
+            borderBottomColor: '#f1f5f9',
+        },
+        headerTitle: { fontFamily: 'Cairo_700Bold', fontSize: fontSize.base, color: '#1e293b' },
+        scrollView: { flex: 1 },
+        scrollContent: { padding: getSize(14, 15, 16, 20, 24) },
+        statusCard: {
+            borderRadius: getSize(10, 11, 12, 14, 16),
+            padding: getSize(14, 15, 16, 20, 24),
+            marginBottom: getSize(12, 14, 16, 20, 24),
+        },
+        statusHeader: {
+            flexDirection: 'row-reverse',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: getSize(6, 7, 8, 10, 12),
+        },
+        currentStatusLabel: {
+            fontFamily: 'Cairo_700Bold',
+            fontSize: fontSize.lg,
+        },
+        estimatedDelivery: {
+            fontFamily: 'Cairo_600SemiBold',
+            fontSize: fontSize.sm,
+            color: '#1e293b',
+            textAlign: 'right',
+            marginBottom: 4,
+        },
+        trackingNumber: {
+            fontFamily: 'Cairo_500Medium',
+            fontSize: fontSize.xs,
+            color: '#64748b',
+            textAlign: 'right',
+        },
+        section: {
+            backgroundColor: 'white',
+            borderRadius: getSize(10, 11, 12, 14, 16),
+            padding: getSize(14, 15, 16, 20, 24),
+            marginBottom: getSize(10, 11, 12, 16, 20),
+            borderWidth: 1,
+            borderColor: '#f1f5f9',
+        },
+        sectionTitle: {
+            fontFamily: 'Cairo_700Bold',
+            fontSize: fontSize.base,
+            color: '#1e293b',
+            textAlign: 'right',
+            marginBottom: getSize(10, 11, 12, 16, 20),
+        },
+        customerInfo: { gap: 12 },
+        customerRow: {
+            flexDirection: 'row-reverse',
+            alignItems: 'center',
+            gap: 8,
+        },
+        customerValue: {
+            fontFamily: 'Cairo_500Medium',
+            fontSize: fontSize.base,
+            color: '#1e293b',
+            textAlign: 'right',
+            flex: 1,
+        },
+        timelineItem: {
+            flexDirection: 'row-reverse',
+            gap: 12,
+        },
+        timelineLeft: {
+            alignItems: 'center',
+        },
+        timelineDot: {
+            width: getSize(10, 11, 12, 14, 16),
+            height: getSize(10, 11, 12, 14, 16),
+            borderRadius: getSize(5, 5.5, 6, 7, 8),
+        },
+        timelineLine: {
+            width: 2,
+            flex: 1,
+            backgroundColor: '#e2e8f0',
+            marginVertical: 4,
+        },
+        timelineContent: {
+            flex: 1,
+        },
+        timelineStatus: {
+            fontFamily: 'Cairo_700Bold',
+            fontSize: fontSize.base,
+            color: '#1e293b',
+            textAlign: 'right',
+            marginBottom: 4,
+        },
+        timelineNote: {
+            fontFamily: 'Cairo_500Medium',
+            fontSize: fontSize.sm,
+            color: '#64748b',
+            textAlign: 'right',
+            marginBottom: 4,
+        },
+        timelineDate: {
+            fontFamily: 'Cairo_500Medium',
+            fontSize: fontSize.xs,
+            color: '#94a3b8',
+            textAlign: 'right',
+        },
+        productItem: {
+            flexDirection: 'row-reverse',
+            gap: 12,
+            marginBottom: getSize(10, 11, 12, 16, 20),
+            alignItems: 'center',
+        },
+        productQuantity: {
+            width: getSize(22, 23, 24, 28, 32),
+            height: getSize(22, 23, 24, 28, 32),
+            borderRadius: getSize(11, 11.5, 12, 14, 16),
+            backgroundColor: '#f1f5f9',
+            alignItems: 'center',
+            justifyContent: 'center',
+        },
+        quantityText: {
+            fontFamily: 'Cairo_700Bold',
+            fontSize: fontSize.xs,
+            color: '#64748b',
+        },
+        productImage: {
+            width: getSize(56, 58, 60, 72, 80),
+            height: getSize(56, 58, 60, 72, 80),
+            borderRadius: getSize(6, 7, 8, 10, 12),
+            backgroundColor: '#f8fafc',
+        },
+        productInfo: { flex: 1 },
+        productName: {
+            fontFamily: 'Cairo_600SemiBold',
+            fontSize: fontSize.sm,
+            color: '#1e293b',
+            textAlign: 'right',
+            marginBottom: 4,
+        },
+        productPrice: {
+            fontFamily: 'Cairo_500Medium',
+            fontSize: fontSize.xs,
+            color: '#64748b',
+            textAlign: 'right',
+        },
+        productTotal: {
+            fontFamily: 'Cairo_700Bold',
+            fontSize: fontSize.base,
+        },
+        addressContainer: {
+            flexDirection: 'row-reverse',
+            gap: 8,
+            marginBottom: getSize(6, 7, 8, 10, 12),
+        },
+        addressText: {
+            fontFamily: 'Cairo_500Medium',
+            fontSize: fontSize.sm,
+            color: '#64748b',
+            textAlign: 'right',
+            flex: 1,
+            lineHeight: getSize(18, 19, 20, 24, 28),
+        },
+        shippingMethod: {
+            fontFamily: 'Cairo_600SemiBold',
+            fontSize: fontSize.xs,
+            color: '#1e293b',
+            textAlign: 'right',
+        },
+        totalSection: {
+            backgroundColor: '#f8fafc',
+            borderRadius: getSize(10, 11, 12, 14, 16),
+            padding: getSize(14, 15, 16, 20, 24),
+            borderWidth: 1,
+            borderColor: '#f1f5f9',
+        },
+        totalRow: {
+            flexDirection: 'row-reverse',
+            justifyContent: 'space-between',
+            marginBottom: getSize(6, 7, 8, 10, 12),
+        },
+        totalLabel: {
+            fontFamily: 'Cairo_500Medium',
+            fontSize: fontSize.sm,
+            color: '#64748b',
+        },
+        totalValue: {
+            fontFamily: 'Cairo_600SemiBold',
+            fontSize: fontSize.sm,
+            color: '#1e293b',
+        },
+        divider: {
+            height: 1,
+            backgroundColor: '#e2e8f0',
+            marginVertical: getSize(6, 7, 8, 10, 12),
+        },
+        finalTotal: {
+            fontSize: fontSize.base,
+            fontFamily: 'Cairo_700Bold',
+        },
+        paymentMethod: {
+            fontFamily: 'Cairo_500Medium',
+            fontSize: fontSize.xs,
+            color: '#94a3b8',
+            textAlign: 'right',
+            marginTop: getSize(6, 7, 8, 10, 12),
+        },
+    });
+};

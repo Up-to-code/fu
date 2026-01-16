@@ -3,15 +3,13 @@
 
 import { Feather } from '@expo/vector-icons';
 import React from 'react';
-import { Dimensions, Text, TouchableOpacity, View } from 'react-native';
+import { Text, TouchableOpacity, View } from 'react-native';
 import { Image } from 'expo-image';
 import { COLORS } from '../../../constants/theme';
+import { useRTL } from '../../../hooks/useRTL';
+import { useResponsive } from '../../../hooks/useResponsive';
 import { IProductCardProps, ProductCardProps } from '../types/card';
 import { getStyles } from '../StyleSheets/ProductCard.styles';
-
-const { width } = Dimensions.get('window');
-const isTablet = width >= 768;
-const isSmallScreen = width < 375;
 
 const ProductCardComponent: React.FC<ProductCardProps> = ({
     product,
@@ -19,7 +17,9 @@ const ProductCardComponent: React.FC<ProductCardProps> = ({
     onFavorite,
     variant = 'grid',
 }) => {
-    const styles = getStyles();
+    const { isRTL } = useRTL();
+    const { getSize, iconSize, isTablet } = useResponsive();
+    const styles = getStyles(isRTL, getSize);
     const finalPrice = product.discount
         ? product.price * (1 - product.discount / 100)
         : product.price;
@@ -48,7 +48,7 @@ const ProductCardComponent: React.FC<ProductCardProps> = ({
                         >
                             <Feather
                                 name="heart"
-                                size={isTablet ? 18 : 16}
+                                size={iconSize.sm}
                                 color={product.isFavorite ? '#EF4444' : '#94a3b8'}
                                 fill={product.isFavorite ? '#EF4444' : 'none'}
                             />
@@ -156,7 +156,7 @@ const ProductCardComponent: React.FC<ProductCardProps> = ({
                             <Text style={styles.ratingText}>
                                 {product.rating}
                             </Text>
-                            <Feather name="star" size={isTablet ? 12 : 10} color="#F59E0B" fill="#F59E0B" />
+                            <Feather name="star" size={getSize(10, 11, 12, 12, 14)} color="#F59E0B" fill="#F59E0B" />
                         </View>
                     )}
                 </View>

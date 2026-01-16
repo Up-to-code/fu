@@ -7,10 +7,13 @@ import { Link, useRouter } from 'expo-router';
 import React from 'react';
 import { ImageBackground, StatusBar, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { styles } from './StyleSheets/LandingScreen.styles';
+import { getStyles } from './StyleSheets/LandingScreen.styles';
+import { useResponsive } from '../../hooks/useResponsive';
 
 const LandingScreen = () => {
     const router = useRouter();
+    const { getSize } = useResponsive();
+    const styles = getStyles(getSize);
 
     return (
         <View style={styles.container}>

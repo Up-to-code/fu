@@ -3,7 +3,7 @@
 
 import { StyleSheet } from 'react-native';
 
-export const styles = StyleSheet.create({
+export const getStyles = (isRTL: boolean = true) => StyleSheet.create({
     inputGroup: {
         gap: 8,
     },
@@ -11,14 +11,14 @@ export const styles = StyleSheet.create({
         fontFamily: 'Cairo_700Bold',
         fontSize: 14,
         color: '#1e293b',
-        textAlign: 'right',
-        marginRight: 4,
+        textAlign: (isRTL ? 'right' : 'left') as const,
+        ...(isRTL ? { marginRight: 4 } : { marginLeft: 4 }),
     },
     required: {
         color: '#EF4444',
     },
     inputContainer: {
-        flexDirection: 'row-reverse',
+        flexDirection: (isRTL ? 'row-reverse' : 'row') as const,
         alignItems: 'center',
         backgroundColor: 'white',
         borderRadius: 12,
@@ -36,7 +36,7 @@ export const styles = StyleSheet.create({
         fontFamily: 'Cairo_500Medium',
         fontSize: 15,
         color: '#1e293b',
-        textAlign: 'right',
+        textAlign: (isRTL ? 'right' : 'left') as const,
         paddingHorizontal: 16,
         paddingVertical: 14,
     },
@@ -54,8 +54,8 @@ export const styles = StyleSheet.create({
         fontFamily: 'Cairo_500Medium',
         fontSize: 12,
         color: '#EF4444',
-        textAlign: 'right',
+        textAlign: (isRTL ? 'right' : 'left') as const,
         marginTop: 4,
-        marginRight: 4,
+        ...(isRTL ? { marginRight: 4 } : { marginLeft: 4 }),
     },
 });

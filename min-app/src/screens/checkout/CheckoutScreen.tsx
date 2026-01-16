@@ -11,7 +11,9 @@ import { Header } from '../shared';
 import { useCheckout, usePaymentMethods } from './_hooks';
 import { useCart } from '../cart/_hooks';
 import { COLORS } from '../../constants/theme';
-import { styles } from './StyleSheets/CheckoutScreen.styles';
+import { useRTL } from '../../hooks/useRTL';
+import { useResponsive } from '../../hooks/useResponsive';
+import { getStyles } from './StyleSheets/CheckoutScreen.styles';
 
 // Mock cart data (in real app, this would come from context/store)
 const CART_ITEMS = [
@@ -34,6 +36,9 @@ const ADDRESSES = [
 
 export default function CheckoutScreen() {
     const router = useRouter();
+    const { isRTL } = useRTL();
+    const { getSize } = useResponsive();
+    const styles = getStyles(isRTL, getSize);
     const { cartItems, cartTotal } = useCart(CART_ITEMS);
     const { formState, handleChange, handleSubmit, isLoading, errors } = useCheckout();
     const { paymentMethods, selectedMethod, setSelectedMethod } = usePaymentMethods();

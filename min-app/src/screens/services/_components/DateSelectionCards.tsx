@@ -3,8 +3,9 @@
 
 import React from 'react';
 import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { useResponsive } from '../../../../hooks/useResponsive';
 import { DateOption, DateSelectionCardsProps } from './types/services';
-import { styles } from './StyleSheets/DateSelectionCards.styles';
+import { getStyles } from './StyleSheets/DateSelectionCards.styles';
 
 export type { DateOption };
 
@@ -13,6 +14,8 @@ export const DateSelectionCards: React.FC<DateSelectionCardsProps> = ({
     selectedId,
     onSelect,
 }) => {
+    const { getSize, width } = useResponsive();
+    const styles = getStyles(getSize, width);
     return (
         <View style={styles.container}>
             <ScrollView

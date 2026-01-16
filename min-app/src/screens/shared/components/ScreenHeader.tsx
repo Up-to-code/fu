@@ -3,9 +3,10 @@
 
 import React from 'react';
 import { Text, View } from 'react-native';
+import { useRTL } from '../../../hooks/useRTL';
 import { Header } from './Header';
 import { ScreenHeaderProps } from '../types/ui';
-import { styles } from '../StyleSheets/ScreenHeader.styles';
+import { getStyles } from '../StyleSheets/ScreenHeader.styles';
 
 export const ScreenHeader: React.FC<ScreenHeaderProps> = ({
     title,
@@ -14,6 +15,9 @@ export const ScreenHeader: React.FC<ScreenHeaderProps> = ({
     rightAction,
     onBack,
 }) => {
+    const { isRTL } = useRTL();
+    const styles = getStyles(isRTL);
+    
     return (
         <View style={styles.container}>
             <Header

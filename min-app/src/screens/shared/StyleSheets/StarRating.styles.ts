@@ -1,23 +1,25 @@
 // File: src/screens/shared/StyleSheets/StarRating.styles.ts
 // Purpose: Styles for StarRating component
 
-import { Dimensions, StyleSheet } from 'react-native';
-import { getResponsiveValue, isSmallScreen } from '../../../utils/responsive';
+import { StyleSheet } from 'react-native';
 
-const { width } = Dimensions.get('window');
-const isTablet = width >= 768;
+type GetSizeFunction = (small: number, medium: number, large: number, tablet: number, desktop: number) => number;
 
-export const getStyles = (size: 'sm' | 'md' | 'lg') => {
-    const starSize = size === 'sm' ? 12 : size === 'lg' ? 20 : 16;
-    const textSize = size === 'sm'
-        ? getResponsiveValue(isSmallScreen ? 11 : 12, 14)
+export const getStyles = (size: 'sm' | 'md' | 'lg', isRTL: boolean = true, getSize: GetSizeFunction) => {
+    const starSize = size === 'sm' 
+        ? getSize(12, 13, 14, 14, 16)
         : size === 'lg'
-            ? getResponsiveValue(isSmallScreen ? 14 : 16, 18)
-            : getResponsiveValue(isSmallScreen ? 12 : 14, 16);
+            ? getSize(18, 20, 22, 22, 24)
+            : getSize(14, 16, 18, 18, 20);
+    const textSize = size === 'sm'
+        ? getSize(11, 12, 13, 14, 15)
+        : size === 'lg'
+            ? getSize(14, 15, 16, 18, 20)
+            : getSize(12, 13, 14, 16, 18);
 
     return StyleSheet.create({
         container: {
-            flexDirection: 'row-reverse',
+            flexDirection: (isRTL ? 'row-reverse' : 'row') as const,
             alignItems: 'center',
             gap: 4,
         },
@@ -25,7 +27,7 @@ export const getStyles = (size: 'sm' | 'md' | 'lg') => {
             fontFamily: 'Cairo_700Bold',
             color: '#334155',
             fontSize: textSize,
-            marginRight: 4,
+            ...(isRTL ? { marginRight: 4 } : { marginLeft: 4 }),
         },
         reviewCount: {
             fontFamily: 'Cairo_500Medium',

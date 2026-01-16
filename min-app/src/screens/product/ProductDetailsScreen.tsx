@@ -4,7 +4,7 @@
 import { Feather, Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { ScrollView, Text, TouchableOpacity, View, Dimensions } from 'react-native';
+import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { Image } from 'expo-image';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ActionButton, BottomBar, FloatingHeader, PriceTable, StarRating } from '../shared';
@@ -12,10 +12,10 @@ import { ReviewCard, Review } from '../shared';
 import { ProductCard, IProductCardProps } from '../shared';
 import { useProductDetails, useProductReviews, useSimilarProducts } from './_hooks';
 import { COLORS } from '../../constants/theme';
+import { useRTL } from '../../hooks/useRTL';
+import { useResponsive } from '../../hooks/useResponsive';
 import { SectionHeaderProps } from './types/product';
-import { styles, padding, imageHeight, maxWidth, getSize } from './StyleSheets/ProductDetailsScreen.styles';
-
-const { width } = Dimensions.get('window');
+import { getStyles } from './StyleSheets/ProductDetailsScreen.styles';
 
 // Mock Data
 const MOCK_PRODUCT = {
@@ -76,17 +76,48 @@ const MOCK_REVIEWS: Review[] = [
         date: 'منذ أسبوعين',
         comment: 'أفضل صوفا اشتريتها! مريحة جداً وتصميمها عصري.',
     },
+    {
+        id: '4',
+        userName: 'فاطمة خالد',
+        userAvatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200&q=80',
+        rating: 4,
+        date: 'منذ شهر',
+        comment: 'جودة عالية وسعر مناسب. التوصيل كان خلال يومين فقط.',
+        helpful: 15,
+    },
+    {
+        id: '5',
+        userName: 'خالد سعيد',
+        rating: 5,
+        date: 'منذ شهر',
+        comment: 'ممتازة جداً! الألوان جميلة والتصميم عصري. أنصح الجميع بها.',
+        helpful: 20,
+    },
+    {
+        id: '6',
+        userName: 'نورا محمد',
+        userAvatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200&q=80',
+        rating: 4,
+        date: 'منذ شهرين',
+        comment: 'منتج رائع بكل المقاييس. الجودة والخدمة ممتازة.',
+        helpful: 10,
+    },
 ];
 
 const SIMILAR_PRODUCTS: IProductCardProps[] = [
     { id: '2', name: 'كنبة زاوية فاخرة', price: 3499, discount: 15, image: 'https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?w=500&q=80', rating: 4.5 },
     { id: '3', name: 'صوفا جلد أصلي', price: 4299, image: 'https://images.unsplash.com/photo-1567538096621-38d2284b23ff?w=500&q=80', rating: 4.9 },
     { id: '4', name: 'أريكة كلاسيكية', price: 1899, image: 'https://images.unsplash.com/photo-1506439773649-6e0eb8cfb237?w=500&q=80', rating: 4.3 },
+    { id: '14', name: 'أريكة كنب كبيرة', price: 4999, discount: 12, image: 'https://images.unsplash.com/photo-1556228720-195a672e8a03?w=500&q=80', rating: 4.7 },
+    { id: '15', name: 'صوفا قماش فاخر', price: 3299, image: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=500&q=80', rating: 4.6 },
 ];
 
 export default function ProductDetailsScreen() {
     const router = useRouter();
-    const { id } = useLocalSearchParams<{ id: string }>();
+    const { id, fromSearch, searchQuery } = useLocalSearchParams<{ id: string; fromSearch?: string; searchQuery?: string }>();
+    const { isRTL } = useRTL();
+    const { getSize, width, padding, spacing, fontSize } = useResponsive();
+    const styles = getStyles(isRTL, getSize, width);
     const { product: hookProduct, isLoading: productLoading } = useProductDetails(id || '1');
     const { reviews: hookReviews, isLoading: reviewsLoading, addReview } = useProductReviews(id || '1');
     const { similarProducts: hookSimilar, isLoading: similarLoading } = useSimilarProducts(id || '1', undefined);
@@ -95,6 +126,17 @@ export default function ProductDetailsScreen() {
     const product = hookProduct || MOCK_PRODUCT;
     const reviews = hookReviews.length > 0 ? hookReviews : MOCK_REVIEWS;
     const similarProducts = hookSimilar.length > 0 ? hookSimilar : SIMILAR_PRODUCTS;
+
+    const handleBack = () => {
+        if (fromSearch === 'true' && searchQuery) {
+            router.push({
+                pathname: '/search/results',
+                params: { q: searchQuery }
+            });
+        } else {
+            router.back();
+        }
+    };
     
     const [quantity, setQuantity] = useState(1);
     const [selectedColor, setSelectedColor] = useState(0);
@@ -132,7 +174,7 @@ export default function ProductDetailsScreen() {
             >
                 {/* Image Gallery */}
                 <TouchableOpacity
-                    style={[styles.imageContainer, { height: imageHeight }]}
+                    style={styles.imageContainer}
                     activeOpacity={0.95}
                     onPress={() => product.images && product.images.length > 0 && router.push({
                         pathname: '/product/fullscreen',
@@ -209,7 +251,7 @@ export default function ProductDetailsScreen() {
                         <StarRating
                             rating={product.rating}
                             reviews={product.reviews}
-                            size={(width >= 768 || width >= 1024) ? 'lg' : 'md'}
+                            size={width >= 768 ? 'lg' : 'md'}
                         />
                     </View>
 
@@ -434,15 +476,27 @@ export default function ProductDetailsScreen() {
                     contentContainerStyle={{ paddingHorizontal: padding }}
                     style={styles.similarProductsScroll}
                 >
-                    {similarProducts.map((item) => (
-                        <View key={item.id} style={styles.similarProductItem}>
-                            <ProductCard
-                                product={item}
-                                variant="horizontal"
-                                onPress={() => router.push(`/product/${item.id}`)}
-                            />
-                        </View>
-                    ))}
+                    {similarProducts.map((item) => {
+                        const queryParams: Record<string, string> = {};
+                        if (fromSearch === 'true') {
+                            queryParams.fromSearch = 'true';
+                            if (searchQuery) {
+                                queryParams.searchQuery = searchQuery as string;
+                            }
+                        }
+                        return (
+                            <View key={item.id} style={styles.similarProductItem}>
+                                <ProductCard
+                                    product={item}
+                                    variant="horizontal"
+                                    onPress={() => router.push({
+                                        pathname: `/product/${item.id}` as any,
+                                        params: queryParams
+                                    })}
+                                />
+                            </View>
+                        );
+                    })}
                 </ScrollView>
             </ScrollView>
 
@@ -450,6 +504,7 @@ export default function ProductDetailsScreen() {
             <FloatingHeader
                 showBack
                 showFavorite
+                onBack={handleBack}
                 onFavorite={() => setIsFavorite(!isFavorite)}
                 isFavorite={isFavorite}
             />

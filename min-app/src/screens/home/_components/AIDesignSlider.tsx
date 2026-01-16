@@ -38,6 +38,9 @@ const SLIDES: Slide[] = [
 export const AIDesignSlider = () => {
     const [activeSlide, setActiveSlide] = useState(0);
     const scrollRef = useRef<ScrollView>(null);
+    const { getSize, width } = useResponsive();
+    const SLIDE_WIDTH = width - 40;
+    const styles = getStyles(getSize, width);
 
     useEffect(() => {
         const interval = setInterval(() => {

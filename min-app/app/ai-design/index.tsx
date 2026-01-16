@@ -41,7 +41,10 @@ export default function AIConfigurationScreen() {
     const handleContinue = () => {
         if (selectedType && selectedStyle) {
             saveAISession({ roomType: selectedType, roomStyle: selectedStyle });
-            router.push('/ai-design/camera');
+            router.push({
+                pathname: '/ai-design/camera',
+                params: { mode: 'design' }
+            });
         }
     };
 

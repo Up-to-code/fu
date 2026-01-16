@@ -1,22 +1,20 @@
 // File: src/screens/shared/StyleSheets/ActionButton.styles.ts
 // Purpose: Styles for ActionButton component
 
-import { Dimensions, StyleSheet } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { COLORS } from '../../../constants/theme';
-import { getResponsiveValue, isSmallScreen } from '../../../utils/responsive';
 
-const { width } = Dimensions.get('window');
-const isTablet = width >= 768;
+type GetSizeFunction = (small: number, medium: number, large: number, tablet: number, desktop: number) => number;
 
-export const getStyles = (variant: 'primary' | 'secondary' | 'outline' | 'danger', disabled: boolean, fullWidth: boolean) => {
+export const getStyles = (variant: 'primary' | 'secondary' | 'outline' | 'danger', disabled: boolean, fullWidth: boolean, isRTL: boolean = true, getSize: GetSizeFunction) => {
     const baseButtonStyle = {
         borderRadius: 16,
-        flexDirection: 'row-reverse' as const,
+        flexDirection: (isRTL ? 'row-reverse' : 'row') as const,
         justifyContent: 'center' as const,
         alignItems: 'center' as const,
         gap: 12,
-        paddingVertical: getResponsiveValue(isSmallScreen ? 14 : 16, 20),
-        paddingHorizontal: getResponsiveValue(16, 24),
+        paddingVertical: getSize(14, 16, 18, 20, 24),
+        paddingHorizontal: getSize(16, 18, 20, 24, 32),
         opacity: disabled ? 0.5 : 1,
         width: fullWidth ? '100%' as const : undefined,
     };
@@ -62,7 +60,7 @@ export const getStyles = (variant: 'primary' | 'secondary' | 'outline' | 'danger
         text: StyleSheet.create({
             text: {
                 fontFamily: 'Cairo_700Bold',
-                fontSize: getResponsiveValue(isSmallScreen ? 14 : 16, 18),
+                fontSize: getSize(14, 15, 16, 18, 20),
                 color: textColors[variant],
             },
         }).text,

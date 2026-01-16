@@ -4,13 +4,19 @@
 import { Feather } from '@expo/vector-icons';
 import React from 'react';
 import { Image, Text, TouchableOpacity, View } from 'react-native';
+import { useRTL } from '../../../hooks/useRTL';
+import { useResponsive } from '../../../hooks/useResponsive';
 import { OrderCardData, OrderCardProps } from '../types/card';
-import { styles } from '../StyleSheets/OrderCard.styles';
+import { getStyles } from '../StyleSheets/OrderCard.styles';
 
 const OrderCardComponent: React.FC<OrderCardProps> = ({
     order,
     onPress,
 }) => {
+    const { isRTL } = useRTL();
+    const { getSize } = useResponsive();
+    const styles = getStyles(isRTL, getSize);
+    
     const formatDate = (date: Date) => {
         return new Intl.DateTimeFormat('ar-SA', {
             year: 'numeric',

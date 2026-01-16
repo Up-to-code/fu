@@ -1,19 +1,20 @@
 // File: src/screens/home/_components/StyleSheets/AIDesignSlider.styles.ts
 // Purpose: Styles for AIDesignSlider component
 
-import { StyleSheet, Dimensions } from 'react-native';
+import { StyleSheet } from 'react-native';
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
-export const SLIDE_WIDTH = SCREEN_WIDTH - 40;
+type GetSizeFunction = (small: number, medium: number, large: number, tablet: number, desktop: number) => number;
 
-export const styles = StyleSheet.create({
+export const getStyles = (getSize: GetSizeFunction, width: number) => {
+    const SLIDE_WIDTH = width - 40;
+    return StyleSheet.create({
     container: {
-        marginHorizontal: 20,
-        marginVertical: 16,
+        marginHorizontal: getSize(16, 18, 20, 24, 32),
+        marginVertical: getSize(12, 14, 16, 20, 24),
     },
     sliderContainer: {
-        height: 200,
-        borderRadius: 16,
+        height: getSize(180, 190, 200, 240, 280),
+        borderRadius: getSize(14, 15, 16, 18, 20),
         overflow: 'hidden',
         backgroundColor: '#f3f4f6',
         position: 'relative',
@@ -36,53 +37,54 @@ export const styles = StyleSheet.create({
         backgroundColor: 'rgba(0, 0, 0, 0.4)',
     },
     slideContent: {
-        padding: 24,
+        padding: getSize(20, 22, 24, 32, 40),
         zIndex: 10,
         alignItems: 'flex-end',
     },
     slideTitle: {
         color: 'white',
-        fontSize: 20,
+        fontSize: getSize(18, 19, 20, 22, 24),
         fontFamily: 'Cairo_700Bold',
-        marginBottom: 8,
+        marginBottom: getSize(6, 7, 8, 10, 12),
         textAlign: 'right',
     },
     slideDescription: {
         color: 'rgba(255, 255, 255, 0.9)',
-        fontSize: 14,
+        fontSize: getSize(13, 13.5, 14, 15, 16),
         fontFamily: 'Cairo_500Medium',
-        marginBottom: 16,
+        marginBottom: getSize(12, 14, 16, 20, 24),
         textAlign: 'right',
     },
     ctaButton: {
         backgroundColor: 'white',
-        paddingHorizontal: 20,
-        paddingVertical: 10,
-        borderRadius: 20,
+        paddingHorizontal: getSize(16, 18, 20, 24, 32),
+        paddingVertical: getSize(8, 9, 10, 12, 14),
+        borderRadius: getSize(18, 19, 20, 22, 24),
         alignSelf: 'flex-start',
     },
     ctaText: {
         fontFamily: 'Cairo_700Bold',
-        fontSize: 14,
+        fontSize: getSize(13, 13.5, 14, 15, 16),
     },
     dotsContainer: {
         position: 'absolute',
-        bottom: 16,
+        bottom: getSize(12, 14, 16, 20, 24),
         width: '100%',
         flexDirection: 'row',
         justifyContent: 'center',
         gap: 6,
     },
     dot: {
-        height: 6,
-        borderRadius: 3,
+        height: getSize(5, 5.5, 6, 7, 8),
+        borderRadius: getSize(2.5, 2.75, 3, 3.5, 4),
         backgroundColor: 'rgba(255, 255, 255, 0.5)',
     },
     dotActive: {
-        width: 24,
+        width: getSize(20, 22, 24, 28, 32),
         backgroundColor: 'white',
     },
     dotInactive: {
-        width: 6,
+        width: getSize(5, 5.5, 6, 7, 8),
     },
-});
+    });
+};

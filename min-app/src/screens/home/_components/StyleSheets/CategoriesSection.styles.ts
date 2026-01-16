@@ -1,37 +1,37 @@
 // File: src/screens/home/_components/StyleSheets/CategoriesSection.styles.ts
 // Purpose: Styles for CategoriesSection component
 
-import { StyleSheet, Dimensions } from 'react-native';
+import { StyleSheet } from 'react-native';
 
-const { width } = Dimensions.get('window');
+type GetSizeFunction = (small: number, medium: number, large: number, tablet: number, desktop: number) => number;
 
-export const styles = StyleSheet.create({
+export const getStyles = (isRTL: boolean = true, getSize: GetSizeFunction) => StyleSheet.create({
     container: {
-        paddingHorizontal: 20,
-        marginBottom: 32,
+        paddingHorizontal: getSize(16, 18, 20, 24, 32),
+        marginBottom: getSize(24, 28, 32, 40, 48),
     },
     title: {
         fontFamily: 'Cairo_700Bold',
-        fontSize: 20,
+        fontSize: getSize(18, 19, 20, 22, 24),
         color: '#1e293b',
-        marginBottom: 16,
-        textAlign: 'right',
+        marginBottom: getSize(12, 14, 16, 20, 24),
+        textAlign: (isRTL ? 'right' : 'left') as const,
     },
     grid: {
-        flexDirection: 'row-reverse',
+        flexDirection: (isRTL ? 'row-reverse' : 'row') as const,
         flexWrap: 'wrap',
         justifyContent: 'center',
-        gap: 20,
+        gap: getSize(16, 18, 20, 24, 28),
     },
     categoryCard: {
         alignItems: 'center',
     },
     categoryImage: {
-        width: 80,
-        height: 80,
-        borderRadius: 40,
+        width: getSize(72, 76, 80, 88, 96),
+        height: getSize(72, 76, 80, 88, 96),
+        borderRadius: getSize(36, 38, 40, 44, 48),
         overflow: 'hidden',
-        marginBottom: 8,
+        marginBottom: getSize(6, 7, 8, 10, 12),
         backgroundColor: '#f1f5f9',
         borderWidth: 2,
         borderColor: '#e2e8f0',
@@ -43,8 +43,8 @@ export const styles = StyleSheet.create({
     categoryName: {
         fontFamily: 'Cairo_500Medium',
         color: '#475569',
-        fontSize: 12,
+        fontSize: getSize(11, 11.5, 12, 13, 14),
         textAlign: 'center',
-        width: 80,
+        width: getSize(72, 76, 80, 88, 96),
     },
 });

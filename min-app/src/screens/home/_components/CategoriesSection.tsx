@@ -4,8 +4,10 @@
 import { useRouter } from 'expo-router';
 import React, { useCallback } from 'react';
 import { Image, Text, TouchableOpacity, View } from 'react-native';
+import { useRTL } from '../../../hooks/useRTL';
+import { useResponsive } from '../../../hooks/useResponsive';
 import { Category } from './types/home';
-import { styles } from './StyleSheets/CategoriesSection.styles';
+import { getStyles } from './StyleSheets/CategoriesSection.styles';
 
 const CATEGORIES: Category[] = [
     { id: '1', name: 'مجالس', image: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=200&q=80' },
@@ -18,6 +20,9 @@ const CATEGORIES: Category[] = [
 
 const CategoriesSectionComponent = () => {
     const router = useRouter();
+    const { isRTL } = useRTL();
+    const { getSize } = useResponsive();
+    const styles = getStyles(isRTL, getSize);
 
     const handleCategoryPress = useCallback((categoryId: string) => {
         router.push(`/category/${categoryId}`);

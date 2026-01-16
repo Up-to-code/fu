@@ -5,10 +5,15 @@ import { Feather } from '@expo/vector-icons';
 import { Link, useRouter } from 'expo-router';
 import React, { useCallback } from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
-import { styles } from './StyleSheets/HomeHeader.styles';
+import { useRTL } from '../../../hooks/useRTL';
+import { useResponsive } from '../../../hooks/useResponsive';
+import { getStyles } from './StyleSheets/HomeHeader.styles';
 
 const HomeHeaderComponent = () => {
     const router = useRouter();
+    const { isRTL } = useRTL();
+    const { getSize, iconSize } = useResponsive();
+    const styles = getStyles(isRTL, getSize);
 
     const handleCameraPress = useCallback((e: any) => {
         e.stopPropagation();
@@ -19,12 +24,12 @@ const HomeHeaderComponent = () => {
         <View style={styles.container}>
             <Link href="/search" asChild>
                 <TouchableOpacity style={styles.searchButton}>
-                    <Feather name="search" size={18} color="#9CA3AF" />
+                    <Feather name="search" size={iconSize.sm} color="#9CA3AF" />
                     <Text style={styles.searchText}>
                         أنت بتدور على آيه؟
                     </Text>
                     <TouchableOpacity onPress={handleCameraPress}>
-                        <Feather name="camera" size={18} color="#9CA3AF" />
+                        <Feather name="camera" size={iconSize.sm} color="#9CA3AF" />
                     </TouchableOpacity>
                 </TouchableOpacity>
             </Link>

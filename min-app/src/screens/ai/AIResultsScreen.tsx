@@ -6,10 +6,11 @@ import { router, useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import { Image, ScrollView, StatusBar, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Header } from '../shared';
 import { COLORS } from '../../constants/theme';
+import { useRTL } from '../../hooks/useRTL';
+import { useResponsive } from '../../hooks/useResponsive';
 import { getLastAIDesignPhoto } from '../../utils/storage';
-import { styles } from './StyleSheets/AIResultsScreen.styles';
+import { getStyles } from './StyleSheets/AIResultsScreen.styles';
 
 const GENERATED_IMAGE = 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?q=80&w=2000';
 const DETECTED_ITEMS = [
@@ -26,7 +27,10 @@ const LOADING_TEXTS = [
 ];
 
 const AIResultsScreen = () => {
-    const { photo: photoParam } = useLocalSearchParams<{ photo?: string }>();
+    const { photo: photoParam, mode: modeParam } = useLocalSearchParams<{ photo?: string; mode?: string }>();
+    const { isRTL } = useRTL();
+    const { getSize, iconSize } = useResponsive();
+    const styles = getStyles(getSize || ((s: number, m: number, l: number, t: number, d: number) => m));
 
     const [isLoading, setIsLoading] = useState(true);
     const [loadingStep, setLoadingStep] = useState(0);
@@ -65,8 +69,20 @@ const AIResultsScreen = () => {
         return () => clearInterval(interval);
     }, []);
 
-    const handleClose = () => router.replace('/(tabs)/home');
-    const handleTryAgain = () => router.push('/ai-design/camera');
+    const handleClose = () => {
+        if (router.canGoBack()) {
+            router.back();
+        } else {
+            router.replace('/(tabs)/home');
+        }
+    };
+    
+    const handleTryAgain = () => {
+        router.push({
+            pathname: '/ai-design/camera',
+            params: modeParam ? { mode: modeParam } : { mode: 'design' }
+        });
+    };
 
     const totalPrice = DETECTED_ITEMS.reduce((sum, item) => {
         const finalPrice = item.discount ? item.price * (1 - item.discount / 100) : item.price;
@@ -98,13 +114,6 @@ const AIResultsScreen = () => {
     return (
         <View style={styles.container}>
             <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
-            <SafeAreaView edges={['top']} style={{ backgroundColor: '#FFFFFF' }}>
-                <Header
-                    title="نتائج التصميم"
-                    showBack
-                    onBack={handleClose}
-                />
-            </SafeAreaView>
 
             <ScrollView 
                 style={{ flex: 1 }}
@@ -159,7 +168,7 @@ const AIResultsScreen = () => {
                         </TouchableOpacity>
                     ))}
 
-                    {/* Top Controls */}
+                    {/* Top Controls - Redesigned without header */}
                     <SafeAreaView style={styles.topBar} edges={['top']}>
                         <View style={styles.topBarContent}>
                             <TouchableOpacity
@@ -167,7 +176,7 @@ const AIResultsScreen = () => {
                                 style={styles.topBarButton}
                                 activeOpacity={0.8}
                             >
-                                <Feather name="x" size={20} color="white" />
+                                <Feather name={isRTL ? "arrow-right" : "arrow-left"} size={iconSize.md} color="white" />
                             </TouchableOpacity>
 
                             <View style={styles.viewModeContainer}>
@@ -197,7 +206,7 @@ const AIResultsScreen = () => {
                                 style={styles.topBarButton}
                                 activeOpacity={0.8}
                             >
-                                <Feather name="share" size={18} color="white" />
+                                <Feather name="share" size={iconSize.sm} color="white" />
                             </TouchableOpacity>
                         </View>
                     </SafeAreaView>
@@ -238,7 +247,11 @@ const AIResultsScreen = () => {
                                         <Text style={styles.itemName}>
                                             {item.name}
                                         </Text>
-                                        <View style={{ flexDirection: 'row-reverse', alignItems: 'center', gap: 12 }}>
+                                        <View style={{ 
+                                        flexDirection: isRTL ? 'row-reverse' : 'row', 
+                                        alignItems: 'center', 
+                                        gap: 12 
+                                    }}>
                                             <Text 
                                                 style={[styles.itemPrice, { color: COLORS.primary }]}
                                             >
@@ -251,8 +264,15 @@ const AIResultsScreen = () => {
                                             )}
                                         </View>
                                     </View>
-                                    <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: '#f0f9ff', alignItems: 'center', justifyContent: 'center' }}>
-                                        <Feather name="plus" size={20} color={COLORS.primary} />
+                                    <View style={{ 
+                                        width: getSize(36, 38, 40, 44, 48), 
+                                        height: getSize(36, 38, 40, 44, 48), 
+                                        borderRadius: getSize(18, 19, 20, 22, 24), 
+                                        backgroundColor: '#f0f9ff', 
+                                        alignItems: 'center', 
+                                        justifyContent: 'center' 
+                                    }}>
+                                        <Feather name="plus" size={iconSize.md} color={COLORS.primary} />
                                     </View>
                                 </TouchableOpacity>
                             );
@@ -278,7 +298,7 @@ const AIResultsScreen = () => {
                             <Text style={[styles.actionButtonText, styles.actionButtonTextPrimary]}>
                                 أضف الكل للسلة ({Math.round(totalPrice)} ر.س)
                             </Text>
-                            <Feather name="shopping-cart" size={20} color="white" />
+                            <Feather name="shopping-cart" size={iconSize.md} color="white" />
                         </TouchableOpacity>
 
                         <TouchableOpacity
@@ -287,7 +307,7 @@ const AIResultsScreen = () => {
                             activeOpacity={0.8}
                         >
                             <Text style={[styles.actionButtonText, styles.actionButtonTextSecondary]}>جرب صورة أخرى</Text>
-                            <Feather name="refresh-cw" size={20} color={COLORS.text} />
+                            <Feather name="refresh-cw" size={iconSize.md} color={COLORS.text} />
                         </TouchableOpacity>
                     </View>
                 </View>

@@ -5,8 +5,9 @@ import { Feather } from '@expo/vector-icons';
 import React from 'react';
 import { TextInput, TouchableOpacity, View } from 'react-native';
 import { COLORS } from '../../../constants/theme';
+import { useRTL } from '../../../hooks/useRTL';
 import { SearchBarProps } from '../types/ui';
-import { styles } from '../StyleSheets/SearchBar.styles';
+import { getStyles } from '../StyleSheets/SearchBar.styles';
 
 export const SearchBar: React.FC<SearchBarProps> = ({
     value,
@@ -16,6 +17,9 @@ export const SearchBar: React.FC<SearchBarProps> = ({
     style,
     ...textInputProps
 }) => {
+    const { isRTL, textAlign } = useRTL();
+    const styles = getStyles(isRTL);
+    
     return (
         <View style={styles.container}>
             <View style={styles.inputContainer}>
@@ -24,7 +28,7 @@ export const SearchBar: React.FC<SearchBarProps> = ({
                     style={[styles.input, style]}
                     value={value}
                     placeholderTextColor="#94a3b8"
-                    textAlign="right"
+                    textAlign={textAlign}
                     {...textInputProps}
                 />
                 {value && value.length > 0 && onClear && (

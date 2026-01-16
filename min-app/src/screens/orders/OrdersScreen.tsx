@@ -4,12 +4,13 @@
 import { Feather } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { Dimensions, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { EmptyState } from '../shared';
 import { Header, TabBar, OrderCard } from '../shared';
 import { useOrders } from './_hooks';
 import { COLORS } from '../../constants/theme';
+import { useResponsive } from '../../hooks/useResponsive';
 import {
     OrderStatus,
     ORDER_STATUS_LABELS,
@@ -20,8 +21,6 @@ import {
     ServiceBooking
 } from '../../types/orders';
 import { OrderType, UnifiedOrder } from './types/orders';
-
-const { width } = Dimensions.get('window');
 
 // Consistent customer data
 const CURRENT_USER = {
@@ -172,9 +171,144 @@ const SERVICE_BOOKINGS: ServiceBooking[] = [
     },
 ];
 
+const getStyles = (
+    getSize: (small: number, medium: number, large: number, tablet: number, desktop: number) => number,
+    fontSize: { xs: number; sm: number; base: number; lg: number; xl: number; '2xl': number; '3xl': number },
+    iconSize: { sm: number; md: number; lg: number; xl: number }
+) => {
+    const { StyleSheet } = require('react-native');
+    return StyleSheet.create({
+        container: { flex: 1, backgroundColor: '#f8fafc' },
+        safeArea: { flex: 1 },
+        header: {
+            flexDirection: 'row-reverse',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            paddingHorizontal: getSize(14, 15, 16, 20, 24),
+            paddingVertical: getSize(10, 11, 12, 16, 20),
+            backgroundColor: 'white',
+            borderBottomWidth: 1,
+            borderBottomColor: '#f1f5f9',
+        },
+        headerTitle: { fontFamily: 'Cairo_700Bold', fontSize: fontSize.lg, color: '#1e293b' },
+        filterContainer: {
+            flexDirection: 'row-reverse',
+            backgroundColor: 'white',
+            paddingHorizontal: getSize(14, 15, 16, 20, 24),
+            paddingVertical: getSize(6, 7, 8, 10, 12),
+            gap: 8,
+            borderBottomWidth: 1,
+            borderBottomColor: '#f1f5f9',
+        },
+        filterTab: {
+            flex: 1,
+            paddingVertical: getSize(6, 7, 8, 10, 12),
+            paddingHorizontal: getSize(10, 11, 12, 16, 20),
+            borderRadius: getSize(6, 7, 8, 10, 12),
+            alignItems: 'center',
+        },
+        filterTabActive: {
+            backgroundColor: COLORS.primary,
+        },
+        filterText: {
+            fontFamily: 'Cairo_600SemiBold',
+            fontSize: fontSize.sm,
+            color: '#64748b',
+        },
+        filterTextActive: {
+            color: 'white',
+        },
+        scrollView: { flex: 1 },
+        scrollContent: { padding: getSize(14, 15, 16, 20, 24) },
+        orderCard: {
+            backgroundColor: 'white',
+            borderRadius: getSize(10, 11, 12, 14, 16),
+            padding: getSize(14, 15, 16, 20, 24),
+            marginBottom: getSize(10, 11, 12, 16, 20),
+            borderWidth: 1,
+            borderColor: '#f1f5f9',
+        },
+        orderHeader: {
+            flexDirection: 'row-reverse',
+            justifyContent: 'space-between',
+            alignItems: 'flex-start',
+            marginBottom: getSize(10, 11, 12, 16, 20),
+        },
+        orderNumberSection: { flex: 1 },
+        orderTypeRow: {
+            flexDirection: 'row-reverse',
+            alignItems: 'center',
+            gap: 8,
+            marginBottom: 4,
+        },
+        orderNumber: {
+            fontFamily: 'Cairo_700Bold',
+            fontSize: fontSize.base,
+            color: '#1e293b',
+        },
+        orderTypeBadge: {
+            flexDirection: 'row-reverse',
+            alignItems: 'center',
+            gap: 4,
+            paddingHorizontal: getSize(5, 5.5, 6, 7, 8),
+            paddingVertical: getSize(2, 2.5, 3, 3.5, 4),
+            borderRadius: getSize(3, 3.5, 4, 5, 6),
+            backgroundColor: `${COLORS.primary}10`,
+        },
+        orderTypeText: {
+            fontFamily: 'Cairo_600SemiBold',
+            fontSize: fontSize.xs,
+            color: COLORS.primary,
+        },
+        providerName: {
+            fontFamily: 'Cairo_500Medium',
+            fontSize: fontSize.xs,
+            color: '#64748b',
+            textAlign: 'right',
+        },
+        statusBadge: {
+            paddingHorizontal: getSize(10, 11, 12, 16, 20),
+            paddingVertical: getSize(5, 5.5, 6, 7, 8),
+            borderRadius: getSize(14, 15, 16, 18, 20),
+            marginLeft: getSize(10, 11, 12, 16, 20),
+        },
+        statusText: {
+            fontFamily: 'Cairo_600SemiBold',
+            fontSize: fontSize.xs,
+            textAlign: 'right',
+        },
+        divider: {
+            height: 1,
+            backgroundColor: '#f1f5f9',
+            marginBottom: getSize(10, 11, 12, 16, 20),
+        },
+        orderDetails: {
+            flexDirection: 'row-reverse',
+            justifyContent: 'space-between',
+            gap: 12,
+        },
+        detailRow: { flex: 1 },
+        detailLabel: {
+            fontFamily: 'Cairo_500Medium',
+            fontSize: fontSize.xs,
+            color: '#94a3b8',
+            textAlign: 'right',
+            marginBottom: 4,
+        },
+        detailValue: {
+            fontFamily: 'Cairo_600SemiBold',
+            fontSize: fontSize.sm,
+            color: '#1e293b',
+            textAlign: 'right',
+        },
+    });
+};
+
 export default function OrdersScreen() {
     const router = useRouter();
     const [filter, setFilter] = useState<'all' | 'products' | 'services'>('all');
+    const { getSize, fontSize, iconSize } = useResponsive();
+    const styles = getStyles(getSize, fontSize, iconSize);
 
     // Combine and sort orders
     const allOrders: UnifiedOrder[] = [
@@ -268,7 +402,7 @@ export default function OrdersScreen() {
                                             <View style={styles.orderTypeBadge}>
                                                 <Feather
                                                     name={order.type === 'product' ? 'package' : 'tool'}
-                                                    size={12}
+                                                    size={iconSize.sm}
                                                     color={COLORS.primary}
                                                 />
                                                 <Text style={styles.orderTypeText}>
@@ -329,129 +463,3 @@ export default function OrdersScreen() {
         </View>
     );
 }
-
-const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#f8fafc' },
-    safeArea: { flex: 1 },
-    header: {
-        flexDirection: 'row-reverse',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingHorizontal: 16,
-        paddingVertical: 12,
-        backgroundColor: 'white',
-        borderBottomWidth: 1,
-        borderBottomColor: '#f1f5f9',
-    },
-    headerTitle: { fontFamily: 'Cairo_700Bold', fontSize: 18, color: '#1e293b' },
-    filterContainer: {
-        flexDirection: 'row-reverse',
-        backgroundColor: 'white',
-        paddingHorizontal: 16,
-        paddingVertical: 8,
-        gap: 8,
-        borderBottomWidth: 1,
-        borderBottomColor: '#f1f5f9',
-    },
-    filterTab: {
-        flex: 1,
-        paddingVertical: 8,
-        paddingHorizontal: 12,
-        borderRadius: 8,
-        alignItems: 'center',
-    },
-    filterTabActive: {
-        backgroundColor: COLORS.primary,
-    },
-    filterText: {
-        fontFamily: 'Cairo_600SemiBold',
-        fontSize: 13,
-        color: '#64748b',
-    },
-    filterTextActive: {
-        color: 'white',
-    },
-    scrollView: { flex: 1 },
-    scrollContent: { padding: 16 },
-    orderCard: {
-        backgroundColor: 'white',
-        borderRadius: 12,
-        padding: 16,
-        marginBottom: 12,
-        borderWidth: 1,
-        borderColor: '#f1f5f9',
-    },
-    orderHeader: {
-        flexDirection: 'row-reverse',
-        justifyContent: 'space-between',
-        alignItems: 'flex-start',
-        marginBottom: 12,
-    },
-    orderNumberSection: { flex: 1 },
-    orderTypeRow: {
-        flexDirection: 'row-reverse',
-        alignItems: 'center',
-        gap: 8,
-        marginBottom: 4,
-    },
-    orderNumber: {
-        fontFamily: 'Cairo_700Bold',
-        fontSize: 14,
-        color: '#1e293b',
-    },
-    orderTypeBadge: {
-        flexDirection: 'row-reverse',
-        alignItems: 'center',
-        gap: 4,
-        paddingHorizontal: 6,
-        paddingVertical: 2,
-        borderRadius: 4,
-        backgroundColor: `${COLORS.primary}10`,
-    },
-    orderTypeText: {
-        fontFamily: 'Cairo_600SemiBold',
-        fontSize: 10,
-        color: COLORS.primary,
-    },
-    providerName: {
-        fontFamily: 'Cairo_500Medium',
-        fontSize: 12,
-        color: '#64748b',
-        textAlign: 'right',
-    },
-    statusBadge: {
-        paddingHorizontal: 12,
-        paddingVertical: 6,
-        borderRadius: 16,
-        marginLeft: 12,
-    },
-    statusText: {
-        fontFamily: 'Cairo_600SemiBold',
-        fontSize: 11,
-        textAlign: 'right',
-    },
-    divider: {
-        height: 1,
-        backgroundColor: '#f1f5f9',
-        marginBottom: 12,
-    },
-    orderDetails: {
-        flexDirection: 'row-reverse',
-        justifyContent: 'space-between',
-        gap: 12,
-    },
-    detailRow: { flex: 1 },
-    detailLabel: {
-        fontFamily: 'Cairo_500Medium',
-        fontSize: 11,
-        color: '#94a3b8',
-        textAlign: 'right',
-        marginBottom: 4,
-    },
-    detailValue: {
-        fontFamily: 'Cairo_600SemiBold',
-        fontSize: 13,
-        color: '#1e293b',
-        textAlign: 'right',
-    },
-});

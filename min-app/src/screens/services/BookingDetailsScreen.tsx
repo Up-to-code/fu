@@ -4,14 +4,13 @@
 import { Feather, Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import React from 'react';
-import { Dimensions, Image, Linking, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Image, Linking, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Header } from '../shared';
 import { useOrderDetails } from '../orders/_hooks';
 import { COLORS } from '../../constants/theme';
+import { useResponsive } from '../../hooks/useResponsive';
 import { ServiceBookingStatus, SERVICE_STATUS_LABELS, ServiceBooking } from '../../types/orders';
-
-const { width } = Dimensions.get('window');
 
 // Mock data - in real app, fetch by ID
 const MOCK_SERVICE_BOOKING: ServiceBooking = {
@@ -119,6 +118,8 @@ export default function BookingDetailsScreen() {
     const { id } = useLocalSearchParams();
     const { order: hookOrder, isLoading } = useOrderDetails(id as string, 'service');
     const booking = (hookOrder as ServiceBooking) || MOCK_SERVICE_BOOKING; // Fallback to mock if hook returns null
+    const { getSize, fontSize, iconSize } = useResponsive();
+    const styles = getStyles(getSize, fontSize, iconSize);
 
     const statusColors = STATUS_COLORS[booking.status];
     const statusLabel = SERVICE_STATUS_LABELS[booking.status];
@@ -330,58 +331,64 @@ export default function BookingDetailsScreen() {
     );
 }
 
-const styles = StyleSheet.create({
-    container: { flex: 1, backgroundColor: '#f8fafc' },
-    safeArea: { flex: 1 },
-    header: {
-        flexDirection: 'row-reverse',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingHorizontal: 16,
-        paddingVertical: 12,
-        backgroundColor: 'white',
-        borderBottomWidth: 1,
-        borderBottomColor: '#f1f5f9',
-    },
-    headerTitle: { fontFamily: 'Cairo_700Bold', fontSize: 16, color: '#1e293b' },
-    scrollView: { flex: 1 },
-    scrollContent: { padding: 16 },
-    statusCard: {
-        borderRadius: 12,
-        padding: 16,
-        marginBottom: 16,
-    },
-    statusHeader: {
-        flexDirection: 'row-reverse',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 8,
-    },
-    currentStatusLabel: { fontFamily: 'Cairo_700Bold', fontSize: 18 },
-    scheduledInfo: {
-        fontFamily: 'Cairo_600SemiBold',
-        fontSize: 13,
-        color: '#1e293b',
-        textAlign: 'right',
-    },
-    section: {
-        backgroundColor: 'white',
-        borderRadius: 12,
-        padding: 16,
-        marginBottom: 12,
-        borderWidth: 1,
-        borderColor: '#f1f5f9',
-    },
-    sectionContent: {
-        // Wrapper for content if needed
-    },
-    sectionTitle: {
-        fontFamily: 'Cairo_700Bold',
-        fontSize: 15,
-        color: '#1e293b',
-        textAlign: 'right',
-        marginBottom: 12,
-    },
+const getStyles = (
+    getSize: (small: number, medium: number, large: number, tablet: number, desktop: number) => number,
+    fontSize: { xs: number; sm: number; base: number; lg: number; xl: number; '2xl': number; '3xl': number },
+    iconSize: { sm: number; md: number; lg: number; xl: number }
+) => {
+    const { StyleSheet } = require('react-native');
+    return StyleSheet.create({
+        container: { flex: 1, backgroundColor: '#f8fafc' },
+        safeArea: { flex: 1 },
+        header: {
+            flexDirection: 'row-reverse',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            paddingHorizontal: getSize(14, 15, 16, 20, 24),
+            paddingVertical: getSize(10, 11, 12, 16, 20),
+            backgroundColor: 'white',
+            borderBottomWidth: 1,
+            borderBottomColor: '#f1f5f9',
+        },
+        headerTitle: { fontFamily: 'Cairo_700Bold', fontSize: fontSize.base, color: '#1e293b' },
+        scrollView: { flex: 1 },
+        scrollContent: { padding: getSize(14, 15, 16, 20, 24) },
+        statusCard: {
+            borderRadius: getSize(10, 11, 12, 14, 16),
+            padding: getSize(14, 15, 16, 20, 24),
+            marginBottom: getSize(12, 14, 16, 20, 24),
+        },
+        statusHeader: {
+            flexDirection: 'row-reverse',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: getSize(6, 7, 8, 10, 12),
+        },
+        currentStatusLabel: { fontFamily: 'Cairo_700Bold', fontSize: fontSize.lg },
+        scheduledInfo: {
+            fontFamily: 'Cairo_600SemiBold',
+            fontSize: fontSize.sm,
+            color: '#1e293b',
+            textAlign: 'right',
+        },
+        section: {
+            backgroundColor: 'white',
+            borderRadius: getSize(10, 11, 12, 14, 16),
+            padding: getSize(14, 15, 16, 20, 24),
+            marginBottom: getSize(10, 11, 12, 16, 20),
+            borderWidth: 1,
+            borderColor: '#f1f5f9',
+        },
+        sectionContent: {
+            // Wrapper for content if needed
+        },
+        sectionTitle: {
+            fontFamily: 'Cairo_700Bold',
+            fontSize: fontSize.base,
+            color: '#1e293b',
+            textAlign: 'right',
+            marginBottom: getSize(10, 11, 12, 16, 20),
+        },
     providerCard: {
         flexDirection: 'row-reverse',
         justifyContent: 'space-between',
@@ -394,15 +401,15 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     providerAvatar: {
-        width: 50,
-        height: 50,
-        borderRadius: 25,
+        width: getSize(46, 48, 50, 56, 64),
+        height: getSize(46, 48, 50, 56, 64),
+        borderRadius: getSize(23, 24, 25, 28, 32),
         backgroundColor: '#f1f5f9',
     },
     providerInfo: { flex: 1 },
     providerName: {
         fontFamily: 'Cairo_700Bold',
-        fontSize: 15,
+        fontSize: fontSize.base,
         color: '#1e293b',
         textAlign: 'right',
         marginBottom: 4,
@@ -414,12 +421,12 @@ const styles = StyleSheet.create({
     },
     ratingText: {
         fontFamily: 'Cairo_600SemiBold',
-        fontSize: 13,
+        fontSize: fontSize.sm,
         color: '#1e293b',
     },
     providerType: {
         fontFamily: 'Cairo_500Medium',
-        fontSize: 12,
+        fontSize: fontSize.xs,
         color: '#64748b',
     },
     callButton: {
@@ -427,13 +434,13 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         gap: 6,
         backgroundColor: COLORS.primary,
-        paddingHorizontal: 16,
-        paddingVertical: 10,
-        borderRadius: 8,
+        paddingHorizontal: getSize(14, 15, 16, 20, 24),
+        paddingVertical: getSize(8, 9, 10, 12, 14),
+        borderRadius: getSize(6, 7, 8, 10, 12),
     },
     callButtonText: {
         fontFamily: 'Cairo_700Bold',
-        fontSize: 13,
+        fontSize: fontSize.sm,
         color: 'white',
     },
     serviceItem: {
@@ -452,36 +459,36 @@ const styles = StyleSheet.create({
     },
     serviceLabel: {
         fontFamily: 'Cairo_600SemiBold',
-        fontSize: 14,
+        fontSize: fontSize.base,
         color: '#1e293b',
         textAlign: 'right',
     },
     servicePrice: {
         fontFamily: 'Cairo_700Bold',
-        fontSize: 13,
+        fontSize: fontSize.sm,
         color: COLORS.primary,
     },
     descriptionBox: {
         backgroundColor: '#f8fafc',
-        padding: 12,
-        borderRadius: 8,
-        marginTop: 12,
+        padding: getSize(10, 11, 12, 16, 20),
+        borderRadius: getSize(6, 7, 8, 10, 12),
+        marginTop: getSize(10, 11, 12, 16, 20),
     },
     descriptionLabel: {
         fontFamily: 'Cairo_700Bold',
-        fontSize: 12,
+        fontSize: fontSize.xs,
         color: '#64748b',
         textAlign: 'right',
         marginBottom: 4,
     },
     descriptionText: {
         fontFamily: 'Cairo_500Medium',
-        fontSize: 13,
+        fontSize: fontSize.sm,
         color: '#1e293b',
         textAlign: 'right',
-        lineHeight: 20,
+        lineHeight: getSize(18, 19, 20, 24, 28),
     },
-    infoRow: { marginBottom: 12 },
+    infoRow: { marginBottom: getSize(10, 11, 12, 16, 20) },
     infoItem: {
         flexDirection: 'row-reverse',
         alignItems: 'center',
@@ -489,7 +496,7 @@ const styles = StyleSheet.create({
     },
     infoText: {
         fontFamily: 'Cairo_500Medium',
-        fontSize: 13,
+        fontSize: fontSize.sm,
         color: '#1e293b',
         textAlign: 'right',
         flex: 1,
@@ -497,28 +504,28 @@ const styles = StyleSheet.create({
     priceRow: {
         flexDirection: 'row-reverse',
         justifyContent: 'space-between',
-        marginBottom: 8,
+        marginBottom: getSize(6, 7, 8, 10, 12),
     },
     priceLabel: {
         fontFamily: 'Cairo_600SemiBold',
-        fontSize: 14,
+        fontSize: fontSize.base,
         color: '#64748b',
     },
     priceValue: {
         fontFamily: 'Cairo_700Bold',
-        fontSize: 20,
+        fontSize: getSize(18, 19, 20, 22, 24),
     },
     quoteNotes: {
         fontFamily: 'Cairo_500Medium',
-        fontSize: 12,
+        fontSize: fontSize.xs,
         color: '#64748b',
         textAlign: 'right',
-        marginBottom: 8,
-        lineHeight: 18,
+        marginBottom: getSize(6, 7, 8, 10, 12),
+        lineHeight: getSize(16, 17, 18, 22, 26),
     },
     paymentMethod: {
         fontFamily: 'Cairo_600SemiBold',
-        fontSize: 12,
+        fontSize: fontSize.xs,
         color: '#1e293b',
         textAlign: 'right',
     },
@@ -527,7 +534,7 @@ const styles = StyleSheet.create({
         gap: 12,
     },
     timelineLeft: { alignItems: 'center' },
-    timelineDot: { width: 12, height: 12, borderRadius: 6 },
+    timelineDot: { width: getSize(10, 11, 12, 14, 16), height: getSize(10, 11, 12, 14, 16), borderRadius: getSize(5, 5.5, 6, 7, 8) },
     timelineLine: {
         width: 2,
         flex: 1,
@@ -537,28 +544,28 @@ const styles = StyleSheet.create({
     timelineContent: { flex: 1 },
     timelineStatus: {
         fontFamily: 'Cairo_700Bold',
-        fontSize: 14,
+        fontSize: fontSize.base,
         color: '#1e293b',
         textAlign: 'right',
         marginBottom: 4,
     },
     timelineNote: {
         fontFamily: 'Cairo_500Medium',
-        fontSize: 13,
+        fontSize: fontSize.sm,
         color: '#64748b',
         textAlign: 'right',
         marginBottom: 4,
     },
     timelineDate: {
         fontFamily: 'Cairo_500Medium',
-        fontSize: 11,
+        fontSize: fontSize.xs,
         color: '#94a3b8',
         textAlign: 'right',
     },
     completeButton: {
         backgroundColor: '#10B981', // Green for success/completion
-        borderRadius: 12,
-        paddingVertical: 14,
+        borderRadius: getSize(10, 11, 12, 14, 16),
+        paddingVertical: getSize(12, 13, 14, 16, 18),
         alignItems: 'center',
     },
     completeButtonContent: {
@@ -568,7 +575,8 @@ const styles = StyleSheet.create({
     },
     completeButtonText: {
         fontFamily: 'Cairo_700Bold',
-        fontSize: 16,
+        fontSize: fontSize.base,
         color: 'white',
     },
-});
+    });
+};

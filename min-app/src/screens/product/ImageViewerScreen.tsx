@@ -6,7 +6,6 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useRef, useState } from 'react';
 import {
     Animated,
-    Dimensions,
     Image,
     PanResponder,
     ScrollView,
@@ -16,13 +15,14 @@ import {
     View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { styles } from './StyleSheets/ImageViewerScreen.styles';
-
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
+import { useResponsive } from '../../hooks/useResponsive';
+import { getStyles } from './StyleSheets/ImageViewerScreen.styles';
 
 export default function ImageViewerScreen() {
     const router = useRouter();
     const { images, index } = useLocalSearchParams();
+    const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT, getSize, fontSize, iconSize } = useResponsive();
+    const styles = getStyles(getSize, fontSize, iconSize);
 
     // Parse images array from params
     const imageUrls: string[] = typeof images === 'string' ? JSON.parse(images) : [];

@@ -1,40 +1,39 @@
 // File: src/screens/shared/StyleSheets/Header.styles.ts
 // Purpose: Styles for Header component
 
-import { Dimensions, StyleSheet } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { COLORS } from '../../../constants/theme';
 
-const { width } = Dimensions.get('window');
-const isTablet = width >= 768;
-const isSmallScreen = width < 375;
+type GetSizeFunction = (small: number, medium: number, large: number, tablet: number, desktop: number) => number;
 
-export const styles = StyleSheet.create({
+export const getStyles = (isRTL: boolean = true, getSize: GetSizeFunction) => StyleSheet.create({
     header: {
-        flexDirection: 'row-reverse',
+        flexDirection: (isRTL ? 'row-reverse' : 'row') as const,
         alignItems: 'center',
         justifyContent: 'space-between',
-        paddingHorizontal: isTablet ? 24 : isSmallScreen ? 12 : 16,
-        paddingVertical: isTablet ? 16 : isSmallScreen ? 10 : 12,
+        paddingHorizontal: getSize(12, 16, 20, 24, 32),
+        paddingVertical: getSize(10, 12, 14, 16, 20),
         backgroundColor: '#FFFFFF',
         borderBottomWidth: 1,
         borderBottomColor: '#f1f5f9',
     },
     backButton: {
-        minWidth: isTablet ? 50 : 40,
-        height: isTablet ? 44 : 40,
+        minWidth: getSize(40, 44, 48, 50, 56),
+        height: getSize(40, 44, 48, 44, 52),
         alignItems: 'center',
         justifyContent: 'center',
         borderRadius: 20,
-        paddingHorizontal: isTablet ? 8 : 4,
+        paddingHorizontal: getSize(4, 6, 8, 8, 12),
     },
     backButtonText: {
         fontFamily: 'Cairo_600SemiBold',
         color: COLORS.text,
-        textAlign: 'right',
+        textAlign: (isRTL ? 'right' : 'left') as const,
+        fontSize: getSize(14, 15, 16, 16, 18),
     },
     headerTitle: {
         fontFamily: 'Cairo_700Bold',
-        fontSize: isTablet ? 18 : isSmallScreen ? 14 : 16,
+        fontSize: getSize(14, 16, 18, 18, 20),
         color: '#1e293b',
         flex: 1,
         textAlign: 'center',

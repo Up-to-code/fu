@@ -3,13 +3,11 @@
 
 import { Feather } from '@expo/vector-icons';
 import React from 'react';
-import { Dimensions, Text, TouchableOpacity } from 'react-native';
-import { getResponsiveValue } from '../../../utils/responsive';
+import { Text, TouchableOpacity } from 'react-native';
+import { useRTL } from '../../../hooks/useRTL';
+import { useResponsive } from '../../../hooks/useResponsive';
 import { ActionButtonProps } from '../types/button';
 import { getStyles } from '../StyleSheets/ActionButton.styles';
-
-const { width } = Dimensions.get('window');
-const isTablet = width >= 768;
 
 const ActionButtonComponent: React.FC<ActionButtonProps> = ({
     label,
@@ -19,7 +17,9 @@ const ActionButtonComponent: React.FC<ActionButtonProps> = ({
     disabled = false,
     fullWidth = true,
 }) => {
-    const styles = getStyles(variant, disabled, fullWidth);
+    const { isRTL } = useRTL();
+    const { getSize, iconSize } = useResponsive();
+    const styles = getStyles(variant, disabled, fullWidth, isRTL, getSize);
 
     return (
         <TouchableOpacity
@@ -30,7 +30,7 @@ const ActionButtonComponent: React.FC<ActionButtonProps> = ({
         >
             <Text style={styles.text}>{label}</Text>
             {icon && (
-                <Feather name={icon} size={getResponsiveValue(18, 22)} color={styles.iconColor} />
+                <Feather name={icon} size={iconSize.md} color={styles.iconColor} />
             )}
         </TouchableOpacity>
     );

@@ -13,6 +13,7 @@ import { useAuth } from '../../hooks/useAuth';
 import { useAccountStats } from '../../hooks/useAccountStats';
 import { useUserProfile } from '../../hooks/useUserProfile';
 import { useProfileImage } from '../../hooks/useLocalData';
+import { useRTL } from '../../hooks/useRTL';
 import { RoleBadge } from '../shared';
 
 // Helper function to get user initials
@@ -113,6 +114,7 @@ export default function AccountScreen() {
     const { user } = useAuth();
     const { role } = useUserProfile(user?.id);
     const { imageBase64 } = useProfileImage(user?.id);
+    const { flexDirection, textAlign, getMarginStart } = useRTL();
     
     // Fetch profile image URL from Convex storage
     const convexImageUrl = useQuery(
@@ -136,14 +138,14 @@ export default function AccountScreen() {
                         onPress={() => router.push('/account/settings' as any)}
                         activeOpacity={0.8}
                     >
-                        <View style={styles.profileCardContent}>
-                            <View style={styles.profileInfo}>
+                        <View style={[styles.profileCardContent, { flexDirection }]}>
+                            <View style={[styles.profileInfo, { flexDirection }]}>
                                 {renderAvatar(user, convexImageUrl, imageBase64, 80)}
-                                <View style={styles.profileText}>
-                                    <Text style={styles.userName}>
+                                <View style={[styles.profileText, getMarginStart(16)]}>
+                                    <Text style={[styles.userName, { textAlign }]}>
                                         {user?.name || 'الاسم غير متوفر'}
                                     </Text>
-                                    <Text style={styles.userEmail}>
+                                    <Text style={[styles.userEmail, { textAlign }]}>
                                         {user?.email || 'البريد الإلكتروني غير متوفر'}
                                     </Text>
                                     {role !== 'customer' && (
@@ -153,7 +155,7 @@ export default function AccountScreen() {
                                     )}
                                 </View>
                             </View>
-                            <Feather name="chevron-left" size={20} color="#94a3b8" />
+                            <Feather name={flexDirection === 'row-reverse' ? 'chevron-left' : 'chevron-right'} size={20} color="#94a3b8" />
                         </View>
                     </TouchableOpacity>
 
@@ -213,17 +215,14 @@ const styles = StyleSheet.create({
         // No shadows - flat minimal design
     },
     profileCardContent: {
-        flexDirection: 'row-reverse',
         alignItems: 'center',
         justifyContent: 'space-between',
     },
     profileInfo: {
-        flexDirection: 'row-reverse',
         alignItems: 'center',
         flex: 1,
     },
     profileText: {
-        marginRight: 16,
         flex: 1,
     },
     avatar: {
@@ -245,13 +244,11 @@ const styles = StyleSheet.create({
         fontSize: 18,
         color: COLORS.text,
         marginBottom: 4,
-        textAlign: 'right',
     },
     userEmail: {
         fontFamily: 'Cairo_500Medium',
         fontSize: 14,
         color: COLORS.textLight,
-        textAlign: 'right',
         marginBottom: 8,
     },
     roleBadgeContainer: {

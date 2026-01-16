@@ -3,14 +3,18 @@
 
 import { StyleSheet } from 'react-native';
 
-export const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: 'white',
-    },
-    scrollContent: {
-        paddingBottom: 20,
-        paddingHorizontal: 20,
-        paddingTop: 80, // Space for floating header
-    },
-});
+type GetSizeFunction = (small: number, medium: number, large: number, tablet: number, desktop: number) => number;
+
+export const getStyles = (getSize: GetSizeFunction) => {
+    return StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: 'white',
+        },
+        scrollContent: {
+            paddingBottom: getSize(16, 18, 20, 24, 32),
+            paddingHorizontal: getSize(16, 18, 20, 24, 32),
+            paddingTop: getSize(72, 76, 80, 88, 96), // Space for floating header
+        },
+    });
+};

@@ -12,10 +12,10 @@ import "./global.css";
 import { authClient } from "@/src/lib/auth-client";
 import { useAuth } from "@/src/hooks/useAuth";
 import { initDB } from "@/src/lib/database";
+import { DirectionProvider } from "@/src/context/DirectionContext";
 
-// Enforce RTL
+// Allow RTL (but don't force it - let DirectionProvider handle it)
 I18nManager.allowRTL(true);
-I18nManager.forceRTL(true);
 
 const convex = new ConvexReactClient(process.env.EXPO_PUBLIC_CONVEX_URL as string, {
   unsavedChangesWarning: false,
@@ -44,15 +44,21 @@ function InitialLayout() {
     });
   }, []);
 
-  // Function to check and handle route protection
-  const checkRouteProtection = useCallback(() => {
-    // Wait for both fonts and auth to be ready
-    if (isLoading || !fontsLoaded) {
+  // Set isReady when fonts and auth are loaded (separate from navigation)
+  useEffect(() => {
+    if (!isLoading && fontsLoaded) {
+      setIsReady(true);
+    } else {
       setIsReady(false);
-      return;
     }
+  }, [isLoading, fontsLoaded]);
 
-    setIsReady(true);
+  // Function to check and handle route protection
+  // Only called after isReady is true to ensure Stack is mounted
+  const checkRouteProtection = useCallback(() => {
+    if (!isReady) {
+      return; // Don't navigate until Stack is mounted
+    }
 
     const inAuthGroup = segments[0] === 'auth';
     const inLanding = segments.length === 0 || segments[0] === 'index';
@@ -84,16 +90,16 @@ function InitialLayout() {
       // This handles the OAuth cancellation scenario where user returns to landing page
       return;
     }
-  }, [user, isLoading, segments, fontsLoaded, router]);
+  }, [user, segments, router, isReady]);
 
   // Session-based listener: React to auth state changes in real-time
   // This handles all auth state changes regardless of current route
   useEffect(() => {
-    // Only check routes when auth state is ready (not loading)
-    if (!isLoading && fontsLoaded) {
+    // Only check routes when component is ready
+    if (isReady) {
       checkRouteProtection();
     }
-  }, [user, isLoading, fontsLoaded, checkRouteProtection]);
+  }, [user, isReady, checkRouteProtection]);
 
   // Re-check routes when screen comes into focus
   // This is critical for OAuth callback scenarios:
@@ -105,22 +111,23 @@ function InitialLayout() {
       // Small delay to ensure auth state has updated after OAuth callback
       // This is especially important when returning from browser OAuth flow
       const timer = setTimeout(() => {
-        if (!isLoading && fontsLoaded) {
+        if (isReady) {
           checkRouteProtection();
         }
       }, 150);
 
       return () => clearTimeout(timer);
-    }, [isLoading, fontsLoaded, checkRouteProtection])
+    }, [isReady, checkRouteProtection])
   );
 
   // Additional effect to handle route segment changes
   // This ensures redirects happen when navigating between routes
   useEffect(() => {
-    if (!isLoading && fontsLoaded) {
+    // Only check routes after component is ready
+    if (isReady) {
       checkRouteProtection();
     }
-  }, [segments, isLoading, fontsLoaded, checkRouteProtection]);
+  }, [segments, isReady, checkRouteProtection]);
 
   if (!isReady) {
     return (
@@ -133,10 +140,13 @@ function InitialLayout() {
   return (
     <Stack
       screenOptions={{
+        
         headerShown: false,
         animation: 'fade',
         animationDuration: 300,
-        contentStyle: { backgroundColor: '#FFFFFF' },
+        contentStyle: { backgroundColor: '#FFFFFF',
+          direction: 'ltr', 
+         },
       }}
     />
   );
@@ -149,7 +159,9 @@ export default function RootLayout() {
         <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
         <ConvexProvider client={convex}>
           <ConvexBetterAuthProvider client={convex} authClient={authClient}>
-            <InitialLayout />
+            <DirectionProvider>
+              <InitialLayout />
+            </DirectionProvider>
           </ConvexBetterAuthProvider>
         </ConvexProvider>
       </SafeAreaProvider>

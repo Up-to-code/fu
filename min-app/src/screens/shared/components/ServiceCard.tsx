@@ -4,8 +4,10 @@
 import { Feather } from '@expo/vector-icons';
 import React from 'react';
 import { Image, Text, TouchableOpacity, View } from 'react-native';
+import { useRTL } from '../../../hooks/useRTL';
+import { useResponsive } from '../../../hooks/useResponsive';
 import { ServiceCardProps } from '../types/card';
-import { styles } from '../StyleSheets/ServiceCard.styles';
+import { getStyles } from '../StyleSheets/ServiceCard.styles';
 
 const ServiceCardComponent: React.FC<ServiceCardProps> = ({
     provider,
@@ -13,6 +15,10 @@ const ServiceCardComponent: React.FC<ServiceCardProps> = ({
     onFavorite,
     isFavorite = false,
 }) => {
+    const { isRTL } = useRTL();
+    const { getSize } = useResponsive();
+    const styles = getStyles(isRTL, getSize);
+    
     return (
         <TouchableOpacity
             style={styles.card}

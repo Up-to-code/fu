@@ -4,6 +4,8 @@
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import { Text, View } from 'react-native';
+import { useRTL } from '../../../hooks/useRTL';
+import { useResponsive } from '../../../hooks/useResponsive';
 import { StarRatingProps } from '../types/ui';
 import { getStyles } from '../StyleSheets/StarRating.styles';
 
@@ -13,7 +15,9 @@ const StarRatingComponent: React.FC<StarRatingProps> = ({
     size = 'md',
     showCount = true,
 }) => {
-    const styles = getStyles(size);
+    const { isRTL } = useRTL();
+    const { getSize } = useResponsive();
+    const styles = getStyles(size, isRTL, getSize);
     const fullStars = Math.floor(rating);
     const hasHalf = rating % 1 >= 0.5;
     const emptyStars = 5 - fullStars - (hasHalf ? 1 : 0);

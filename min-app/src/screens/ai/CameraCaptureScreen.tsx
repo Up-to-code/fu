@@ -4,20 +4,24 @@
 import { Feather } from '@expo/vector-icons';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import * as ImagePicker from 'expo-image-picker';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import React, { useRef, useState } from 'react';
 import { Alert, StatusBar, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Header } from '../shared';
 import { COLORS } from '../../constants/theme';
+import { useResponsive } from '../../hooks/useResponsive';
 import { saveAISession } from '../../utils/storage';
-import { styles } from './StyleSheets/CameraCaptureScreen.styles';
+import { getStyles } from './StyleSheets/CameraCaptureScreen.styles';
 
 const CameraCaptureScreen = () => {
+    const { mode, searchQuery } = useLocalSearchParams<{ mode?: 'search' | 'design'; searchQuery?: string }>();
+    const isSearchMode = mode === 'search';
     const [showFlash, setShowFlash] = useState(false);
     const [flashMode, setFlashMode] = useState<'off' | 'on'>('off');
     const [permission, requestPermission] = useCameraPermissions();
     const cameraRef = useRef<CameraView>(null);
+    const { getSize, iconSize } = useResponsive();
+    const styles = getStyles(getSize);
 
     if (!permission) {
         return <View style={styles.loadingContainer} />;
@@ -29,7 +33,7 @@ const CameraCaptureScreen = () => {
                 <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
 
                 <View style={styles.permissionIcon}>
-                    <Feather name="camera-off" size={32} color="white" />
+                    <Feather name="camera-off" size={iconSize.lg} color="white" />
                 </View>
 
                 <Text style={styles.permissionTitle}>
@@ -37,7 +41,10 @@ const CameraCaptureScreen = () => {
                 </Text>
 
                 <Text style={styles.permissionDescription}>
-                    للتصوير وتصميم غرفتك بالذكاء الاصطناعي
+                    {isSearchMode 
+                        ? 'للبحث عن منتجات مشابهة بالصورة'
+                        : 'للتصوير وتصميم غرفتك بالذكاء الاصطناعي'
+                    }
                 </Text>
 
                 <TouchableOpacity
@@ -46,7 +53,7 @@ const CameraCaptureScreen = () => {
                     activeOpacity={0.8}
                 >
                     <Text style={styles.permissionButtonText}>السماح</Text>
-                    <Feather name="unlock" size={18} color="white" />
+                    <Feather name="unlock" size={iconSize.sm} color="white" />
                 </TouchableOpacity>
             </SafeAreaView>
         );
@@ -70,11 +77,26 @@ const CameraCaptureScreen = () => {
                 const photoUri = photo?.uri;
 
                 if (photoUri) {
-                    saveAISession({ originalPhotoUri: photoUri });
-                    router.push({
-                        pathname: '/ai-design/results',
-                        params: { photo: photoUri }
-                    });
+                    if (isSearchMode) {
+                        // Navigate to search results with image search
+                        router.push({
+                            pathname: '/search/results',
+                            params: { 
+                                imageSearch: photoUri,
+                                q: searchQuery || 'image search'
+                            }
+                        });
+                    } else {
+                        // Navigate to AI design results
+                        saveAISession({ originalPhotoUri: photoUri });
+                        router.push({
+                            pathname: '/ai-design/results',
+                            params: { 
+                                photo: photoUri,
+                                mode: mode || 'design'
+                            }
+                        });
+                    }
                 }
             } catch (error) {
                 console.error('Camera error:', error);
@@ -93,11 +115,27 @@ const CameraCaptureScreen = () => {
 
             if (!result.canceled && result.assets[0]) {
                 const photoUri = result.assets[0].uri;
-                saveAISession({ originalPhotoUri: photoUri });
-                router.push({
-                    pathname: '/ai-design/results',
-                    params: { photo: photoUri }
-                });
+                
+                if (isSearchMode) {
+                    // Navigate to search results with image search
+                    router.push({
+                        pathname: '/search/results',
+                        params: { 
+                            imageSearch: photoUri,
+                            q: searchQuery || 'image search'
+                        }
+                    });
+                } else {
+                    // Navigate to AI design results
+                    saveAISession({ originalPhotoUri: photoUri });
+                    router.push({
+                        pathname: '/ai-design/results',
+                        params: { 
+                            photo: photoUri,
+                            mode: mode || 'design'
+                        }
+                    });
+                }
             }
         } catch (error) {
             Alert.alert('خطأ', 'فشل اختيار الصورة');
@@ -121,13 +159,17 @@ const CameraCaptureScreen = () => {
                 enableTorch={flashMode === 'on'}
             />
 
-            {/* Header */}
+            {/* Top Bar - Close Button Only */}
             <SafeAreaView style={styles.topBar} edges={['top']}>
-                <Header
-                    title="تصميم بالذكاء الاصطناعي"
-                    showBack
-                    onBack={handleBack}
-                />
+                <View style={styles.topBarContent}>
+                    <TouchableOpacity
+                        onPress={handleBack}
+                        style={styles.closeButton}
+                        activeOpacity={0.8}
+                    >
+                        <Feather name="x" size={iconSize.md} color="white" />
+                    </TouchableOpacity>
+                </View>
             </SafeAreaView>
 
             {/* Guide Frame */}
@@ -140,7 +182,10 @@ const CameraCaptureScreen = () => {
                 <View style={styles.bottomContent}>
                     {/* Hint */}
                     <Text style={styles.hintText}>
-                        حاول تصوير الغرفة كاملة
+                        {isSearchMode 
+                            ? 'التقط صورة للبحث عن منتجات مشابهة'
+                            : 'حاول تصوير الغرفة كاملة'
+                        }
                     </Text>
 
                     {/* Controls */}
@@ -151,7 +196,7 @@ const CameraCaptureScreen = () => {
                             style={styles.galleryButton}
                             activeOpacity={0.8}
                         >
-                            <Feather name="image" size={24} color="white" />
+                            <Feather name="image" size={iconSize.md} color="white" />
                         </TouchableOpacity>
 
                         {/* Capture */}
@@ -174,7 +219,7 @@ const CameraCaptureScreen = () => {
                         >
                             <Feather
                                 name={flashMode === 'on' ? 'zap' : 'zap-off'}
-                                size={24}
+                                size={iconSize.md}
                                 color="white"
                             />
                         </TouchableOpacity>

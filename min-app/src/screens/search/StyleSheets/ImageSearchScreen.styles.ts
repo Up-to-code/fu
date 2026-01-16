@@ -4,7 +4,10 @@
 import { StyleSheet } from 'react-native';
 import { COLORS } from '../../../constants/theme';
 
-export const styles = StyleSheet.create({
+type GetSizeFunction = (small: number, medium: number, large: number, tablet: number, desktop: number) => number;
+
+export const getStyles = (getSize: GetSizeFunction) => {
+    return StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: 'white',
@@ -13,42 +16,41 @@ export const styles = StyleSheet.create({
         flex: 1,
         alignItems: 'center',
         justifyContent: 'center',
-        paddingHorizontal: 20,
+        paddingHorizontal: getSize(16, 18, 20, 24, 32),
     },
     iconContainer: {
-        width: 96,
-        height: 96,
-        borderRadius: 16,
+        width: getSize(88, 92, 96, 112, 128),
+        height: getSize(88, 92, 96, 112, 128),
+        borderRadius: getSize(14, 15, 16, 18, 20),
         backgroundColor: '#f0f9ff',
         alignItems: 'center',
         justifyContent: 'center',
-        marginBottom: 32,
+        marginBottom: getSize(24, 28, 32, 40, 48),
     },
     title: {
         fontFamily: 'Cairo_700Bold',
-        fontSize: 24,
+        fontSize: getSize(20, 22, 24, 28, 32),
         color: '#1e293b',
         textAlign: 'center',
-        marginBottom: 12,
+        marginBottom: getSize(10, 11, 12, 16, 20),
     },
     description: {
         fontFamily: 'Cairo_500Medium',
         color: '#64748b',
         textAlign: 'center',
-        marginBottom: 40,
-        fontSize: 16,
-        lineHeight: 24,
+        marginBottom: getSize(32, 36, 40, 48, 56),
+        fontSize: getSize(14, 15, 16, 18, 20),
+        lineHeight: getSize(20, 22, 24, 28, 32),
     },
     buttonsContainer: {
         width: '100%',
-        gap: 16,
-        maxWidth: 340,
+        gap: getSize(12, 14, 16, 20, 24),
+        maxWidth: getSize(300, 320, 340, 400, 480),
     },
     cameraButton: {
         backgroundColor: COLORS.primary,
-        paddingVertical: 16,
-        borderRadius: 12,
-        flexDirection: 'row-reverse',
+        paddingVertical: getSize(14, 15, 16, 18, 20),
+        borderRadius: getSize(10, 11, 12, 14, 16),
         alignItems: 'center',
         justifyContent: 'center',
         gap: 12,
@@ -56,6 +58,7 @@ export const styles = StyleSheet.create({
     cameraButtonText: {
         fontFamily: 'Cairo_700Bold',
         color: 'white',
-        fontSize: 18,
+        fontSize: getSize(16, 17, 18, 20, 22),
     },
-});
+    });
+};

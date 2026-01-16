@@ -4,25 +4,29 @@
 import { StyleSheet } from 'react-native';
 import { COLORS } from '../../../constants/theme';
 
-export const styles = StyleSheet.create({
+type GetSizeFunction = (small: number, medium: number, large: number, tablet: number, desktop: number) => number;
+
+export const getStyles = (isRTL: boolean = true, getSize: GetSizeFunction) => {
+    return StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: 'white',
     },
     scrollContent: {
-        padding: 20,
+        padding: getSize(16, 18, 20, 24, 32),
     },
     section: {
-        marginBottom: 24,
+        marginBottom: getSize(20, 22, 24, 32, 40),
     },
     sectionTitle: {
         fontFamily: 'Cairo_700Bold',
         color: '#1e293b',
-        textAlign: 'right',
-        marginBottom: 12,
+        fontSize: getSize(16, 17, 18, 20, 22),
+        textAlign: (isRTL ? 'right' : 'left') as const,
+        marginBottom: getSize(10, 11, 12, 16, 20),
     },
     priceRangeContainer: {
-        flexDirection: 'row-reverse',
+        flexDirection: (isRTL ? 'row-reverse' : 'row') as const,
         gap: 12,
     },
     priceInputContainer: {
@@ -31,31 +35,32 @@ export const styles = StyleSheet.create({
     priceLabel: {
         fontFamily: 'Cairo_500Medium',
         color: '#64748b',
-        fontSize: 12,
-        textAlign: 'right',
+        fontSize: getSize(11, 11.5, 12, 13, 14),
+        textAlign: (isRTL ? 'right' : 'left') as const,
         marginBottom: 4,
     },
     priceInput: {
         backgroundColor: '#f8fafc',
-        borderRadius: 12,
-        paddingHorizontal: 16,
-        paddingVertical: 12,
-        textAlign: 'right',
+        borderRadius: getSize(10, 11, 12, 14, 16),
+        paddingHorizontal: getSize(14, 15, 16, 20, 24),
+        paddingVertical: getSize(10, 11, 12, 14, 16),
+        fontSize: getSize(13, 13.5, 14, 15, 16),
+        textAlign: (isRTL ? 'right' : 'left') as const,
         fontFamily: 'Cairo_500Medium',
         color: '#1e293b',
     },
     chipsContainer: {
-        flexDirection: 'row-reverse',
+        flexDirection: (isRTL ? 'row-reverse' : 'row') as const,
         flexWrap: 'wrap',
         gap: 8,
     },
     brandButton: {
-        flexDirection: 'row-reverse',
+        flexDirection: (isRTL ? 'row-reverse' : 'row') as const,
         alignItems: 'center',
         gap: 8,
-        paddingHorizontal: 16,
-        paddingVertical: 8,
-        borderRadius: 20,
+        paddingHorizontal: getSize(14, 15, 16, 20, 24),
+        paddingVertical: getSize(6, 7, 8, 10, 12),
+        borderRadius: getSize(18, 19, 20, 24, 28),
         borderWidth: 1,
     },
     brandButtonSelected: {
@@ -68,7 +73,7 @@ export const styles = StyleSheet.create({
     },
     brandText: {
         fontFamily: 'Cairo_500Medium',
-        fontSize: 14,
+        fontSize: getSize(13, 13.5, 14, 15, 16),
     },
     brandTextSelected: {
         color: 'white',
@@ -77,9 +82,9 @@ export const styles = StyleSheet.create({
         color: '#475569',
     },
     sortButton: {
-        paddingHorizontal: 16,
-        paddingVertical: 8,
-        borderRadius: 20,
+        paddingHorizontal: getSize(14, 15, 16, 20, 24),
+        paddingVertical: getSize(6, 7, 8, 10, 12),
+        borderRadius: getSize(18, 19, 20, 24, 28),
         borderWidth: 1,
     },
     sortButtonSelected: {
@@ -92,7 +97,7 @@ export const styles = StyleSheet.create({
     },
     sortText: {
         fontFamily: 'Cairo_500Medium',
-        fontSize: 14,
+        fontSize: getSize(13, 13.5, 14, 15, 16),
     },
     sortTextSelected: {
         color: 'white',
@@ -101,10 +106,11 @@ export const styles = StyleSheet.create({
         color: '#475569',
     },
     footer: {
-        paddingHorizontal: 20,
-        paddingBottom: 16,
-        paddingTop: 16,
+        paddingHorizontal: getSize(16, 18, 20, 24, 32),
+        paddingBottom: getSize(12, 14, 16, 20, 24),
+        paddingTop: getSize(12, 14, 16, 20, 24),
         borderTopWidth: 1,
         borderTopColor: '#f1f5f9',
     },
-});
+    });
+};

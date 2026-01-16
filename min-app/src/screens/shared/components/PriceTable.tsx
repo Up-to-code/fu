@@ -3,14 +3,20 @@
 
 import React from 'react';
 import { Text, View } from 'react-native';
+import { useRTL } from '../../../hooks/useRTL';
+import { useResponsive } from '../../../hooks/useResponsive';
 import { PriceTableProps } from '../types/ui';
-import { styles } from '../StyleSheets/PriceTable.styles';
+import { getStyles } from '../StyleSheets/PriceTable.styles';
 
 const PriceTableComponent: React.FC<PriceTableProps> = ({
     items,
     total,
     currency = 'ر.س',
 }) => {
+    const { isRTL } = useRTL();
+    const { getSize } = useResponsive();
+    const styles = getStyles(isRTL, getSize);
+    
     return (
         <View style={styles.container}>
             {items.map((item, idx) => (

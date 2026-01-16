@@ -3,7 +3,7 @@
 
 import { StyleSheet } from 'react-native';
 
-export const styles = StyleSheet.create({
+export const getStyles = (isRTL: boolean = true) => StyleSheet.create({
     container: {
         backgroundColor: 'white',
     },
@@ -17,6 +17,6 @@ export const styles = StyleSheet.create({
         fontFamily: 'Cairo_500Medium',
         fontSize: 13,
         color: '#64748b',
-        textAlign: 'right',
+        textAlign: (isRTL ? 'right' : 'left') as const,
     },
 });

@@ -7,11 +7,14 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Header, PrimaryButton } from '../shared';
 import { useImageSearch } from './_hooks';
 import { COLORS } from '../../constants/theme';
-import { styles } from './StyleSheets/ImageSearchScreen.styles';
+import { useResponsive } from '../../hooks/useResponsive';
+import { getStyles } from './StyleSheets/ImageSearchScreen.styles';
 
 export default function ImageSearchScreen() {
     const router = useRouter();
     const { pickImage, searchResults, isLoading, imageUri } = useImageSearch();
+    const { getSize, iconSize } = useResponsive();
+    const styles = getStyles(getSize);
 
     const handleOpenCamera = async () => {
         router.push('/ai-design/camera?mode=search' as any);
@@ -29,7 +32,7 @@ export default function ImageSearchScreen() {
                     {/* Content */}
                     <View style={styles.content}>
                         <View style={styles.iconContainer}>
-                            <Feather name="camera" size={40} color={COLORS.primary} />
+                            <Feather name="camera" size={iconSize.xl} color={COLORS.primary} />
                         </View>
                         
                         <Text style={styles.title}>
@@ -44,7 +47,7 @@ export default function ImageSearchScreen() {
                                 onPress={handleOpenCamera}
                                 style={styles.cameraButton}
                             >
-                                <Feather name="camera" size={22} color="white" />
+                                <Feather name="camera" size={iconSize.md} color="white" />
                                 <Text style={styles.cameraButtonText}>فتح الكاميرا</Text>
                             </TouchableOpacity>
                             
