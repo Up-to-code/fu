@@ -24,6 +24,7 @@ export interface ProductGridProps {
     onProductPress?: (product: IProductCardProps) => void;
     onFavorite?: (product: IProductCardProps) => void;
     numColumns?: number;
+    useScrollView?: boolean; // Use View+flexWrap when true (for ScrollView), FlashList when false
 }
 
 export interface ProductHorizontalListProps {

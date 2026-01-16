@@ -14,7 +14,11 @@ export const getStyles = (getSize: GetSizeFunction) => {
         scrollContent: {
             paddingBottom: getSize(16, 18, 20, 24, 32),
             paddingHorizontal: getSize(16, 18, 20, 24, 32),
-            paddingTop: getSize(72, 76, 80, 88, 96), // Space for floating header
+            paddingTop: getSize(12, 14, 16, 20, 24),
+            flexGrow: 1,
+        },
+        favoriteButton: {
+            padding: getSize(8, 9, 10, 12, 14),
         },
     });
 };

@@ -1,7 +1,7 @@
 // File: src/screens/shared/components/ProductGrid.tsx
-// Purpose: Responsive product grid wrapper with FlashList for performance
+// Purpose: Responsive product grid wrapper - uses View+flexWrap for ScrollView compatibility
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { View } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 import { useResponsive } from '../../../hooks/useResponsive';
@@ -14,6 +14,7 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
     onProductPress,
     onFavorite,
     numColumns,
+    useScrollView = true, // Default to true for ScrollView compatibility
 }) => {
     const { width, isTablet, padding, getSize } = useResponsive();
     const styles = getStyles(getSize);
@@ -26,7 +27,25 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
         return itemWidth * 1.5; // Approximate height (width * aspect ratio)
     }, [columns, width, padding]);
 
-    const renderItem = useCallback(({ item }: { item: IProductCardProps }) => (
+    // Use View + flexWrap when inside ScrollView (more reliable)
+    if (useScrollView) {
+        return (
+            <View style={styles.gridContainer}>
+                {products.map((item) => (
+                    <View key={item.id} style={[styles.cardWrapper, { width: cardWidth }]}>
+                        <ProductCard
+                            product={item}
+                            onPress={() => onProductPress?.(item)}
+                            onFavorite={() => onFavorite?.(item)}
+                        />
+                    </View>
+                ))}
+            </View>
+        );
+    }
+
+    // Use FlashList for standalone usage (not inside ScrollView)
+    const renderItem = React.useCallback(({ item }: { item: IProductCardProps }) => (
         <View style={[styles.cardWrapper, { width: cardWidth }]}>
             <ProductCard
                 product={item}
@@ -36,7 +55,7 @@ export const ProductGrid: React.FC<ProductGridProps> = ({
         </View>
     ), [cardWidth, onProductPress, onFavorite]);
 
-    const keyExtractor = useCallback((item: IProductCardProps) => item.id, []);
+    const keyExtractor = React.useCallback((item: IProductCardProps) => item.id, []);
 
     return (
         <View style={styles.gridContainer}>

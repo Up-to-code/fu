@@ -10,8 +10,8 @@ export default function CategoryDetailsRoute() {
     const query = Array.isArray(searchQuery) ? searchQuery[0] : searchQuery;
 
     return (
-        <CategoryDetailsScreen 
-            id={categoryId} 
+        <CategoryDetailsScreen
+            id={categoryId}
             name={categoryName}
             fromSearch={isFromSearch}
             searchQuery={query}
