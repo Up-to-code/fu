@@ -5,7 +5,7 @@ import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Alert } from 'react-native';
 import { useMutation, useQuery } from 'convex/react';
-import { api } from '../../../../../convex/_generated/api';
+import { api } from '../../../../convex/_generated/api';
 import { useAuth } from '../../../hooks/useAuth';
 import { initDB, saveAddress } from '../../../lib/database';
 

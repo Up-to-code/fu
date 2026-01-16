@@ -19,7 +19,8 @@
     "prebuild:ios": "expo prebuild --platform ios",
     "prebuild:android": "expo prebuild --platform android",
     "pod:install": "cd ios && pod install",
-    "pod:update": "cd ios && pod update"
+    "pod:update": "cd ios && pod update",
+    "eas-build-pre-install": "echo 'Convex _generated files should be committed in min-app/convex/_generated/'"
   },
   "dependencies": {
     "@appandflow/expo-camera-characteristics": "^1.2.0",

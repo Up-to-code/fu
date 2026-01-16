@@ -2,7 +2,7 @@
 // Purpose: Fetch order details
 
 import { useQuery } from 'convex/react';
-import { api } from '../../../../../convex/_generated/api';
+import { api } from '../../../../convex/_generated/api';
 import { useAuth } from '../../../hooks/useAuth';
 import { ProductOrder, ServiceBooking } from '../../../types/orders';
 

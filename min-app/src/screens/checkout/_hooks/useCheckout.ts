@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useMutation } from 'convex/react';
-import { api } from '../../../../../convex/_generated/api';
+import { api } from '../../../../convex/_generated/api';
 import { useAuth } from '../../../hooks/useAuth';
 import { CartItem } from '../../cart/_hooks';
 

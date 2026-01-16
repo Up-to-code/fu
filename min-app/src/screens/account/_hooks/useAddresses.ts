@@ -3,7 +3,7 @@
 
 import { useEffect, useState, useMemo } from 'react';
 import { useMutation, useQuery } from 'convex/react';
-import { api } from '../../../../../convex/_generated/api';
+import { api } from '../../../../convex/_generated/api';
 import { useAuth } from '../../../hooks/useAuth';
 import { initDB, getAddresses as getAddressesLocal, deleteAddress as deleteAddressLocal } from '../../../lib/database';
 

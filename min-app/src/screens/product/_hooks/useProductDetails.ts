@@ -2,7 +2,7 @@
 // Purpose: Fetch product details
 
 import { useQuery } from 'convex/react';
-import { api } from '../../../../../convex/_generated/api';
+import { api } from '../../../../convex/_generated/api';
 
 interface ProductDetails {
     id: string;

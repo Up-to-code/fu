@@ -52,7 +52,7 @@ yarn-error.log*
 next-env.d.ts
 
 # Convex
-convex/_generated/
+# convex/_generated/ - Commented out to include generated files in EAS builds
 
 # Expo
 min-app/.expo/

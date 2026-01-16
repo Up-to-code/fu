@@ -2,7 +2,7 @@
 // Purpose: Fetch categories list
 
 import { useQuery } from 'convex/react';
-import { api } from '../../../../../convex/_generated/api';
+import { api } from '../../../../convex/_generated/api';
 
 export interface Category {
     id: string;

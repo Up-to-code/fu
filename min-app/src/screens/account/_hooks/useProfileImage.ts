@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { Alert } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { useMutation, useAction } from 'convex/react';
-import { api } from '../../../../../convex/_generated/api';
+import { api } from '../../../../convex/_generated/api';
 import { useAuth } from '../../../hooks/useAuth';
 import { initDB, saveProfileImage, getProfileImage } from '../../../lib/database';
 
