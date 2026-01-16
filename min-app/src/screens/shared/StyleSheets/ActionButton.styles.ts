@@ -1,22 +1,22 @@
 // File: src/screens/shared/StyleSheets/ActionButton.styles.ts
 // Purpose: Styles for ActionButton component
 
-import { StyleSheet } from 'react-native';
+import { StyleSheet, ViewStyle } from 'react-native';
 import { COLORS } from '../../../constants/theme';
 
 type GetSizeFunction = (small: number, medium: number, large: number, tablet: number, desktop: number) => number;
 
 export const getStyles = (variant: 'primary' | 'secondary' | 'outline' | 'danger', disabled: boolean, fullWidth: boolean, isRTL: boolean = true, getSize: GetSizeFunction) => {
-    const baseButtonStyle = {
+    const baseButtonStyle: ViewStyle = {
         borderRadius: 16,
         flexDirection: isRTL ? 'row-reverse' : 'row',
-        justifyContent: 'center' as const,
-        alignItems: 'center' as const,
+        justifyContent: 'center',
+        alignItems: 'center',
         gap: 12,
         paddingVertical: getSize(14, 16, 18, 20, 24),
         paddingHorizontal: getSize(16, 18, 20, 24, 32),
         opacity: disabled ? 0.5 : 1,
-        width: fullWidth ? '100%' as const : undefined,
+        width: fullWidth ? '100%' : undefined,
     };
 
     const variantStyles = {

@@ -1,11 +1,18 @@
 // File: src/screens/shared/StyleSheets/StarRating.styles.ts
 // Purpose: Styles for StarRating component
 
-import { StyleSheet } from 'react-native';
+import { StyleSheet, ViewStyle, TextStyle } from 'react-native';
 
 type GetSizeFunction = (small: number, medium: number, large: number, tablet: number, desktop: number) => number;
 
-export const getStyles = (size: 'sm' | 'md' | 'lg', isRTL: boolean = true, getSize: GetSizeFunction) => {
+type StarRatingStyles = {
+    container: ViewStyle;
+    ratingText: TextStyle;
+    reviewCount: TextStyle;
+    starSize: number;
+};
+
+export const getStyles = (size: 'sm' | 'md' | 'lg', isRTL: boolean = true, getSize: GetSizeFunction): StarRatingStyles => {
     const starSize = size === 'sm' 
         ? getSize(12, 13, 14, 14, 16)
         : size === 'lg'
@@ -17,7 +24,7 @@ export const getStyles = (size: 'sm' | 'md' | 'lg', isRTL: boolean = true, getSi
             ? getSize(14, 15, 16, 18, 20)
             : getSize(12, 13, 14, 16, 18);
 
-    return StyleSheet.create({
+    const styleSheet = StyleSheet.create({
         container: {
             flexDirection: isRTL ? 'row-reverse' : 'row',
             alignItems: 'center',
@@ -34,6 +41,10 @@ export const getStyles = (size: 'sm' | 'md' | 'lg', isRTL: boolean = true, getSi
             color: '#94a3b8',
             fontSize: textSize,
         },
-        starSize,
     });
+
+    return {
+        ...styleSheet,
+        starSize,
+    };
 };
