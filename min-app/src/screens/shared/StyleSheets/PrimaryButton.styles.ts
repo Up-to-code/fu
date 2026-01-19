@@ -6,7 +6,7 @@ import { COLORS } from '../../../constants/theme';
 
 export const styles = StyleSheet.create({
     button: {
-        borderRadius: 12,
+        borderRadius: 16,
         height: 56,
         alignItems: 'center',
         justifyContent: 'center',

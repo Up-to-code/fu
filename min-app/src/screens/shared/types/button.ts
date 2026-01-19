@@ -11,8 +11,11 @@ export interface PrimaryButtonProps extends TouchableOpacityProps {
 
 export interface SocialButtonProps extends TouchableOpacityProps {
     provider: 'google' | 'apple';
-    label: string;
+    label?: string;
+    onPress: () => void;
 }
+
+
 
 export interface ActionButtonProps extends TouchableOpacityProps {
     label: string;

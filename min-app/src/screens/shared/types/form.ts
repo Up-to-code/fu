@@ -5,7 +5,7 @@ import { TextInputProps } from 'react-native';
 import { Feather } from '@expo/vector-icons';
 
 export interface FormInputProps extends TextInputProps {
-    label: string;
+    label?: string;
     error?: string;
     required?: boolean;
     icon?: keyof typeof Feather.glyphMap;

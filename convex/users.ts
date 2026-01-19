@@ -165,6 +165,7 @@ export const updateUserProfile = mutation({
   args: {
     userId: v.string(),
     name: v.optional(v.string()),
+    businessName: v.optional(v.string()),
     email: v.optional(v.string()),
     phone: v.optional(v.string()),
     role: v.optional(v.string()),
@@ -181,6 +182,7 @@ export const updateUserProfile = mutation({
     if (existingProfile) {
       await ctx.db.patch(existingProfile._id, {
         ...(args.name !== undefined && { name: args.name ?? null }),
+        ...(args.businessName !== undefined && { businessName: args.businessName }),
         ...(args.phone !== undefined && { phone: args.phone ?? null }),
         ...(args.role !== undefined && { role: args.role }),
         ...(args.language !== undefined && { language: args.language }),
@@ -193,6 +195,7 @@ export const updateUserProfile = mutation({
         userId: args.userId,
         role: args.role || "customer",
         name: args.name ?? null,
+        businessName: args.businessName,
         phone: args.phone ?? null,
         language: args.language,
         createdAt: now,

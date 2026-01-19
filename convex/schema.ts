@@ -63,6 +63,7 @@ export default defineSchema(
       userId: v.string(),
       role: v.string(), // "customer" (default), "freelancer", "vendor", "admin"
       name: v.union(v.string(), v.null()),
+      businessName: v.optional(v.string()), // Store/Organization name
       phone: v.union(v.string(), v.null()),
       language: v.optional(v.string()),
       imageStorageId: v.optional(v.id("_storage")),
@@ -71,6 +72,99 @@ export default defineSchema(
       createdAt: v.number(),
       updatedAt: v.number(),
     }),
+
+    // Services table (for service providers)
+    services: defineTable({
+      providerId: v.string(),              // Links to userProfiles.userId
+      name: v.string(),
+      nameEn: v.string(),
+      description: v.string(),
+      categoryId: v.id("serviceCategories"),
+      price: v.number(),
+      priceType: v.union(v.literal("fixed"), v.literal("hourly"), v.literal("range")),
+      priceRange: v.optional(v.object({
+        min: v.number(),
+        max: v.number(),
+      })),
+      images: v.array(v.string()),
+      location: v.string(),
+      locationType: v.union(v.literal("home"), v.literal("provider_location"), v.literal("remote")),
+      duration: v.optional(v.number()),   // Duration in minutes
+      experienceYears: v.optional(v.number()),
+      languages: v.array(v.string()),
+      responseTime: v.optional(v.string()),
+      isActive: v.boolean(),
+      verified: v.boolean(),
+      rating: v.optional(v.number()),
+      reviewsCount: v.optional(v.number()),
+      createdAt: v.number(),
+      updatedAt: v.number(),
+    })
+    .index("by_provider", ["providerId"])
+    .index("by_category", ["categoryId"])
+    .index("by_provider_and_active", ["providerId", "isActive"]),
+
+    // Service Categories table
+    serviceCategories: defineTable({
+      name: v.string(),
+      nameEn: v.string(),
+      description: v.optional(v.string()),
+      icon: v.optional(v.string()),
+      parentId: v.optional(v.id("serviceCategories")),
+      order: v.number(),
+    })
+    .index("by_parent", ["parentId"]),
+
+    // Bookings table
+    bookings: defineTable({
+      serviceId: v.id("services"),
+      providerId: v.string(),             // Service provider
+      customerId: v.string(),              // Customer who booked
+      status: v.union(
+        v.literal("pending"),
+        v.literal("confirmed"),
+        v.literal("in_progress"),
+        v.literal("completed"),
+        v.literal("cancelled"),
+        v.literal("rejected")
+      ),
+      selectedServices: v.array(v.string()), // Service IDs selected
+      scheduledDate: v.string(),           // ISO date string
+      scheduledTime: v.string(),          // Time string (HH:mm)
+      location: v.union(
+        v.literal("home"),
+        v.literal("provider_location"),
+        v.literal("remote")
+      ),
+      address: v.optional(v.string()),
+      addressId: v.optional(v.id("addresses")),
+      phone: v.string(),
+      description: v.optional(v.string()),
+      totalPrice: v.number(),
+      paymentStatus: v.union(v.literal("unpaid"), v.literal("paid"), v.literal("refunded")),
+      paymentMethod: v.optional(v.string()),
+      createdAt: v.number(),
+      updatedAt: v.number(),
+    })
+    .index("by_provider", ["providerId"])
+    .index("by_customer", ["customerId"])
+    .index("by_service", ["serviceId"])
+    .index("by_provider_and_status", ["providerId", "status"])
+    .index("by_date", ["scheduledDate"]),
+
+    // Service Reviews table
+    serviceReviews: defineTable({
+      serviceId: v.id("services"),
+      bookingId: v.optional(v.id("bookings")),
+      customerId: v.string(),
+      customerName: v.string(),
+      rating: v.number(),                  // 1-5
+      comment: v.string(),
+      images: v.optional(v.array(v.string())),
+      createdAt: v.number(),
+    })
+    .index("by_service", ["serviceId"])
+    .index("by_customer", ["customerId"]),
   },
   { schemaValidation: true }
 );

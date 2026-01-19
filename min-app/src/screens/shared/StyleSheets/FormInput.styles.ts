@@ -20,10 +20,10 @@ export const getStyles = (isRTL: boolean = true) => StyleSheet.create({
     inputContainer: {
         flexDirection: isRTL ? 'row-reverse' : 'row',
         alignItems: 'center',
-        backgroundColor: 'white',
-        borderRadius: 12,
+        backgroundColor: '#F8FAFC',
+        borderRadius: 16,
         borderWidth: 1,
-        borderColor: '#e2e8f0',
+        borderColor: '#F1F5F9',
         minHeight: 56,
     },
     inputIcon: {

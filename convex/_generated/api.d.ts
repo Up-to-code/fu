@@ -9,10 +9,13 @@
  */
 
 import type * as auth from "../auth.js";
+import type * as bookings from "../bookings.js";
 import type * as crons from "../crons.js";
 import type * as http from "../http.js";
 import type * as myFunctions from "../myFunctions.js";
 import type * as orders from "../orders.js";
+import type * as providers from "../providers.js";
+import type * as services from "../services.js";
 import type * as users from "../users.js";
 
 import type {
@@ -23,10 +26,13 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   auth: typeof auth;
+  bookings: typeof bookings;
   crons: typeof crons;
   http: typeof http;
   myFunctions: typeof myFunctions;
   orders: typeof orders;
+  providers: typeof providers;
+  services: typeof services;
   users: typeof users;
 }>;
 

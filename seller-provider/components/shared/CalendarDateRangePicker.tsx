@@ -1,0 +1,78 @@
+"use client";
+
+import * as React from "react";
+import { addDays, format } from "date-fns";
+import { ar } from "date-fns/locale";
+import { Calendar as CalendarIcon } from "lucide-react";
+import { DateRange } from "react-day-picker";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from "@/components/ui/popover";
+
+interface CalendarDateRangePickerProps {
+    className?: string;
+    date?: DateRange | undefined;
+    setDate?: (date: DateRange | undefined) => void;
+}
+
+export function CalendarDateRangePicker({
+    className,
+    date: externalDate,
+    setDate: externalSetDate,
+}: CalendarDateRangePickerProps) {
+    const [internalDate, setInternalDate] = React.useState<DateRange | undefined>({
+        from: addDays(new Date(), -30),
+        to: new Date(),
+    });
+
+    const date = externalDate ?? internalDate;
+    const setDate = externalSetDate ?? setInternalDate;
+
+    return (
+        <div className={cn("grid gap-2", className)}>
+            <Popover>
+                <PopoverTrigger asChild>
+                    <Button
+                        id="date"
+                        variant={"outline"}
+                        className={cn(
+                            "w-[300px] justify-end text-right font-normal bg-white border-gray-200 h-10 rounded-xl hover:bg-gray-50",
+                            !date && "text-muted-foreground"
+                        )}
+                    >
+                        <CalendarIcon className="ml-2 h-4 w-4" />
+                        {date?.from ? (
+                            date.to ? (
+                                <span dir="ltr" className="inline-block">
+                                    {format(date.from, "dd MMM، yyyy", { locale: ar })} - {format(date.to, "dd MMM، yyyy", { locale: ar })}
+                                </span>
+                            ) : (
+                                <span dir="ltr" className="inline-block">
+                                    {format(date.from, "dd MMM، yyyy", { locale: ar })}
+                                </span>
+                            )
+                        ) : (
+                            <span>اختر الفترة</span>
+                        )}
+                    </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start" dir="ltr">
+                    <Calendar
+                        initialFocus
+                        mode="range"
+                        defaultMonth={date?.from}
+                        selected={date}
+                        onSelect={setDate}
+                        numberOfMonths={2}
+                        locale={ar}
+                    />
+                </PopoverContent>
+            </Popover>
+        </div>
+    );
+}
