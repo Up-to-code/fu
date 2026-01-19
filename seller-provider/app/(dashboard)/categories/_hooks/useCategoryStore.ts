@@ -1,15 +1,14 @@
 import { create } from "zustand";
-import { categories as initialCategories } from "@/data/categories";
 
 export type Category = {
     id: string;
     name: string;
-    nameEn: string;
-    description: string;
-    products: number;
-    icon: string;
-    image: string;
-    style: string;
+    nameEn?: string;
+    description?: string;
+    products?: number;
+    icon?: string;
+    image?: string;
+    style?: string;
 };
 
 type CategoryFilters = {
@@ -38,7 +37,7 @@ type CategoryStore = {
 };
 
 export const useCategoryStore = create<CategoryStore>((set, get) => ({
-    categories: initialCategories as Category[],
+    categories: [],
     searchQuery: "",
     filters: {},
     viewMode: "cards",
@@ -84,8 +83,8 @@ export const useCategoryStore = create<CategoryStore>((set, get) => ({
             filtered = filtered.filter(
                 (c) =>
                     c.name.toLowerCase().includes(query) ||
-                    c.nameEn.toLowerCase().includes(query) ||
-                    c.description.toLowerCase().includes(query)
+                    (c.nameEn ? c.nameEn.toLowerCase().includes(query) : false) ||
+                    (c.description ? c.description.toLowerCase().includes(query) : false)
             );
         }
         

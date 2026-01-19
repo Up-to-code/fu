@@ -39,7 +39,7 @@ export default function ProductsPage() {
     const router = useRouter();
     const products = useProducts();
     const { searchQuery, setSearchQuery } = useProductSearch();
-    const { deleteProduct } = useProductActions();
+    const { deleteSellerProduct } = useProductActions();
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [productToDelete, setProductToDelete] = useState<string | null>(null);
 
@@ -50,9 +50,9 @@ export default function ProductsPage() {
         setDeleteDialogOpen(true);
     };
 
-    const handleDeleteConfirm = () => {
+    const handleDeleteConfirm = async () => {
         if (productToDelete) {
-            deleteProduct(productToDelete);
+            await deleteSellerProduct({ productId: productToDelete as any });
             setDeleteDialogOpen(false);
             setProductToDelete(null);
         }

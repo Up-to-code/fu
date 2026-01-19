@@ -1,10 +1,35 @@
+import { useEffect, useMemo } from "react";
 import { useCategoryStore } from "./useCategoryStore";
-import { useMemo } from "react";
+import { useAuth } from "@/lib/auth/hooks";
+import { useMutation, useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
 
 /**
  * Hook to get all categories with search and filters applied
  */
 export function useCategories() {
+    const { user } = useAuth();
+    const setCategories = useCategoryStore((state) => state.setCategories);
+    const categoriesPage = useQuery(
+        api.sellerCategories.listSellerCategories,
+        user?.id ? { providerId: user.id, includeDeleted: false } : "skip"
+    );
+
+    useEffect(() => {
+        if (!categoriesPage?.page) return;
+        const mapped = categoriesPage.page.map((c: any) => ({
+            id: c._id as string,
+            name: c.name,
+            nameEn: c.nameEn,
+            description: c.description,
+            products: c.products,
+            icon: c.icon,
+            image: c.image ?? c.imageUrl,
+            style: c.style,
+        }));
+        setCategories(mapped);
+    }, [categoriesPage, setCategories]);
+
     const filteredCategories = useCategoryStore((state) => state.getFilteredCategories());
     return filteredCategories;
 }
@@ -62,13 +87,13 @@ export function useCategoryViewMode() {
  * Hook for category actions (create, update, delete)
  */
 export function useCategoryActions() {
-    const addCategory = useCategoryStore((state) => state.addCategory);
-    const updateCategory = useCategoryStore((state) => state.updateCategory);
-    const deleteCategory = useCategoryStore((state) => state.deleteCategory);
-    
+    const createSellerCategory = useMutation(api.sellerCategories.createSellerCategory);
+    const updateSellerCategory = useMutation(api.sellerCategories.updateSellerCategory);
+    const deleteSellerCategory = useMutation(api.sellerCategories.deleteSellerCategory);
+
     return {
-        addCategory,
-        updateCategory,
-        deleteCategory,
+        createSellerCategory,
+        updateSellerCategory,
+        deleteSellerCategory,
     };
 }

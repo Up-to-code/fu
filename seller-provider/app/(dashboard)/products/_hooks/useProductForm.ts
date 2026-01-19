@@ -37,7 +37,7 @@ const defaultFormData: ProductFormData = {
 
 export function useProductForm(productId?: string, initialData?: Partial<Product>) {
     const router = useRouter();
-    const { addProduct, updateProduct } = useProductActions();
+    const { createSellerProduct, updateSellerProduct } = useProductActions();
     const [formData, setFormData] = useState<ProductFormData>(() => {
         if (initialData) {
             return {
@@ -116,43 +116,50 @@ export function useProductForm(productId?: string, initialData?: Partial<Product
         setIsSubmitting(true);
         
         try {
-            // Get category name from categoryId
-            const { categories } = await import("@/data");
-            const category = categories.find(c => c.id === formData.categoryId);
-            
-            const productData: Product = {
-                id: productId || Date.now().toString(),
-                name: formData.name,
-                nameEn: formData.nameEn,
-                description: formData.description,
-                price: parseFloat(formData.price),
-                comparePrice: formData.comparePrice ? parseFloat(formData.comparePrice) : undefined,
-                stock: parseInt(formData.stock) || 0,
-                sku: formData.sku,
-                categoryId: formData.categoryId,
-                category: category?.name || "",
-                style: formData.style || "modern",
-                status: formData.status,
-                image: formData.image || formData.images[0] || "",
-                images: formData.images.length > 0 ? formData.images : (formData.image ? [formData.image] : []),
-                sales: initialData?.sales || 0,
-                views: initialData?.views || 0,
-            };
-            
+            const images = formData.images.length > 0 ? formData.images : (formData.image ? [formData.image] : []);
+            const mainImage = formData.image || images[0] || "";
+
             if (productId) {
-                updateProduct(productId, productData);
+                await updateSellerProduct({
+                    productId: productId as any,
+                    name: formData.name,
+                    nameEn: formData.nameEn,
+                    description: formData.description,
+                    price: parseFloat(formData.price),
+                    comparePrice: formData.comparePrice ? parseFloat(formData.comparePrice) : undefined,
+                    stock: parseInt(formData.stock) || 0,
+                    sku: formData.sku || undefined,
+                    categoryId: formData.categoryId ? (formData.categoryId as any) : undefined,
+                    style: formData.style || undefined,
+                    status: formData.status,
+                    image: mainImage,
+                    images,
+                });
+                router.push(`/products/${productId}`);
             } else {
-                addProduct(productData);
+                const res = await createSellerProduct({
+                    name: formData.name,
+                    nameEn: formData.nameEn || undefined,
+                    description: formData.description || undefined,
+                    price: parseFloat(formData.price),
+                    comparePrice: formData.comparePrice ? parseFloat(formData.comparePrice) : undefined,
+                    stock: parseInt(formData.stock) || 0,
+                    sku: formData.sku || undefined,
+                    categoryId: formData.categoryId ? (formData.categoryId as any) : undefined,
+                    style: formData.style || undefined,
+                    status: formData.status,
+                    image: mainImage,
+                    images,
+                });
+                router.push(`/products/${(res as any).productId}`);
             }
-            
-            router.push(`/products/${productData.id}`);
         } catch (error) {
             console.error("Error saving product:", error);
             setErrors({ submit: "حدث خطأ أثناء حفظ المنتج" });
         } finally {
             setIsSubmitting(false);
         }
-    }, [formData, productId, validate, addProduct, updateProduct, router, initialData]);
+    }, [formData, productId, validate, createSellerProduct, updateSellerProduct, router]);
     
     return {
         formData,

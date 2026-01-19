@@ -80,7 +80,7 @@ function LoginForm() {
                     if (errorKeys.length > 0) {
                         errorMessage = `خطأ في OAuth: ${JSON.stringify(result.error)}`;
                     } else {
-                        errorMessage = "حدث خطأ غير معروف. يرجى التحقق من إعدادات Google OAuth في Convex (GOOGLE_CLIENT_ID و GOOGLE_CLIENT_SECRET)";
+                        errorMessage = "لم يتم تكوين Google OAuth بشكل صحيح. يرجى التحقق من إعدادات GOOGLE_CLIENT_ID و GOOGLE_CLIENT_SECRET في Convex.";
                     }
                 }
 

@@ -33,12 +33,12 @@ export default function ProductDetailPage() {
     const router = useRouter();
     const productId = params.productId as string;
     const product = useProduct(productId);
-    const { deleteProduct } = useProductActions();
+    const { deleteSellerProduct } = useProductActions();
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
-    const handleDelete = () => {
+    const handleDelete = async () => {
         if (product) {
-            deleteProduct(productId);
+            await deleteSellerProduct({ productId: productId as any });
             setDeleteDialogOpen(false);
             router.push("/products");
         }

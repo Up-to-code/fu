@@ -17,29 +17,22 @@ export const getProviderConfig = query({
     // Get user profile
     const profile = await ctx.db
       .query("userProfiles")
-      .filter((q) => q.eq(q.field("userId"), args.userId))
+      .withIndex("by_userId", (q) => q.eq("userId", args.userId))
       .first();
 
     if (!profile || profile.isDeleted) {
       return null;
     }
 
-    // Check if user has selected a provider type
-    // If role is "customer", they haven't selected a type yet
-    if (profile.role === "customer") {
-      return null; // User needs to select type
+    if (profile.role !== "vendor" && profile.role !== "admin") {
+      return null;
     }
 
     // Map role to provider type and entity type
     // We now enforce "furniture_seller" for all providers
     const providerType = "furniture_seller";
     
-    // If role is "freelancer", treat as "individual" for backward compatibility
-    // "vendor" can be either, but usually implies organization or established seller
-    // For now, let's assume "vendor" is the standard role
-    const entityType = profile.role === "freelancer" 
-      ? "individual" 
-      : "organization"; // Default to organization or need better mapping
+    const entityType = "organization";
 
     return {
       id: profile._id,
@@ -62,15 +55,14 @@ export const hasProviderType = query({
   handler: async (ctx, args) => {
     const profile = await ctx.db
       .query("userProfiles")
-      .filter((q) => q.eq(q.field("userId"), args.userId))
+      .withIndex("by_userId", (q) => q.eq("userId", args.userId))
       .first();
 
     if (!profile || profile.isDeleted) {
       return false;
     }
 
-    // If role is "customer", they haven't selected a type
-    return profile.role !== "customer";
+    return profile.role === "vendor" || profile.role === "admin";
   },
 });
 
@@ -87,7 +79,7 @@ export const updateProviderConfig = mutation({
     // Get user profile
     let profile = await ctx.db
       .query("userProfiles")
-      .filter((q) => q.eq(q.field("userId"), args.userId))
+      .withIndex("by_userId", (q) => q.eq("userId", args.userId))
       .first();
 
     const now = Date.now();
@@ -96,7 +88,7 @@ export const updateProviderConfig = mutation({
     if (!profile) {
       const profileId = await ctx.db.insert("userProfiles", {
         userId: args.userId,
-        role: "customer", // Will be updated below
+        role: "vendor", // Default to vendor
         name: null,
         phone: null,
         createdAt: now,

@@ -1,10 +1,52 @@
+import { useEffect, useMemo } from "react";
 import { useProductStore } from "./useProductStore";
-import { useMemo } from "react";
+import { useAuth } from "@/lib/auth/hooks";
+import { useQuery, useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
 
 /**
  * Hook to get all products with search and filters applied
  */
 export function useProducts() {
+    const { user } = useAuth();
+    const setProducts = useProductStore((state) => state.setProducts);
+    const categoriesPage = useQuery(
+        api.sellerCategories.listSellerCategories,
+        user?.id ? { providerId: user.id, includeDeleted: false } : "skip"
+    );
+    const productsPage = useQuery(
+        api.sellerProducts.listSellerProducts,
+        user?.id ? { providerId: user.id, includeDeleted: false } : "skip"
+    );
+
+    useEffect(() => {
+        if (!productsPage?.page) return;
+        const categories = categoriesPage?.page ?? [];
+        const categoryNameById = new Map<string, string>(
+            categories.map((c: any) => [c._id as string, c.name as string])
+        );
+
+        const mapped = productsPage.page.map((p: any) => ({
+            id: p._id as string,
+            name: p.name,
+            nameEn: p.nameEn,
+            description: p.description,
+            price: p.price,
+            comparePrice: p.comparePrice,
+            stock: p.stock,
+            status: p.status,
+            categoryId: p.categoryId as string | undefined,
+            category: p.categoryId ? categoryNameById.get(p.categoryId as string) : undefined,
+            style: p.style,
+            sku: p.sku,
+            image: p.image,
+            images: p.images,
+            sales: p.sales,
+            views: p.views,
+        }));
+        setProducts(mapped);
+    }, [productsPage, categoriesPage, setProducts]);
+
     const filteredProducts = useProductStore((state) => state.getFilteredProducts());
     return filteredProducts;
 }
@@ -49,13 +91,13 @@ export function useProductFilters() {
  * Hook for product actions (create, update, delete)
  */
 export function useProductActions() {
-    const addProduct = useProductStore((state) => state.addProduct);
-    const updateProduct = useProductStore((state) => state.updateProduct);
-    const deleteProduct = useProductStore((state) => state.deleteProduct);
-    
+    const createSellerProduct = useMutation(api.sellerProducts.createSellerProduct);
+    const updateSellerProduct = useMutation(api.sellerProducts.updateSellerProduct);
+    const deleteSellerProduct = useMutation(api.sellerProducts.deleteSellerProduct);
+
     return {
-        addProduct,
-        updateProduct,
-        deleteProduct,
+        createSellerProduct,
+        updateSellerProduct,
+        deleteSellerProduct,
     };
 }

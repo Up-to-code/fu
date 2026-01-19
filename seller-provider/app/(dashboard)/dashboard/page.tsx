@@ -6,17 +6,22 @@ import { DashboardCharts } from "@/components/shared/DashboardCharts";
 import { Button } from "@/components/ui/button";
 import { DollarSign, CreditCard, Package, Users, ArrowLeft } from "lucide-react";
 import Link from "next/link";
-import { DateRange } from "react-day-picker";
-import { useDashboardStats, useChartData, useDateRange } from "./_hooks";
+import { useDashboardStats, useChartData, getDefaultDateRange } from "./_hooks";
 import { useOrders } from "../orders/_hooks";
 import { salesByCategory } from "@/data";
 import { RecentOrdersTable, QuickActions } from "./_components";
+import { useCurrentUser } from "../_hooks/useCurrentUser";
+import { PermissionGuard } from "@/components/shared/PermissionGuard";
+import { Permission } from "@/lib/permissions";
+import { useState } from "react";
+import { DateRange } from "react-day-picker";
 
 export default function DashboardPage() {
-    const stats = useDashboardStats();
-    const chartData = useChartData();
-    const { dateRange, setDateRange } = useDateRange();
+    const [dateRange, setDateRange] = useState<DateRange | undefined>(getDefaultDateRange());
+    const stats = useDashboardStats(dateRange);
+    const chartData = useChartData(dateRange);
     const orders = useOrders();
+    const user = useCurrentUser();
     
     // Get recent 5 orders
     const recentOrders = orders.slice(0, 5).map(order => ({
@@ -31,14 +36,14 @@ export default function DashboardPage() {
     const formattedChartData = chartData;
 
     // Format date range for DateRangePicker
-    const dateRangePicker = dateRange.from && dateRange.to ? {
+    const dateRangePicker = dateRange?.from && dateRange?.to ? {
         from: dateRange.from,
         to: dateRange.to,
     } : undefined;
 
     const handleDateRangeChange = (range: DateRange | undefined) => {
         if (range) {
-            setDateRange(range.from, range.to);
+            setDateRange(range);
         }
     };
 
@@ -116,6 +121,57 @@ export default function DashboardPage() {
                             <p className="text-base text-gray-400 font-bold">الوصول السريع للمهام المتكررة</p>
                         </div>
                         <QuickActions />
+                    </div>
+                </div>
+            </div>
+
+            <div className="grid gap-8 md:grid-cols-2">
+                <div className="bg-white border border-gray-100 rounded-3xl p-10 shadow-none transition-all hover:border-[#242C5A]/10">
+                    <div className="flex items-center justify-between mb-6">
+                        <div className="space-y-1 text-right">
+                            <h3 className="text-2xl font-black text-[#242C5A]">الملف الشخصي</h3>
+                            <p className="text-base text-gray-400 font-bold">معلوماتك وتفضيلاتك</p>
+                        </div>
+                        <Link href="/account/update">
+                            <Button variant="outline" className="rounded-xl font-black">
+                                تعديل
+                            </Button>
+                        </Link>
+                    </div>
+                    <div className="space-y-3 text-right">
+                        <div className="flex items-center justify-between gap-6">
+                            <span className="text-gray-500 font-bold">الاسم</span>
+                            <span className="text-gray-900 font-black">{user?.name || "—"}</span>
+                        </div>
+                        <div className="flex items-center justify-between gap-6">
+                            <span className="text-gray-500 font-bold">البريد الإلكتروني</span>
+                            <span className="text-gray-900 font-black">{user?.email || "—"}</span>
+                        </div>
+                        <div className="flex items-center justify-between gap-6">
+                            <span className="text-gray-500 font-bold">الدور</span>
+                            <span className="text-gray-900 font-black">{user?.role || "—"}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="bg-white border border-gray-100 rounded-3xl p-10 shadow-none transition-all hover:border-[#242C5A]/10">
+                    <div className="space-y-1 mb-6 text-right">
+                        <h3 className="text-2xl font-black text-[#242C5A]">المنشآت</h3>
+                        <p className="text-base text-gray-400 font-bold">إدارة المنشأة أو الوصول لإدارة المنشآت</p>
+                    </div>
+                    <div className="flex flex-col sm:flex-row gap-3">
+                        <Link href="/organization" className="w-full sm:w-auto">
+                            <Button variant="outline" className="rounded-xl font-black w-full sm:w-auto">
+                                منشأتي
+                            </Button>
+                        </Link>
+                        <PermissionGuard permission={Permission.VIEW_ORGANIZATIONS}>
+                            <Link href="/organizations" className="w-full sm:w-auto">
+                                <Button className="bg-[#242C5A] hover:bg-[#1a2144] rounded-xl font-black w-full sm:w-auto">
+                                    إدارة المنشآت
+                                </Button>
+                            </Link>
+                        </PermissionGuard>
                     </div>
                 </div>
             </div>

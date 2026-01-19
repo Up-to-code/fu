@@ -25,6 +25,12 @@ export enum Permission {
     VIEW_ORGANIZATION = 'view_organization',
     EDIT_ORGANIZATION = 'edit_organization',
     MANAGE_TEAM = 'manage_team',
+
+    // Organizations (admin)
+    VIEW_ORGANIZATIONS = 'view_organizations',
+    CREATE_ORGANIZATIONS = 'create_organizations',
+    EDIT_ORGANIZATIONS = 'edit_organizations',
+    DELETE_ORGANIZATIONS = 'delete_organizations',
     
     // Analytics
     VIEW_ANALYTICS = 'view_analytics',
@@ -54,7 +60,12 @@ export type Role = 'owner' | 'admin' | 'member';
  * Role-permission mapping
  */
 const rolePermissions: Record<Role, Permission[]> = {
-    owner: Object.values(Permission), // All permissions
+    owner: Object.values(Permission).filter(p => ![
+        Permission.VIEW_ORGANIZATIONS,
+        Permission.CREATE_ORGANIZATIONS,
+        Permission.EDIT_ORGANIZATIONS,
+        Permission.DELETE_ORGANIZATIONS,
+    ].includes(p)),
     
     admin: [
         // Products
@@ -78,6 +89,12 @@ const rolePermissions: Record<Role, Permission[]> = {
         Permission.VIEW_ORGANIZATION,
         Permission.EDIT_ORGANIZATION,
         Permission.MANAGE_TEAM,
+
+        // Organizations (admin)
+        Permission.VIEW_ORGANIZATIONS,
+        Permission.CREATE_ORGANIZATIONS,
+        Permission.EDIT_ORGANIZATIONS,
+        Permission.DELETE_ORGANIZATIONS,
         
         // Analytics
         Permission.VIEW_ANALYTICS,
@@ -140,6 +157,7 @@ const pagePermissions: Record<string, Permission> = {
     '/orders': Permission.VIEW_ORDERS,
     '/categories': Permission.VIEW_CATEGORIES,
     '/organization': Permission.VIEW_ORGANIZATION,
+    '/organizations': Permission.VIEW_ORGANIZATIONS,
     '/analytics': Permission.VIEW_ANALYTICS,
     '/settings': Permission.VIEW_SETTINGS,
     '/notifications': Permission.VIEW_SETTINGS, // Same as settings
@@ -236,6 +254,12 @@ export function getPermissionGroups(): Record<string, Permission[]> {
             Permission.EDIT_ORGANIZATION,
             Permission.MANAGE_TEAM,
         ],
+        'إدارة المنشآت': [
+            Permission.VIEW_ORGANIZATIONS,
+            Permission.CREATE_ORGANIZATIONS,
+            Permission.EDIT_ORGANIZATIONS,
+            Permission.DELETE_ORGANIZATIONS,
+        ],
         'التحليلات': [
             Permission.VIEW_ANALYTICS,
         ],
@@ -278,6 +302,10 @@ export const permissionLabels: Record<Permission, string> = {
     [Permission.VIEW_ORGANIZATION]: "عرض المنشأة",
     [Permission.EDIT_ORGANIZATION]: "تعديل المنشأة",
     [Permission.MANAGE_TEAM]: "إدارة الفريق",
+    [Permission.VIEW_ORGANIZATIONS]: "عرض المنشآت",
+    [Permission.CREATE_ORGANIZATIONS]: "إضافة منشأة",
+    [Permission.EDIT_ORGANIZATIONS]: "تعديل منشأة",
+    [Permission.DELETE_ORGANIZATIONS]: "حذف منشأة",
     [Permission.VIEW_ANALYTICS]: "عرض التحليلات",
     [Permission.VIEW_SETTINGS]: "عرض الإعدادات",
     [Permission.EDIT_SETTINGS]: "تعديل الإعدادات",

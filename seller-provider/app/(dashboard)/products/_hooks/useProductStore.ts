@@ -1,20 +1,19 @@
 import { create } from "zustand";
-import { products as initialProducts } from "@/data/products";
 
-// Product type matching the mock data structure
+// Product type for UI rendering (backed by Convex sellerProducts)
 export type Product = {
     id: string;
     name: string;
-    nameEn: string;
-    description: string;
+    nameEn?: string;
+    description?: string;
     price: number;
     comparePrice?: number;
     stock: number;
-    status: "active" | "low_stock" | "out_of_stock" | "draft";
-    category: string;
-    categoryId: string;
-    style: string;
-    sku: string;
+    status: string;
+    category?: string;
+    categoryId?: string;
+    style?: string;
+    sku?: string;
     image: string;
     images: string[];
     sales?: number;
@@ -47,7 +46,7 @@ type ProductStore = {
 };
 
 export const useProductStore = create<ProductStore>((set, get) => ({
-    products: initialProducts as Product[],
+    products: [],
     searchQuery: "",
     filters: {},
     
@@ -90,9 +89,9 @@ export const useProductStore = create<ProductStore>((set, get) => ({
             filtered = filtered.filter(
                 (p) =>
                     p.name.toLowerCase().includes(query) ||
-                    p.nameEn.toLowerCase().includes(query) ||
-                    p.sku.toLowerCase().includes(query) ||
-                    p.description.toLowerCase().includes(query)
+                    (p.nameEn ? p.nameEn.toLowerCase().includes(query) : false) ||
+                    (p.sku ? p.sku.toLowerCase().includes(query) : false) ||
+                    (p.description ? p.description.toLowerCase().includes(query) : false)
             );
         }
         

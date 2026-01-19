@@ -41,6 +41,7 @@ function SidebarItem({ route, isActive }: { route: any, isActive: boolean }) {
     );
 }
 
+import { useCurrentUser } from "@/app/(dashboard)/_hooks/useCurrentUser";
 import { authClient } from "@/lib/auth/client";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -50,6 +51,7 @@ export function DashboardSidebar() {
     const router = useRouter();
     const { hasPermission } = usePermissions();
     const { mainRoutes, organizationRoutes, accountRoutes } = useProviderConfig();
+    const user = useCurrentUser();
 
     const handleLogout = async () => {
         try {
@@ -78,13 +80,6 @@ export function DashboardSidebar() {
     const filteredAccountRoutes = accountRoutes.filter(route => 
         !route.permission || hasPermission(route.permission as Permission)
     );
-
-    // Mock user data for UI demo
-    const mockUser = {
-        name: "أحمد محمد",
-        email: "ahmed@example.com",
-        initials: "أم"
-    };
 
     return (
         <div className="flex flex-col h-full bg-[#1A1A27] text-white border-none relative font-sans">
@@ -147,19 +142,19 @@ export function DashboardSidebar() {
                 </div>
             </div>
 
-            {/* User Profile Footer - Static Demo */}
+            {/* User Profile Footer */}
             <div className="p-6 mt-auto border-t border-white/5">
                 <div className="flex items-center gap-4 p-3 rounded-[1.5rem] bg-white/5 hover:bg-white/10 transition-all cursor-pointer group pr-2">
                     <Avatar className="h-11 w-11 border-2 border-white/10 group-hover:border-white/20 transition-all">
                         <AvatarImage src="" />
                         <AvatarFallback className="bg-[#242C5A] text-white font-bold">
-                            {mockUser.initials}
+                            {user?.name?.substring(0, 2).toUpperCase() || "م"}
                         </AvatarFallback>
                     </Avatar>
                     <div className="flex-1 min-w-0">
-                        <p className="text-sm font-bold text-white truncate">{mockUser.name}</p>
+                        <p className="text-sm font-bold text-white truncate">{user?.name || "مستخدم"}</p>
                         <p className="text-[10px] text-white/40 font-bold uppercase tracking-wider truncate">
-                            {mockUser.email}
+                            {user?.email || ""}
                         </p>
                     </div>
                     <Button

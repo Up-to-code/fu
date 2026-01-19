@@ -67,7 +67,7 @@ export function OrganizationInfoForm({
         setFormLogo(logo);
         setFormLinks(links);
         setHasChanges(false);
-    }, [name, commercialRegistration, description, logo, links]);
+    }, [name, commercialRegistration, description, logo, JSON.stringify(links)]);
 
     const handleNameChange = (value: string) => {
         setFormName(value);

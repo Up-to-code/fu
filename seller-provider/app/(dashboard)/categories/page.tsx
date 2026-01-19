@@ -16,12 +16,13 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useCategories, useCategorySearch, useCategoryViewMode, useCategoryActions } from "./_hooks";
 import { CategoryCard, CategoryListItem, CategoryFormDialog, ViewModeToggle } from "./_components";
+import { toast } from "sonner";
 
 export default function CategoriesPage() {
     const categories = useCategories();
     const { searchQuery, setSearchQuery } = useCategorySearch();
     const { viewMode, setViewMode } = useCategoryViewMode();
-    const { addCategory, deleteCategory } = useCategoryActions();
+    const { createSellerCategory, deleteSellerCategory } = useCategoryActions();
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [categoryToDelete, setCategoryToDelete] = useState<string | null>(null);
 
@@ -30,19 +31,28 @@ export default function CategoriesPage() {
         setDeleteDialogOpen(true);
     };
 
-    const handleDeleteConfirm = () => {
+    const handleDeleteConfirm = async () => {
         if (categoryToDelete) {
-            deleteCategory(categoryToDelete);
+            await deleteSellerCategory({ categoryId: categoryToDelete as any });
             setDeleteDialogOpen(false);
             setCategoryToDelete(null);
         }
     };
 
-    const handleAddCategory = (categoryData: Omit<import("./_hooks").Category, "id">) => {
-        addCategory({
-            ...categoryData,
-            id: Date.now().toString(),
-        });
+    const handleAddCategory = async (categoryData: Omit<import("./_hooks").Category, "id">) => {
+        try {
+            await createSellerCategory({
+                name: categoryData.name,
+                nameEn: categoryData.nameEn,
+                description: categoryData.description,
+                image: categoryData.image,
+                icon: categoryData.icon,
+                style: categoryData.style,
+            });
+            toast.success("تم إضافة التصنيف");
+        } catch (e: any) {
+            toast.error("فشل إضافة التصنيف", { description: e?.message });
+        }
     };
 
     return (

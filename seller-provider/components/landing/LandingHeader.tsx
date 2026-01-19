@@ -1,8 +1,13 @@
+"use client";
+
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Building2, Menu } from "lucide-react";
+import { Building2, Menu, LayoutDashboard, Loader2 } from "lucide-react";
+import { useAuth } from "@/lib/auth/hooks";
 
 export function LandingHeader() {
+    const { isAuthenticated, isLoading } = useAuth();
+
     return (
         <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-100">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -39,14 +44,29 @@ export function LandingHeader() {
 
                     {/* Actions */}
                     <div className="flex items-center space-x-4 space-x-reverse">
-                        <Link href="/login" className="hidden sm:inline-block text-sm font-semibold text-gray-700 hover:text-[#242C5A] transition-colors">
-                            تسجيل الدخول
-                        </Link>
-                        <Link href="/register">
-                            <Button className="bg-[#242C5A] hover:bg-[#1a2144] text-white font-semibold px-6 h-10 rounded-lg shadow-sm hover:shadow-md transition-all">
-                                انضم إلينا
-                            </Button>
-                        </Link>
+                        {isLoading ? (
+                            <div className="flex items-center justify-center w-24">
+                                <Loader2 className="h-5 w-5 animate-spin text-[#242C5A]" />
+                            </div>
+                        ) : isAuthenticated ? (
+                            <Link href="/dashboard">
+                                <Button className="bg-[#242C5A] hover:bg-[#1a2144] text-white font-semibold px-6 h-10 rounded-lg shadow-sm hover:shadow-md transition-all flex items-center gap-2">
+                                    <LayoutDashboard className="h-4 w-4" />
+                                    <span>لوحة التحكم</span>
+                                </Button>
+                            </Link>
+                        ) : (
+                            <>
+                                <Link href="/login" className="text-sm font-semibold text-gray-700 hover:text-[#242C5A] transition-colors">
+                                    تسجيل الدخول
+                                </Link>
+                                <Link href="/register" className="hidden sm:inline-block">
+                                    <Button className="bg-[#242C5A] hover:bg-[#1a2144] text-white font-semibold px-6 h-10 rounded-lg shadow-sm hover:shadow-md transition-all">
+                                        انضم إلينا
+                                    </Button>
+                                </Link>
+                            </>
+                        )}
                     </div>
                 </div>
             </div>

@@ -1,6 +1,10 @@
 import { query, mutation, action, internalMutation } from "./_generated/server";
 import { v } from "convex/values";
 import { Id } from "./_generated/dataModel";
+import { authComponent } from "./auth";
+import { throwAppError } from "./errors";
+import { getUserProfileByUserId, requireAuthUserId } from "./authz";
+import { logAuditEvent } from "./audit";
 
 /**
  * Get count of orders for a user
@@ -12,9 +16,8 @@ export const getOrdersCount = query({
   handler: async (ctx, args) => {
     const orders = await ctx.db
       .query("orders")
-      .filter((q) => q.eq(q.field("userId"), args.userId))
+      .withIndex("by_user", (q) => q.eq("userId", args.userId))
       .collect();
-    
     return orders.length;
   },
 });
@@ -72,7 +75,7 @@ export const getAddresses = query({
     // Check if user account is deleted
     const profile = await ctx.db
       .query("userProfiles")
-      .filter((q) => q.eq(q.field("userId"), args.userId))
+      .withIndex("by_userId", (q) => q.eq("userId", args.userId))
       .first();
     
     if (profile?.isDeleted) {
@@ -139,7 +142,7 @@ export const getUserProfile = query({
   handler: async (ctx, args) => {
     const profile = await ctx.db
       .query("userProfiles")
-      .filter((q) => q.eq(q.field("userId"), args.userId))
+      .withIndex("by_userId", (q) => q.eq("userId", args.userId))
       .first();
     
     // If profile doesn't exist or is deleted, return default with "customer" role
@@ -157,10 +160,101 @@ export const getUserProfile = query({
   },
 });
 
+export const getSellerProfile = query({
+  args: {
+    userId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const profile = await ctx.db
+      .query("userProfiles")
+      .withIndex("by_userId", (q) => q.eq("userId", args.userId))
+      .first();
+
+    if (!profile || profile.isDeleted) {
+      return null;
+    }
+
+    if (profile.role !== "vendor" && profile.role !== "admin") {
+      return null;
+    }
+
+    return profile;
+  },
+});
+
+export const ensureSellerInitialized = mutation({
+  args: {
+    name: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const user = await authComponent.getAuthUser(ctx);
+    const userId = user?._id;
+    if (!userId) {
+      throw new Error("Unauthenticated");
+    }
+
+    const existingProfile = await ctx.db
+      .query("userProfiles")
+      .withIndex("by_userId", (q) => q.eq("userId", userId))
+      .first();
+
+    if (existingProfile) {
+      return existingProfile;
+    }
+
+    const now = Date.now();
+    const profileId = await ctx.db.insert("userProfiles", {
+      userId,
+      role: "vendor",
+      name: args.name ?? null,
+      phone: null,
+      createdAt: now,
+      updatedAt: now,
+    });
+
+    return await ctx.db.get(profileId);
+  },
+});
+
 /**
  * Update user profile information
  * Auto-creates profile if it doesn't exist with default "customer" role
  */
+export const ensureUserInitialized = mutation({
+  args: {
+    name: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const user = await authComponent.getAuthUser(ctx);
+    const userId = user?._id;
+    if (!userId) {
+      throw new Error("Unauthenticated");
+    }
+
+    const existingProfile = await ctx.db
+      .query("userProfiles")
+      .withIndex("by_userId", (q) => q.eq("userId", userId))
+      .first();
+
+    if (existingProfile) {
+      return existingProfile;
+    }
+
+    const now = Date.now();
+    // Default to "vendor" role for Seller App users
+    const profileId = await ctx.db.insert("userProfiles", {
+      userId,
+      role: "vendor",
+      name: args.name ?? null,
+      phone: null,
+      createdAt: now,
+      updatedAt: now,
+    });
+
+    return await ctx.db.get(profileId);
+  },
+});
+
 export const updateUserProfile = mutation({
   args: {
     userId: v.string(),
@@ -170,38 +264,165 @@ export const updateUserProfile = mutation({
     phone: v.optional(v.string()),
     role: v.optional(v.string()),
     language: v.optional(v.string()),
+    expectedUpdatedAt: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
+    const actorUserId = await requireAuthUserId(ctx);
+    const actorProfile = await getUserProfileByUserId(ctx, actorUserId);
+    const isAdmin = actorProfile?.role === "admin" && !actorProfile?.isDeleted;
+
+    if (!isAdmin && actorUserId !== args.userId) {
+      throwAppError("FORBIDDEN", "Forbidden");
+    }
+
+    if (args.role !== undefined && !isAdmin) {
+      throwAppError("FORBIDDEN", "Forbidden");
+    }
+
+    if (args.name !== undefined) {
+      const name = args.name?.trim() ?? "";
+      if (name && (name.length < 2 || name.length > 50)) {
+        throwAppError("VALIDATION_FAILED", "Invalid name");
+      }
+    }
+    if (args.businessName !== undefined) {
+      const businessName = args.businessName?.trim() ?? "";
+      if (businessName && (businessName.length < 2 || businessName.length > 100)) {
+        throwAppError("VALIDATION_FAILED", "Invalid business name");
+      }
+    }
+    if (args.phone !== undefined) {
+      const phone = args.phone?.trim() ?? "";
+      if (phone && (phone.length < 8 || phone.length > 20)) {
+        throwAppError("VALIDATION_FAILED", "Invalid phone");
+      }
+    }
+    if (args.language !== undefined) {
+      const language = args.language?.trim() ?? "";
+      if (language && language.length > 10) {
+        throwAppError("VALIDATION_FAILED", "Invalid language");
+      }
+    }
+
     const existingProfile = await ctx.db
       .query("userProfiles")
-      .filter((q) => q.eq(q.field("userId"), args.userId))
+      .withIndex("by_userId", (q) => q.eq("userId", args.userId))
       .first();
     
     const now = Date.now();
     
     if (existingProfile) {
+      if (existingProfile.isDeleted) {
+        throwAppError("NOT_FOUND", "Profile not found");
+      }
+
+      if (args.expectedUpdatedAt !== undefined && existingProfile.updatedAt !== args.expectedUpdatedAt) {
+        throwAppError("CONFLICT", "Data has been modified by another user");
+      }
+
+      const before = {
+        name: existingProfile.name,
+        businessName: existingProfile.businessName,
+        phone: existingProfile.phone,
+        role: existingProfile.role,
+        language: existingProfile.language,
+        updatedAt: existingProfile.updatedAt,
+      };
+
       await ctx.db.patch(existingProfile._id, {
-        ...(args.name !== undefined && { name: args.name ?? null }),
-        ...(args.businessName !== undefined && { businessName: args.businessName }),
-        ...(args.phone !== undefined && { phone: args.phone ?? null }),
+        ...(args.name !== undefined && { name: (args.name?.trim() || null) as any }),
+        ...(args.businessName !== undefined && { businessName: args.businessName?.trim() || undefined }),
+        ...(args.phone !== undefined && { phone: (args.phone?.trim() || null) as any }),
         ...(args.role !== undefined && { role: args.role }),
-        ...(args.language !== undefined && { language: args.language }),
+        ...(args.language !== undefined && { language: args.language?.trim() || undefined }),
         updatedAt: now,
+      });
+
+      const after = {
+        ...before,
+        ...(args.name !== undefined ? { name: args.name?.trim() || null } : {}),
+        ...(args.businessName !== undefined ? { businessName: args.businessName?.trim() || undefined } : {}),
+        ...(args.phone !== undefined ? { phone: args.phone?.trim() || null } : {}),
+        ...(args.role !== undefined ? { role: args.role } : {}),
+        ...(args.language !== undefined ? { language: args.language?.trim() || undefined } : {}),
+        updatedAt: now,
+      };
+
+      await logAuditEvent(ctx, {
+        actorUserId,
+        action: "update",
+        entityType: "userProfiles",
+        entityId: existingProfile._id,
+        before,
+        after,
       });
       return { success: true, profileId: existingProfile._id };
     } else {
-      // Create new profile with default "customer" role
+      const role = isAdmin ? (args.role || "vendor") : "vendor";
       const profileId = await ctx.db.insert("userProfiles", {
         userId: args.userId,
-        role: args.role || "customer",
-        name: args.name ?? null,
+        role,
+        name: args.name?.trim() || null,
+        businessName: args.businessName?.trim() || undefined,
+        phone: args.phone?.trim() || null,
+        language: args.language?.trim() || undefined,
+        createdAt: now,
+        updatedAt: now,
+      });
+
+      await logAuditEvent(ctx, {
+        actorUserId,
+        action: "create",
+        entityType: "userProfiles",
+        entityId: profileId,
+        after: { userId: args.userId, role },
+      });
+      return { success: true, profileId };
+    }
+  },
+});
+
+export const upgradeToVendor = mutation({
+  args: {
+    businessName: v.string(),
+    phone: v.string(),
+    language: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const user = await authComponent.getAuthUser(ctx);
+    const userId = user?._id;
+    if (!userId) {
+      throw new Error("Unauthenticated");
+    }
+
+    const existingProfile = await ctx.db
+      .query("userProfiles")
+      .withIndex("by_userId", (q) => q.eq("userId", userId))
+      .first();
+
+    const now = Date.now();
+
+    if (existingProfile) {
+      await ctx.db.patch(existingProfile._id, {
+        role: "vendor",
         businessName: args.businessName,
-        phone: args.phone ?? null,
+        phone: args.phone,
+        language: args.language,
+        updatedAt: now,
+      });
+      return { success: true, profileId: existingProfile._id, role: "vendor" };
+    } else {
+      const profileId = await ctx.db.insert("userProfiles", {
+        userId,
+        role: "vendor",
+        name: null,
+        businessName: args.businessName,
+        phone: args.phone,
         language: args.language,
         createdAt: now,
         updatedAt: now,
       });
-      return { success: true, profileId };
+      return { success: true, profileId, role: "vendor" };
     }
   },
 });
@@ -387,7 +608,7 @@ export const updateProfileImage = mutation({
       // Create new profile with default "customer" role
       const profileId = await ctx.db.insert("userProfiles", {
         userId: args.userId,
-        role: "customer",
+        role: "vendor",
         name: null,
         phone: null,
         imageStorageId: args.storageId,
@@ -409,7 +630,7 @@ export const getProfileImageUrl = query({
   handler: async (ctx, args) => {
     const profile = await ctx.db
       .query("userProfiles")
-      .filter((q) => q.eq(q.field("userId"), args.userId))
+      .withIndex("by_userId", (q) => q.eq("userId", args.userId))
       .first();
 
     if (!profile?.imageStorageId) {
@@ -557,6 +778,13 @@ export const softDeleteAccount = mutation({
       isDeleted: true,
       deletedAt: now,
       updatedAt: now,
+    });
+
+    await logAuditEvent(ctx, {
+      actorUserId: args.userId,
+      action: "delete",
+      entityType: "userProfiles",
+      entityId: profile._id,
     });
 
     return { success: true };

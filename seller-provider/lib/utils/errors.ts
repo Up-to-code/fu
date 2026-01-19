@@ -22,6 +22,21 @@ export function getErrorMessage(error: unknown): string {
  * Handle Convex errors
  */
 export function handleConvexError(error: unknown): string {
+    const dataCode = (error as any)?.data?.code as string | undefined;
+    const dataMessage = (error as any)?.data?.message as string | undefined;
+    if (dataCode) {
+        const msg = dataMessage || getErrorMessage(error);
+        const codeMap: Record<string, string> = {
+            AUTH_REQUIRED: 'يرجى تسجيل الدخول للمتابعة',
+            FORBIDDEN: 'غير مصرح لك بتنفيذ هذا الإجراء',
+            NOT_FOUND: 'العنصر غير موجود',
+            VALIDATION_FAILED: 'البيانات المدخلة غير صحيحة',
+            CONFLICT: 'تعذر إكمال العملية بسبب تعارض في البيانات',
+            INTEGRITY_BLOCKED: 'تعذر الحذف بسبب بيانات مرتبطة',
+        };
+        return codeMap[dataCode] || msg;
+    }
+
     const message = getErrorMessage(error);
     
     // Map common Convex error messages to user-friendly Arabic messages

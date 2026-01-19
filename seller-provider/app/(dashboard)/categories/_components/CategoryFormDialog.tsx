@@ -14,7 +14,8 @@ import {
 } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plus } from "lucide-react";
-import { styleTypes, emojiIcons, type Category } from "@/data";
+import { styleTypes, emojiIcons } from "@/data";
+import type { Category } from "../_hooks";
 
 interface CategoryFormDialogProps {
     onAdd: (category: Omit<Category, "id">) => void;

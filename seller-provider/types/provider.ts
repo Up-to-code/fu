@@ -8,7 +8,7 @@ export type ProviderType =
  * Entity Types - Individual or Organization
  */
 export type EntityType = 
-    | 'individual'          // A person (freelancer, individual seller)
+    | 'individual'          // A person (individual seller)
     | 'organization';       // A company/organization
 
 /**

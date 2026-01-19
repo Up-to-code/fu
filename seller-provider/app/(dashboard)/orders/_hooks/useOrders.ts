@@ -1,10 +1,43 @@
+import { useEffect, useMemo } from "react";
 import { useOrderStore, getFilteredOrders } from "./useOrderStore";
-import { useMemo } from "react";
+import { useAuth } from "@/lib/auth/hooks";
+import { useMutation, useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
 
 /**
  * Hook to get all orders with search and filters applied
  */
 export function useOrders() {
+    const { user } = useAuth();
+    const setOrders = useOrderStore((state) => state.setOrders);
+    const ordersPage = useQuery(
+        api.sellerOrders.listSellerOrders,
+        user?.id ? { providerId: user.id, includeDeleted: false } : "skip"
+    );
+
+    useEffect(() => {
+        if (!ordersPage?.page) return;
+        const mapped = ordersPage.page.map((o: any) => ({
+            id: o.orderNumber as string,
+            customer: o.customerName,
+            email: o.email,
+            phone: o.phone,
+            items: o.items,
+            total: o.total,
+            subtotal: o.subtotal,
+            shipping: o.shipping,
+            status: o.status,
+            date: o.date,
+            address: o.address,
+            paymentMethod: o.paymentMethod,
+            shippingCompany: o.shippingCompany,
+            trackingNumber: o.trackingNumber,
+            shippingNotes: o.shippingNotes,
+            cancellationReason: o.cancellationReason,
+        }));
+        setOrders(mapped);
+    }, [ordersPage, setOrders]);
+
     const orders = useOrderStore((state) => state.orders);
     const searchQuery = useOrderStore((state) => state.searchQuery);
     const filters = useOrderStore((state) => state.filters);
@@ -58,9 +91,11 @@ export function useOrderFilters() {
  * Hook for order actions
  */
 export function useOrderActions() {
-    const updateOrder = useOrderStore((state) => state.updateOrder);
-    
+    const updateSellerOrder = useMutation(api.sellerOrders.updateSellerOrder);
+    const deleteSellerOrder = useMutation(api.sellerOrders.deleteSellerOrder);
+
     return {
-        updateOrder,
+        updateSellerOrder,
+        deleteSellerOrder,
     };
 }

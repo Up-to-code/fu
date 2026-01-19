@@ -9,13 +9,14 @@ import { useParams, useRouter } from "next/navigation";
 import { useOrder, useOrderActions } from "../_hooks";
 import { getOrderStatusById } from "@/data";
 import { OrderItemsList, ShippingDialog, CancelOrderDialog } from "../_components";
+import { toast } from "sonner";
 
 export default function OrderDetailPage() {
     const params = useParams();
     const router = useRouter();
     const orderId = params.id as string;
     const order = useOrder(orderId);
-    const { updateOrder } = useOrderActions();
+    const { updateSellerOrder } = useOrderActions();
     const [shippingDialogOpen, setShippingDialogOpen] = useState(false);
     const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -44,11 +45,11 @@ export default function OrderDetailPage() {
     const handleAcceptOrder = async () => {
         setIsSubmitting(true);
         try {
-            updateOrder(orderId, {
-                status: "processing",
-            });
+            await updateSellerOrder({ orderNumber: orderId, status: "processing" });
+            toast.success("تم قبول الطلب");
         } catch (error) {
             console.error("Error accepting order:", error);
+            toast.error("فشل قبول الطلب");
         } finally {
             setIsSubmitting(false);
         }
@@ -61,15 +62,18 @@ export default function OrderDetailPage() {
     }) => {
         setIsSubmitting(true);
         try {
-            updateOrder(orderId, {
+            await updateSellerOrder({
+                orderNumber: orderId,
                 status: "shipping",
                 shippingCompany: data.shippingCompany,
                 trackingNumber: data.trackingNumber,
                 shippingNotes: data.notes,
             });
             setShippingDialogOpen(false);
+            toast.success("تم تحديث الشحن");
         } catch (error) {
             console.error("Error updating order:", error);
+            toast.error("فشل تحديث الشحن");
         } finally {
             setIsSubmitting(false);
         }
@@ -78,11 +82,11 @@ export default function OrderDetailPage() {
     const handleCompleteOrder = async () => {
         setIsSubmitting(true);
         try {
-            updateOrder(orderId, {
-                status: "completed",
-            });
+            await updateSellerOrder({ orderNumber: orderId, status: "completed" });
+            toast.success("تم إكمال الطلب");
         } catch (error) {
             console.error("Error completing order:", error);
+            toast.error("فشل إكمال الطلب");
         } finally {
             setIsSubmitting(false);
         }
@@ -91,14 +95,17 @@ export default function OrderDetailPage() {
     const handleCancelOrder = async (reason: string) => {
         setIsSubmitting(true);
         try {
-            updateOrder(orderId, {
+            await updateSellerOrder({
+                orderNumber: orderId,
                 status: "cancelled",
                 cancellationReason: reason,
             });
             setCancelDialogOpen(false);
             router.push("/orders");
+            toast.success("تم إلغاء الطلب");
         } catch (error) {
             console.error("Error cancelling order:", error);
+            toast.error("فشل إلغاء الطلب");
         } finally {
             setIsSubmitting(false);
         }

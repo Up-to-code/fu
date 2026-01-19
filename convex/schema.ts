@@ -38,7 +38,10 @@ export default defineSchema(
         country: v.string(),
       })),
       createdAt: v.number(),
-    }),
+    })
+    .index("by_user", ["userId"])
+    .index("by_status", ["status"])
+    .index("by_createdAt", ["createdAt"]),
 
     // User addresses
     addresses: defineTable({
@@ -56,7 +59,8 @@ export default defineSchema(
     favorites: defineTable({
       userId: v.string(),
       productId: v.string(),
-    }),
+    })
+    .index("by_user_product", ["userId", "productId"]),
 
     // User profiles with role information
     userProfiles: defineTable({
@@ -67,11 +71,69 @@ export default defineSchema(
       phone: v.union(v.string(), v.null()),
       language: v.optional(v.string()),
       imageStorageId: v.optional(v.id("_storage")),
+      organizationId: v.optional(v.id("organizations")), // Link to primary organization
       isDeleted: v.optional(v.boolean()),
       deletedAt: v.optional(v.number()),
       createdAt: v.number(),
       updatedAt: v.number(),
+    })
+    .index("by_userId", ["userId"])
+    .index("by_role", ["role"])
+    .index("by_isDeleted", ["isDeleted"])
+    .index("by_organization", ["organizationId"]),
+
+    organizations: defineTable({
+      name: v.string(),
+      nameLower: v.string(),
+      slug: v.string(),
+      commercialRegistration: v.optional(v.string()),
+      description: v.optional(v.string()),
+      website: v.optional(v.string()),
+      isDeleted: v.optional(v.boolean()),
+      deletedAt: v.optional(v.number()),
+      createdAt: v.number(),
+      updatedAt: v.number(),
+      createdByUserId: v.string(),
+      updatedByUserId: v.string(),
+    })
+    .index("by_slug", ["slug"])
+    .index("by_isDeleted", ["isDeleted"])
+    .index("by_createdAt", ["createdAt"])
+    .searchIndex("search_name", {
+      searchField: "name",
+      filterFields: ["isDeleted"],
     }),
+
+    organizationMembers: defineTable({
+      organizationId: v.id("organizations"),
+      userId: v.optional(v.string()),
+      inviteEmail: v.optional(v.string()),
+      role: v.string(), // "owner", "admin", "member"
+      customPermissions: v.optional(v.array(v.string())),
+      isDeleted: v.optional(v.boolean()),
+      deletedAt: v.optional(v.number()),
+      createdAt: v.number(),
+      updatedAt: v.number(),
+      createdByUserId: v.string(),
+      updatedByUserId: v.string(),
+    })
+    .index("by_organization", ["organizationId"])
+    .index("by_user", ["userId"])
+    .index("by_org_user", ["organizationId", "userId"])
+    .index("by_isDeleted", ["isDeleted"]),
+
+    auditLogs: defineTable({
+      actorUserId: v.string(),
+      action: v.string(),
+      entityType: v.string(),
+      entityId: v.string(),
+      before: v.optional(v.any()),
+      after: v.optional(v.any()),
+      createdAt: v.number(),
+    })
+    .index("by_entity", ["entityType", "entityId"])
+    .index("by_actor", ["actorUserId"])
+    .index("by_createdAt", ["createdAt"]),
 
     // Services table (for service providers)
     services: defineTable({
@@ -165,6 +227,87 @@ export default defineSchema(
     })
     .index("by_service", ["serviceId"])
     .index("by_customer", ["customerId"]),
+
+    sellerCategories: defineTable({
+      providerId: v.string(),
+      name: v.string(),
+      nameEn: v.optional(v.string()),
+      description: v.optional(v.string()),
+      imageUrl: v.optional(v.string()),
+      image: v.optional(v.string()),
+      icon: v.optional(v.string()),
+      style: v.optional(v.string()),
+      products: v.optional(v.number()),
+      parentId: v.optional(v.id("sellerCategories")),
+      isDeleted: v.optional(v.boolean()),
+      createdAt: v.number(),
+      updatedAt: v.number(),
+    })
+    .index("by_provider", ["providerId"])
+    .index("by_provider_and_deleted", ["providerId", "isDeleted"])
+    .index("by_parent", ["parentId"]),
+
+    sellerProducts: defineTable({
+      providerId: v.string(),
+      name: v.string(),
+      nameEn: v.optional(v.string()),
+      description: v.optional(v.string()),
+      price: v.number(),
+      comparePrice: v.optional(v.number()),
+      stock: v.number(),
+      status: v.string(),
+      categoryId: v.optional(v.id("sellerCategories")),
+      style: v.optional(v.string()),
+      sku: v.optional(v.string()),
+      image: v.string(),
+      images: v.array(v.string()),
+      sales: v.optional(v.number()),
+      views: v.optional(v.number()),
+      isDeleted: v.optional(v.boolean()),
+      createdAt: v.number(),
+      updatedAt: v.number(),
+    })
+    .index("by_provider", ["providerId"])
+    .index("by_provider_and_deleted", ["providerId", "isDeleted"])
+    .index("by_category", ["categoryId"]),
+
+    sellerOrders: defineTable({
+      providerId: v.string(),
+      orderNumber: v.string(),
+      customerName: v.string(),
+      email: v.string(),
+      phone: v.string(),
+      items: v.array(v.object({
+        productId: v.string(),
+        productName: v.string(),
+        productImage: v.string(),
+        quantity: v.number(),
+        unitPrice: v.number(),
+        totalPrice: v.number(),
+      })),
+      total: v.number(),
+      subtotal: v.number(),
+      shipping: v.number(),
+      status: v.string(),
+      date: v.string(),
+      address: v.object({
+        street: v.string(),
+        city: v.string(),
+        district: v.string(),
+        postalCode: v.string(),
+      }),
+      paymentMethod: v.string(),
+      shippingCompany: v.optional(v.string()),
+      trackingNumber: v.optional(v.string()),
+      shippingNotes: v.optional(v.string()),
+      cancellationReason: v.optional(v.string()),
+      isDeleted: v.optional(v.boolean()),
+      createdAt: v.number(),
+      updatedAt: v.number(),
+    })
+    .index("by_provider", ["providerId"])
+    .index("by_provider_and_status", ["providerId", "status"])
+    .index("by_orderNumber", ["orderNumber"]),
   },
   { schemaValidation: true }
 );

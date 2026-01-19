@@ -45,12 +45,16 @@ export function ProviderProvider({ children }: ProviderProviderProps) {
 
     // Update local state when Convex data changes
     useEffect(() => {
+        // Use functional update or check equality to avoid loops if convexProviderConfig returns new objects
+        // However, Convex queries usually stable. 
+        // The issue might be currentUser changing or this effect running too often.
         if (convexProviderConfig) {
-            setLocalProvider(convexProviderConfig);
+            setLocalProvider(prev => {
+                // Simple equality check to prevent re-render if same
+                if (JSON.stringify(prev) === JSON.stringify(convexProviderConfig)) return prev;
+                return convexProviderConfig;
+            });
         } else if (convexProviderConfig === null && currentUser) {
-            // User exists but no provider config (needs to select type)
-            // Auto-create for furniture_seller if needed, or handle elsewhere.
-            // For now, we set null, but we could auto-initialize.
             setLocalProvider(null);
         }
     }, [convexProviderConfig, currentUser]);

@@ -139,10 +139,35 @@ function RegisterForm() {
                 callbackURL: '/dashboard',
             }) as { data?: { url?: string }; error?: any } | undefined;
 
+            // If result has an error, show it
             if (result?.error) {
-                 // ... existing error handling ...
-                 toast.error('فشل التسجيل مع Google');
-                 return;
+                console.error("Google OAuth API error:", result.error);
+                console.error("Full result:", result);
+
+                // Extract error message from various possible formats
+                let errorMessage = "حدث خطأ أثناء الاتصال بخدمة Google.";
+
+                if (typeof result.error === 'string') {
+                    errorMessage = result.error;
+                } else if (result.error?.message) {
+                    errorMessage = result.error.message;
+                } else if (result.error?.code) {
+                    errorMessage = `خطأ ${result.error.code}: ${result.error.message || 'يرجى التحقق من إعدادات OAuth'}`;
+                } else if (typeof result.error === 'object') {
+                    // Try to extract any useful info from the error object
+                    const errorKeys = Object.keys(result.error);
+                    if (errorKeys.length > 0) {
+                        errorMessage = `خطأ في OAuth: ${JSON.stringify(result.error)}`;
+                    } else {
+                        errorMessage = "لم يتم تكوين Google OAuth بشكل صحيح. يرجى التحقق من إعدادات GOOGLE_CLIENT_ID و GOOGLE_CLIENT_SECRET في Convex.";
+                    }
+                }
+
+                toast.error("فشل التسجيل مع Google", {
+                    description: errorMessage,
+                    duration: 5000,
+                });
+                return;
             }
 
             if (result?.data?.url) {

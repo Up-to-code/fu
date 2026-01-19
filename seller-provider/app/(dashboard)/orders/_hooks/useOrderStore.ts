@@ -1,7 +1,7 @@
 import { create } from "zustand";
-import { orders as initialOrders } from "@/data/orders";
+import type { Order as MockOrder } from "@/data/orders";
 
-export type Order = typeof initialOrders[number];
+export type Order = MockOrder;
 
 type OrderFilters = {
     status?: string;
@@ -21,7 +21,7 @@ type OrderStore = {
 };
 
 export const useOrderStore = create<OrderStore>((set, get) => ({
-    orders: initialOrders as Order[],
+    orders: [],
     searchQuery: "",
     filters: {},
     
