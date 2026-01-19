@@ -74,7 +74,6 @@ export default defineSchema(
       organizationId: v.optional(v.id("organizations")), // Link to primary organization
       isDeleted: v.optional(v.boolean()),
       deletedAt: v.optional(v.number()),
-      organizationId: v.optional(v.id("organizations")),
       createdAt: v.number(),
       updatedAt: v.number(),
     })
@@ -189,6 +188,86 @@ export default defineSchema(
     .index("by_service", ["serviceId"])
     .index("by_provider_and_status", ["providerId", "status"])
     .index("by_date", ["scheduledDate"]),
+
+    // Seller Categories
+    sellerCategories: defineTable({
+      providerId: v.string(),
+      name: v.string(),
+      nameEn: v.optional(v.string()),
+      description: v.optional(v.string()),
+      imageUrl: v.optional(v.string()),
+      image: v.optional(v.string()),
+      icon: v.optional(v.string()),
+      style: v.optional(v.string()),
+      products: v.optional(v.number()),
+      parentId: v.optional(v.id("sellerCategories")),
+      isDeleted: v.boolean(),
+      createdAt: v.number(),
+      updatedAt: v.number(),
+    })
+    .index("by_provider", ["providerId"]),
+
+    // Seller Products
+    sellerProducts: defineTable({
+      providerId: v.string(),
+      name: v.string(),
+      nameEn: v.optional(v.string()),
+      description: v.optional(v.string()),
+      price: v.number(),
+      comparePrice: v.optional(v.number()),
+      stock: v.number(),
+      status: v.string(),
+      categoryId: v.optional(v.id("sellerCategories")),
+      style: v.optional(v.string()),
+      sku: v.optional(v.string()),
+      image: v.string(),
+      images: v.array(v.string()),
+      sales: v.optional(v.number()),
+      views: v.optional(v.number()),
+      isDeleted: v.boolean(),
+      createdAt: v.number(),
+      updatedAt: v.number(),
+    })
+    .index("by_provider", ["providerId"])
+    .index("by_provider_and_deleted", ["providerId", "isDeleted"]),
+
+    // Seller Orders
+    sellerOrders: defineTable({
+      providerId: v.string(),
+      orderNumber: v.string(),
+      customerName: v.string(),
+      email: v.string(),
+      phone: v.string(),
+      items: v.array(v.object({
+        productId: v.string(),
+        productName: v.string(),
+        productImage: v.string(),
+        quantity: v.number(),
+        unitPrice: v.number(),
+        totalPrice: v.number(),
+      })),
+      total: v.number(),
+      subtotal: v.number(),
+      shipping: v.number(),
+      status: v.string(),
+      date: v.string(),
+      address: v.object({
+        street: v.string(),
+        city: v.string(),
+        district: v.string(),
+        postalCode: v.string(),
+      }),
+      paymentMethod: v.string(),
+      shippingCompany: v.optional(v.string()),
+      trackingNumber: v.optional(v.string()),
+      shippingNotes: v.optional(v.string()),
+      cancellationReason: v.optional(v.string()),
+      isDeleted: v.boolean(),
+      createdAt: v.number(),
+      updatedAt: v.number(),
+    })
+    .index("by_provider", ["providerId"])
+    .index("by_orderNumber", ["orderNumber"]),
 
     // Service Reviews table
     serviceReviews: defineTable({
