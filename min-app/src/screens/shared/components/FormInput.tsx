@@ -19,13 +19,15 @@ export const FormInput: React.FC<FormInputProps> = ({
 }) => {
     const { isRTL, textAlign } = useRTL();
     const styles = getStyles(isRTL);
-    
+
     return (
         <View style={styles.inputGroup}>
-            <Text style={styles.label}>
-                {label}
-                {required && <Text style={styles.required}> *</Text>}
-            </Text>
+            {label && (
+                <Text style={styles.label}>
+                    {label}
+                    {required && <Text style={styles.required}> *</Text>}
+                </Text>
+            )}
             <View style={[styles.inputContainer, disabled && styles.inputDisabled, error && styles.inputError]}>
                 {icon && (
                     <View style={styles.inputIcon}>

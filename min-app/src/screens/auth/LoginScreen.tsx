@@ -1,39 +1,50 @@
 // File: src/screens/auth/LoginScreen.tsx
 // Purpose: Simple Arabic Login screen
 
+import { Feather } from '@expo/vector-icons';
 import { Link } from 'expo-router';
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Header, FormInput, PasswordInput, PrimaryButton, SocialButton } from '../shared';
+import { FormInput, PasswordInput, PrimaryButton, SocialButton, AlertBanner } from '../shared';
 import { useLogin } from './_hooks';
 import { COLORS } from '../../constants/theme';
 
 const LoginScreen = () => {
-    const { email, password, setEmail, setPassword, handleLogin, isLoading, errors } = useLogin();
+    const { email, password, setEmail, setPassword, handleLogin, isLoading, errors, serverError, clearServerError } = useLogin();
 
     return (
         <SafeAreaView style={styles.container}>
-            <Header title="تسجيل الدخول" showBack={false} />
+            <View style={styles.header}>
+                <View style={styles.iconContainer}>
+                    <Feather name="log-in" size={32} color={COLORS.primary} />
+                </View>
+                <Text style={styles.title}>مرحباً بعودتك</Text>
+                <Text style={styles.subtitle}>أدخل بياناتك للمتابعة</Text>
+            </View>
 
             <View style={styles.content}>
+                <AlertBanner
+                    type="error"
+                    message={serverError || ''}
+                    visible={!!serverError}
+                    onDismiss={clearServerError}
+                />
+
                 <FormInput
-                    label="البريد الإلكتروني"
+                    placeholder="البريد الإلكتروني"
                     value={email}
                     onChangeText={setEmail}
-                    placeholder="example@email.com"
                     keyboardType="email-address"
                     autoCapitalize="none"
-                    required
+                    icon="mail"
                     error={errors.email}
                 />
 
                 <PasswordInput
-                    label="كلمة المرور"
+                    placeholder="كلمة المرور"
                     value={password}
                     onChangeText={setPassword}
-                    placeholder="••••••••"
-                    required
                     error={errors.password}
                 />
 
@@ -50,6 +61,8 @@ const LoginScreen = () => {
                     disabled={isLoading}
                 />
 
+
+
                 <View style={styles.divider}>
                     <View style={styles.dividerLine} />
                     <Text style={styles.dividerText}>أو</Text>
@@ -60,12 +73,12 @@ const LoginScreen = () => {
                     <SocialButton
                         provider="google"
                         label="Google"
-                        onPress={() => {}}
+                        onPress={() => { }}
                     />
                     <SocialButton
                         provider="apple"
                         label="Apple"
-                        onPress={() => {}}
+                        onPress={() => { }}
                     />
                 </View>
 
@@ -89,8 +102,35 @@ const styles = StyleSheet.create({
     },
     content: {
         flex: 1,
-        padding: 20,
+        padding: 24,
         gap: 16,
+    },
+    header: {
+        alignItems: 'center',
+        marginBottom: 32,
+        marginTop: 40,
+    },
+    iconContainer: {
+        width: 80,
+        height: 80,
+        backgroundColor: 'rgba(30, 58, 95, 0.1)', // primary with opacity
+        borderRadius: 40,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginBottom: 24,
+    },
+    title: {
+        fontFamily: 'Cairo_700Bold',
+        fontSize: 24,
+        color: '#1e293b',
+        marginBottom: 8,
+        textAlign: 'center',
+    },
+    subtitle: {
+        fontFamily: 'Cairo_500Medium',
+        fontSize: 16,
+        color: '#94a3b8',
+        textAlign: 'center',
     },
     forgotPassword: {
         alignSelf: 'flex-end',
@@ -101,6 +141,7 @@ const styles = StyleSheet.create({
         fontSize: 13,
         color: COLORS.primary,
     },
+
     divider: {
         flexDirection: 'row',
         alignItems: 'center',
@@ -114,7 +155,7 @@ const styles = StyleSheet.create({
     },
     dividerText: {
         fontFamily: 'Cairo_500Medium',
-        fontSize: 13,
+        fontSize: 14,
         color: '#94a3b8',
     },
     socialButtons: {

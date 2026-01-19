@@ -6,6 +6,47 @@ import { useState } from 'react';
 import { Alert } from 'react-native';
 import { useAuth } from '../../../hooks/useAuth';
 
+// Convert technical error messages to user-friendly Arabic
+const parseServerError = (error: any): string => {
+    const message = error?.message || '';
+
+    // Check for common validation patterns
+    if (message.includes('body.name') || message.includes('name')) {
+        if (message.includes('Too small') || message.includes('required')) {
+            return 'الاسم مطلوب';
+        }
+    }
+
+    if (message.includes('body.email') || message.includes('email')) {
+        if (message.includes('Invalid')) {
+            return 'البريد الإلكتروني غير صحيح';
+        }
+        if (message.includes('already') || message.includes('exists')) {
+            return 'هذا البريد الإلكتروني مسجل مسبقاً';
+        }
+        if (message.includes('Too small') || message.includes('required')) {
+            return 'البريد الإلكتروني مطلوب';
+        }
+    }
+
+    if (message.includes('body.password') || message.includes('password')) {
+        if (message.includes('Too small') || message.includes('short')) {
+            return 'كلمة المرور قصيرة جداً';
+        }
+        if (message.includes('required')) {
+            return 'كلمة المرور مطلوبة';
+        }
+    }
+
+    // Network errors
+    if (message.includes('network') || message.includes('Network')) {
+        return 'خطأ في الاتصال. تحقق من الإنترنت';
+    }
+
+    // Default error
+    return 'فشل إنشاء الحساب. حاول مرة أخرى';
+};
+
 interface UseRegisterReturn {
     name: string;
     email: string;
@@ -20,6 +61,8 @@ interface UseRegisterReturn {
         email?: string;
         password?: string;
     };
+    serverError: string | null;
+    clearServerError: () => void;
 }
 
 export const useRegister = (): UseRegisterReturn => {
@@ -30,6 +73,9 @@ export const useRegister = (): UseRegisterReturn => {
     const [password, setPassword] = useState('');
     const [errors, setErrors] = useState<{ name?: string; email?: string; password?: string }>({});
     const [isLoading, setIsLoading] = useState(false);
+    const [serverError, setServerError] = useState<string | null>(null);
+
+    const clearServerError = () => setServerError(null);
 
     const validateForm = (): boolean => {
         const newErrors: { name?: string; email?: string; password?: string } = {};
@@ -60,11 +106,12 @@ export const useRegister = (): UseRegisterReturn => {
         }
 
         setIsLoading(true);
+        setServerError(null);
         try {
             await register(email.trim(), password, name.trim());
             router.replace('/(tabs)/home');
         } catch (error: any) {
-            Alert.alert('خطأ', error?.message || 'فشل إنشاء الحساب');
+            setServerError(parseServerError(error));
         } finally {
             setIsLoading(false);
         }
@@ -80,5 +127,7 @@ export const useRegister = (): UseRegisterReturn => {
         handleRegister,
         isLoading: isLoading || authLoading,
         errors,
+        serverError,
+        clearServerError,
     };
 };

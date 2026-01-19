@@ -1,0 +1,239 @@
+app/(tabs)/_layout.tsx(11,17): error TS2353: Object literal may only specify known properties, and 'animationDuration' does not exist in type 'BottomTabNavigationOptions | ((props: { route: RouteProp<ParamListBase, string>; navigation: BottomTabNavigationProp<ParamListBase, string, undefined>; theme: Theme; }) => BottomTabNavigationOptions)'.
+app/product/[id].tsx(10,34): error TS2322: Type '{ id: string; }' is not assignable to type 'IntrinsicAttributes'.
+  Property 'id' does not exist on type 'IntrinsicAttributes'.
+src/__tests__/performance/benchmarks.test.ts(7,1): error TS2582: Cannot find name 'describe'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/__tests__/performance/benchmarks.test.ts(8,5): error TS2304: Cannot find name 'beforeEach'.
+src/__tests__/performance/benchmarks.test.ts(13,5): error TS2582: Cannot find name 'describe'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/__tests__/performance/benchmarks.test.ts(14,9): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/__tests__/performance/benchmarks.test.ts(27,13): error TS2304: Cannot find name 'expect'.
+src/__tests__/performance/benchmarks.test.ts(28,13): error TS2304: Cannot find name 'expect'.
+src/__tests__/performance/benchmarks.test.ts(31,9): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/__tests__/performance/benchmarks.test.ts(44,13): error TS2304: Cannot find name 'expect'.
+src/__tests__/performance/benchmarks.test.ts(45,13): error TS2304: Cannot find name 'expect'.
+src/__tests__/performance/benchmarks.test.ts(49,5): error TS2582: Cannot find name 'describe'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/__tests__/performance/benchmarks.test.ts(50,9): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/__tests__/performance/benchmarks.test.ts(60,13): error TS2304: Cannot find name 'expect'.
+src/__tests__/performance/benchmarks.test.ts(61,13): error TS2304: Cannot find name 'expect'.
+src/__tests__/performance/benchmarks.test.ts(65,5): error TS2582: Cannot find name 'describe'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/__tests__/performance/benchmarks.test.ts(66,9): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/__tests__/performance/benchmarks.test.ts(80,13): error TS2304: Cannot find name 'expect'.
+src/__tests__/performance/benchmarks.test.ts(81,13): error TS2304: Cannot find name 'expect'.
+src/__tests__/performance/benchmarks.test.ts(85,5): error TS2582: Cannot find name 'describe'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/__tests__/performance/benchmarks.test.ts(86,9): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/__tests__/performance/benchmarks.test.ts(87,13): error TS2304: Cannot find name 'expect'.
+src/__tests__/performance/benchmarks.test.ts(88,13): error TS2304: Cannot find name 'expect'.
+src/__tests__/performance/benchmarks.test.ts(89,13): error TS2304: Cannot find name 'expect'.
+src/__tests__/performance/benchmarks.test.ts(90,13): error TS2304: Cannot find name 'expect'.
+src/__tests__/performance/benchmarks.test.ts(94,5): error TS2582: Cannot find name 'describe'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/__tests__/performance/benchmarks.test.ts(95,9): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/__tests__/performance/benchmarks.test.ts(101,13): error TS2304: Cannot find name 'expect'.
+src/__tests__/performance/benchmarks.test.ts(104,13): error TS2304: Cannot find name 'expect'.
+src/__tests__/performance/benchmarks.test.ts(107,9): error TS2582: Cannot find name 'it'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha`.
+src/__tests__/performance/benchmarks.test.ts(119,13): error TS2304: Cannot find name 'expect'.
+src/__tests__/performance/benchmarks.test.ts(120,13): error TS2304: Cannot find name 'expect'.
+src/__tests__/performance/benchmarks.test.ts(122,17): error TS2304: Cannot find name 'expect'.
+src/screens/account/ProfileEditScreen.tsx(15,42): error TS2305: Module '"../../utils/direction"' has no exported member 'getLeftOrRight'.
+src/screens/account/ProfileEditScreen.tsx(51,25): error TS2304: Cannot find name 'styles'.
+src/screens/account/ProfileEditScreen.tsx(60,25): error TS2304: Cannot find name 'styles'.
+src/screens/account/ProfileEditScreen.tsx(70,13): error TS2304: Cannot find name 'styles'.
+src/screens/account/ProfileEditScreen.tsx(71,13): error TS2304: Cannot find name 'styles'.
+src/screens/account/ProfileEditScreen.tsx(75,31): error TS2304: Cannot find name 'styles'.
+src/screens/cart/CartScreen.tsx(62,84): error TS2339: Property 'xs' does not exist on type '{ sm: number; md: number; lg: number; xl: number; }'.
+src/screens/cart/CartScreen.tsx(81,86): error TS2339: Property 'xs' does not exist on type '{ sm: number; md: number; lg: number; xl: number; }'.
+src/screens/cart/CartScreen.tsx(88,85): error TS2339: Property 'xs' does not exist on type '{ sm: number; md: number; lg: number; xl: number; }'.
+src/screens/checkout/_hooks/useCheckout.ts(92,64): error TS2345: Argument of type '"/(tabs)/orders"' is not assignable to parameter of type '"/(tabs)/home" | RelativePathString | ExternalPathString | "/" | `/?${string}` | `/#${string}` | "/_sitemap" | `/_sitemap?${string}` | `/_sitemap#${string}` | "/(tabs)/account" | ... 166 more ... | { ...; }'.
+src/screens/checkout/CheckoutScreen.tsx(67,41): error TS2554: Expected 1 arguments, but got 2.
+src/screens/home/_components/AIDesignSlider.tsx(9,10): error TS2305: Module '"./StyleSheets/AIDesignSlider.styles"' has no exported member 'styles'.
+src/screens/home/_components/AIDesignSlider.tsx(9,18): error TS2305: Module '"./StyleSheets/AIDesignSlider.styles"' has no exported member 'SLIDE_WIDTH'.
+src/screens/home/_components/AIDesignSlider.tsx(41,32): error TS2304: Cannot find name 'useResponsive'.
+src/screens/home/_components/AIDesignSlider.tsx(43,20): error TS2304: Cannot find name 'getStyles'.
+src/screens/home/_components/ProductListSection.tsx(61,21): error TS2322: Type '{ data: IProductCardProps[]; renderItem: ({ item }: { item: IProductCardProps; }) => Element; keyExtractor: (item: IProductCardProps) => string; horizontal: true; estimatedItemSize: number; showsHorizontalScrollIndicator: false; contentContainerStyle: { ...; }; }' is not assignable to type 'IntrinsicAttributes & FlashListProps<IProductCardProps> & { ref?: Ref<FlashListRef<IProductCardProps>> | undefined; }'.
+  Property 'estimatedItemSize' does not exist on type 'IntrinsicAttributes & FlashListProps<IProductCardProps> & { ref?: Ref<FlashListRef<IProductCardProps>> | undefined; }'.
+src/screens/home/_components/StyleSheets/CategoriesSection.styles.ts(18,20): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/home/_components/StyleSheets/CategoriesSection.styles.ts(21,24): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/home/_components/StyleSheets/HomeHeader.styles.ts(16,24): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/home/_components/StyleSheets/HomeHeader.styles.ts(25,20): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/home/_components/StyleSheets/ServicesSection.styles.ts(14,24): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/orders/_hooks/index.ts(5,26): error TS2459: Module '"./useOrders"' declares 'UnifiedOrder' locally, but it is not exported.
+src/screens/orders/_hooks/useOrders.ts(44,39): error TS2367: This comparison appears to be unintentional because the types '"product" | "service"' and '"products" | "services"' have no overlap.
+src/screens/orders/OrderDetailsScreen.tsx(73,26): error TS7053: Element implicitly has an 'any' type because expression of type 'OrderStatus | ServiceBookingStatus' can't be used to index type 'Record<OrderStatus, { color: string; bg: string; }>'.
+  Property '[ServiceBookingStatus.PENDING]' does not exist on type 'Record<OrderStatus, { color: string; bg: string; }>'.
+src/screens/orders/OrderDetailsScreen.tsx(74,25): error TS7053: Element implicitly has an 'any' type because expression of type 'OrderStatus | ServiceBookingStatus' can't be used to index type 'Record<OrderStatus, string>'.
+  Property '[ServiceBookingStatus.PENDING]' does not exist on type 'Record<OrderStatus, string>'.
+src/screens/orders/OrderDetailsScreen.tsx(87,38): error TS2339: Property 'orderNumber' does not exist on type 'ProductOrder | ServiceBooking'.
+  Property 'orderNumber' does not exist on type 'ServiceBooking'.
+src/screens/orders/OrderDetailsScreen.tsx(102,32): error TS2339: Property 'estimatedDelivery' does not exist on type 'ProductOrder | ServiceBooking'.
+  Property 'estimatedDelivery' does not exist on type 'ServiceBooking'.
+src/screens/orders/OrderDetailsScreen.tsx(104,57): error TS2339: Property 'estimatedDelivery' does not exist on type 'ProductOrder | ServiceBooking'.
+  Property 'estimatedDelivery' does not exist on type 'ServiceBooking'.
+src/screens/orders/OrderDetailsScreen.tsx(107,32): error TS2339: Property 'trackingNumber' does not exist on type 'ProductOrder | ServiceBooking'.
+  Property 'trackingNumber' does not exist on type 'ServiceBooking'.
+src/screens/orders/OrderDetailsScreen.tsx(109,52): error TS2339: Property 'trackingNumber' does not exist on type 'ProductOrder | ServiceBooking'.
+  Property 'trackingNumber' does not exist on type 'ServiceBooking'.
+src/screens/orders/OrderDetailsScreen.tsx(142,48): error TS7053: Element implicitly has an 'any' type because expression of type 'OrderStatus | ServiceBookingStatus' can't be used to index type 'Record<OrderStatus, { color: string; bg: string; }>'.
+  Property '[ServiceBookingStatus.PENDING]' does not exist on type 'Record<OrderStatus, { color: string; bg: string; }>'.
+src/screens/orders/OrderDetailsScreen.tsx(152,46): error TS7053: Element implicitly has an 'any' type because expression of type 'OrderStatus | ServiceBookingStatus' can't be used to index type 'Record<OrderStatus, string>'.
+  Property '[ServiceBookingStatus.PENDING]' does not exist on type 'Record<OrderStatus, string>'.
+src/screens/orders/OrderDetailsScreen.tsx(174,32): error TS2339: Property 'items' does not exist on type 'ProductOrder | ServiceBooking'.
+  Property 'items' does not exist on type 'ServiceBooking'.
+src/screens/orders/OrderDetailsScreen.tsx(174,43): error TS7006: Parameter 'item' implicitly has an 'any' type.
+src/screens/orders/OrderDetailsScreen.tsx(183,72): error TS2339: Property 'currency' does not exist on type 'ProductOrder | ServiceBooking'.
+  Property 'currency' does not exist on type 'ServiceBooking'.
+src/screens/orders/OrderDetailsScreen.tsx(187,68): error TS2339: Property 'currency' does not exist on type 'ProductOrder | ServiceBooking'.
+  Property 'currency' does not exist on type 'ServiceBooking'.
+src/screens/orders/OrderDetailsScreen.tsx(199,40): error TS2339: Property 'shippingAddress' does not exist on type 'ProductOrder | ServiceBooking'.
+  Property 'shippingAddress' does not exist on type 'ServiceBooking'.
+src/screens/orders/OrderDetailsScreen.tsx(199,72): error TS2339: Property 'shippingAddress' does not exist on type 'ProductOrder | ServiceBooking'.
+  Property 'shippingAddress' does not exist on type 'ServiceBooking'.
+src/screens/orders/OrderDetailsScreen.tsx(200,40): error TS2339: Property 'shippingAddress' does not exist on type 'ProductOrder | ServiceBooking'.
+  Property 'shippingAddress' does not exist on type 'ServiceBooking'.
+src/screens/orders/OrderDetailsScreen.tsx(200,81): error TS2339: Property 'shippingAddress' does not exist on type 'ProductOrder | ServiceBooking'.
+  Property 'shippingAddress' does not exist on type 'ServiceBooking'.
+src/screens/orders/OrderDetailsScreen.tsx(201,46): error TS2339: Property 'shippingAddress' does not exist on type 'ProductOrder | ServiceBooking'.
+  Property 'shippingAddress' does not exist on type 'ServiceBooking'.
+src/screens/orders/OrderDetailsScreen.tsx(205,49): error TS2339: Property 'shippingMethod' does not exist on type 'ProductOrder | ServiceBooking'.
+  Property 'shippingMethod' does not exist on type 'ServiceBooking'.
+src/screens/orders/OrderDetailsScreen.tsx(212,68): error TS2339: Property 'subtotal' does not exist on type 'ProductOrder | ServiceBooking'.
+  Property 'subtotal' does not exist on type 'ServiceBooking'.
+src/screens/orders/OrderDetailsScreen.tsx(212,96): error TS2339: Property 'currency' does not exist on type 'ProductOrder | ServiceBooking'.
+  Property 'currency' does not exist on type 'ServiceBooking'.
+src/screens/orders/OrderDetailsScreen.tsx(216,68): error TS2339: Property 'shippingCost' does not exist on type 'ProductOrder | ServiceBooking'.
+  Property 'shippingCost' does not exist on type 'ServiceBooking'.
+src/screens/orders/OrderDetailsScreen.tsx(216,100): error TS2339: Property 'currency' does not exist on type 'ProductOrder | ServiceBooking'.
+  Property 'currency' does not exist on type 'ServiceBooking'.
+src/screens/orders/OrderDetailsScreen.tsx(220,68): error TS2339: Property 'tax' does not exist on type 'ProductOrder | ServiceBooking'.
+  Property 'tax' does not exist on type 'ServiceBooking'.
+src/screens/orders/OrderDetailsScreen.tsx(220,91): error TS2339: Property 'currency' does not exist on type 'ProductOrder | ServiceBooking'.
+  Property 'currency' does not exist on type 'ServiceBooking'.
+src/screens/orders/OrderDetailsScreen.tsx(223,32): error TS2339: Property 'discount' does not exist on type 'ProductOrder | ServiceBooking'.
+  Property 'discount' does not exist on type 'ServiceBooking'.
+src/screens/orders/OrderDetailsScreen.tsx(226,45): error TS2339: Property 'discount' does not exist on type 'ProductOrder | ServiceBooking'.
+  Property 'discount' does not exist on type 'ServiceBooking'.
+src/screens/orders/OrderDetailsScreen.tsx(226,73): error TS2339: Property 'currency' does not exist on type 'ProductOrder | ServiceBooking'.
+  Property 'currency' does not exist on type 'ServiceBooking'.
+src/screens/orders/OrderDetailsScreen.tsx(234,40): error TS2339: Property 'total' does not exist on type 'ProductOrder | ServiceBooking'.
+  Property 'total' does not exist on type 'ServiceBooking'.
+src/screens/orders/OrderDetailsScreen.tsx(234,65): error TS2339: Property 'currency' does not exist on type 'ProductOrder | ServiceBooking'.
+  Property 'currency' does not exist on type 'ServiceBooking'.
+src/screens/product/StyleSheets/ProductDetailsScreen.styles.ts(102,20): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/product/StyleSheets/ProductDetailsScreen.styles.ts(106,24): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/product/StyleSheets/ProductDetailsScreen.styles.ts(122,24): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/product/StyleSheets/ProductDetailsScreen.styles.ts(140,24): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/product/StyleSheets/ProductDetailsScreen.styles.ts(157,24): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/product/StyleSheets/ProductDetailsScreen.styles.ts(177,24): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/product/StyleSheets/ProductDetailsScreen.styles.ts(210,24): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/product/StyleSheets/ProductDetailsScreen.styles.ts(239,24): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/product/StyleSheets/ProductDetailsScreen.styles.ts(254,20): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/search/ImageSearchScreen.tsx(58,33): error TS2322: Type '{ label: string; onPress: () => Promise<void>; variant: "outline"; icon: string; }' is not assignable to type 'IntrinsicAttributes & PrimaryButtonProps'.
+  Property 'icon' does not exist on type 'IntrinsicAttributes & PrimaryButtonProps'.
+src/screens/search/SearchResultsScreen.tsx(241,29): error TS2322: Type '`/product/${string}`' is not assignable to type '"/(tabs)/home" | RelativePathString | ExternalPathString | "/" | "/_sitemap" | "/(tabs)/account" | "/account" | "/(tabs)/cart" | ... 38 more ... | "/services/booking-details/[id]"'.
+src/screens/search/StyleSheets/FilterScreen.styles.ts(25,20): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/search/StyleSheets/FilterScreen.styles.ts(29,24): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/search/StyleSheets/FilterScreen.styles.ts(39,20): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/search/StyleSheets/FilterScreen.styles.ts(48,20): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/search/StyleSheets/FilterScreen.styles.ts(53,24): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/search/StyleSheets/FilterScreen.styles.ts(58,24): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/search/StyleSheets/SearchResultsScreen.styles.ts(20,24): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/search/StyleSheets/SearchResultsScreen.styles.ts(75,20): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/search/StyleSheets/SearchResultsScreen.styles.ts(79,24): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/search/StyleSheets/SearchScreen.styles.ts(15,24): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/search/StyleSheets/SearchScreen.styles.ts(41,24): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/search/StyleSheets/SearchScreen.styles.ts(51,20): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/search/StyleSheets/SearchScreen.styles.ts(58,24): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/search/StyleSheets/SearchScreen.styles.ts(77,24): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/search/StyleSheets/SearchScreen.styles.ts(85,24): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/services/_components/DateSelectionCards.tsx(6,31): error TS2307: Cannot find module '../../../../hooks/useResponsive' or its corresponding type declarations.
+src/screens/services/_components/types/services.ts(95,21): error TS2307: Cannot find module '../../shared' or its corresponding type declarations.
+src/screens/services/_hooks/useServiceDetails.ts(7,11): error TS2430: Interface 'ServiceDetails' incorrectly extends interface 'ServiceProvider'.
+  Types of property 'services' are incompatible.
+    Type '{ id: string; label: string; basePrice?: number | undefined; }[] | undefined' is not assignable to type 'string[] | undefined'.
+      Type '{ id: string; label: string; basePrice?: number | undefined; }[]' is not assignable to type 'string[]'.
+        Type '{ id: string; label: string; basePrice?: number | undefined; }' is not assignable to type 'string'.
+src/screens/services/BookingScreen.tsx(268,85): error TS2551: Property 'serviceItemSelected' does not exist on type '{ container: { flex: number; backgroundColor: string; }; safeArea: { flex: number; }; header: { flexDirection: "row" | "row-reverse"; alignItems: "center"; justifyContent: "space-between"; paddingHorizontal: number; paddingVertical: number; backgroundColor: string; borderBottomWidth: number; borderBottomColor: strin...'. Did you mean 'serviceLabelSelected'?
+src/screens/services/StyleSheets/BookingDetailsScreen.styles.ts(19,28): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/services/StyleSheets/BookingDetailsScreen.styles.ts(37,28): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/services/StyleSheets/BookingDetailsScreen.styles.ts(47,24): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/services/StyleSheets/BookingDetailsScreen.styles.ts(64,24): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/services/StyleSheets/BookingDetailsScreen.styles.ts(68,28): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/services/StyleSheets/BookingDetailsScreen.styles.ts(73,28): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/services/StyleSheets/BookingDetailsScreen.styles.ts(89,24): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/services/StyleSheets/BookingDetailsScreen.styles.ts(93,28): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/services/StyleSheets/BookingDetailsScreen.styles.ts(108,28): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/services/StyleSheets/BookingDetailsScreen.styles.ts(122,28): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/services/StyleSheets/BookingDetailsScreen.styles.ts(130,28): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/services/StyleSheets/BookingDetailsScreen.styles.ts(139,24): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/services/StyleSheets/BookingDetailsScreen.styles.ts(156,24): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/services/StyleSheets/BookingDetailsScreen.styles.ts(163,24): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/services/StyleSheets/BookingDetailsScreen.styles.ts(168,28): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/services/StyleSheets/BookingDetailsScreen.styles.ts(176,24): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/services/StyleSheets/BookingDetailsScreen.styles.ts(180,28): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/services/StyleSheets/BookingDetailsScreen.styles.ts(197,24): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/services/StyleSheets/BookingDetailsScreen.styles.ts(205,24): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/services/StyleSheets/BookingDetailsScreen.styles.ts(208,28): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/services/StyleSheets/BookingDetailsScreen.styles.ts(224,24): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/services/StyleSheets/BookingDetailsScreen.styles.ts(231,24): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/services/StyleSheets/BookingDetailsScreen.styles.ts(238,24): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/services/StyleSheets/BookingDetailsScreen.styles.ts(247,28): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/services/StyleSheets/BookingScreen.styles.ts(19,28): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/services/StyleSheets/BookingScreen.styles.ts(43,24): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/services/StyleSheets/BookingScreen.styles.ts(47,28): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/services/StyleSheets/BookingScreen.styles.ts(53,28): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/services/StyleSheets/BookingScreen.styles.ts(81,24): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/services/StyleSheets/BookingScreen.styles.ts(87,24): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/services/StyleSheets/BookingScreen.styles.ts(94,24): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/services/StyleSheets/BookingScreen.styles.ts(97,28): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/services/StyleSheets/BookingScreen.styles.ts(109,24): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/services/StyleSheets/BookingScreen.styles.ts(117,24): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/services/StyleSheets/BookingScreen.styles.ts(133,28): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/services/StyleSheets/BookingScreen.styles.ts(167,28): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/services/StyleSheets/BookingScreen.styles.ts(190,28): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/services/StyleSheets/BookingScreen.styles.ts(195,28): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/services/StyleSheets/BookingScreen.styles.ts(224,24): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/services/StyleSheets/BookingScreen.styles.ts(239,28): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/services/StyleSheets/BookingScreen.styles.ts(257,24): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/services/StyleSheets/ServiceDetailScreen.styles.ts(34,28): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/services/StyleSheets/ServiceDetailScreen.styles.ts(55,28): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/services/StyleSheets/ServiceDetailScreen.styles.ts(68,24): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/services/StyleSheets/ServiceDetailScreen.styles.ts(72,28): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/services/StyleSheets/ServiceDetailScreen.styles.ts(87,24): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/services/StyleSheets/ServiceDetailScreen.styles.ts(99,24): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/services/StyleSheets/ServiceDetailScreen.styles.ts(105,24): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/services/StyleSheets/ServiceDetailScreen.styles.ts(138,28): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/services/StyleSheets/ServiceDetailScreen.styles.ts(161,28): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/services/StyleSheets/ServiceDetailScreen.styles.ts(172,28): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/services/StyleSheets/ServiceDetailScreen.styles.ts(181,28): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/services/StyleSheets/ServiceDetailScreen.styles.ts(198,24): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/services/StyleSheets/ServiceDetailScreen.styles.ts(206,24): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/services/StyleSheets/ServiceDetailScreen.styles.ts(219,28): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/services/StyleSheets/ServiceDetailScreen.styles.ts(230,24): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/services/StyleSheets/ServiceDetailScreen.styles.ts(236,24): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/services/StyleSheets/ServiceDetailScreen.styles.ts(242,28): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/services/StyleSheets/ServicesScreen.styles.ts(25,28): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/services/StyleSheets/ServicesScreen.styles.ts(39,28): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/services/StyleSheets/ServicesScreen.styles.ts(48,28): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/services/StyleSheets/ServicesScreen.styles.ts(57,24): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/services/StyleSheets/ServicesScreen.styles.ts(88,28): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/services/StyleSheets/ServicesScreen.styles.ts(125,28): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/services/StyleSheets/ServicesScreen.styles.ts(137,24): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/services/StyleSheets/ServicesScreen.styles.ts(141,28): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/services/StyleSheets/ServicesScreen.styles.ts(148,24): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/services/StyleSheets/ServicesScreen.styles.ts(159,24): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/services/StyleSheets/ServicesScreen.styles.ts(162,28): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/services/StyleSheets/ServicesScreen.styles.ts(167,28): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/services/StyleSheets/ServicesScreen.styles.ts(173,28): error TS1355: A 'const' assertions can only be applied to references to enum members, or string, number, boolean, array, or object literals.
+src/screens/shared/components/FilterBottomSheet.tsx(23,13): error TS2304: Cannot find name 'styles'.
+src/screens/shared/components/FilterBottomSheet.tsx(30,17): error TS2304: Cannot find name 'styles'.
+src/screens/shared/components/FilterBottomSheet.tsx(52,18): error TS2304: Cannot find name 'styles'.
+src/screens/shared/components/FilterBottomSheet.tsx(53,22): error TS2304: Cannot find name 'styles'.
+src/screens/shared/components/FilterBottomSheet.tsx(54,22): error TS2304: Cannot find name 'styles'.
+src/screens/shared/components/index.ts(22,10): error TS2614: Module '"./CameraScreen"' has no exported member 'CameraScreen'. Did you mean to use 'import CameraScreen from "./CameraScreen"' instead?
+src/screens/shared/components/ProductGrid.tsx(67,17): error TS2322: Type '{ data: IProductCardProps[]; renderItem: ({ item }: { item: IProductCardProps; }) => Element; keyExtractor: (item: IProductCardProps) => string; numColumns: number; estimatedItemSize: number; contentContainerStyle: { ...; }; }' is not assignable to type 'IntrinsicAttributes & FlashListProps<IProductCardProps> & { ref?: Ref<FlashListRef<IProductCardProps>> | undefined; }'.
+  Property 'estimatedItemSize' does not exist on type 'IntrinsicAttributes & FlashListProps<IProductCardProps> & { ref?: Ref<FlashListRef<IProductCardProps>> | undefined; }'.
+src/screens/shared/components/ProductGrid.tsx(82,24): error TS2304: Cannot find name 'useCallback'.
+src/screens/shared/components/ProductGrid.tsx(83,23): error TS2304: Cannot find name 'styles'.
+src/screens/shared/components/ProductGrid.tsx(93,26): error TS2304: Cannot find name 'useCallback'.
+src/screens/shared/components/ProductGrid.tsx(102,17): error TS2322: Type '{ data: IProductCardProps[]; renderItem: any; keyExtractor: any; horizontal: true; estimatedItemSize: number; showsHorizontalScrollIndicator: false; contentContainerStyle: any; }' is not assignable to type 'IntrinsicAttributes & FlashListProps<IProductCardProps> & { ref?: Ref<FlashListRef<IProductCardProps>> | undefined; }'.
+  Property 'estimatedItemSize' does not exist on type 'IntrinsicAttributes & FlashListProps<IProductCardProps> & { ref?: Ref<FlashListRef<IProductCardProps>> | undefined; }'.
+src/screens/shared/components/ProductGrid.tsx(104,40): error TS2304: Cannot find name 'styles'.
+src/screens/shared/components/RatingsBreakdown.tsx(7,33): error TS2305: Module '"../types/ui"' has no exported member 'RatingDistribution'.
+src/screens/shared/index.ts(19,35): error TS2305: Module '"./types/button"' has no exported member 'SocialButtonProps'.
