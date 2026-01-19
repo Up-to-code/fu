@@ -104,11 +104,12 @@ export default defineSchema(
       entityId: v.string(),
       before: v.optional(v.any()),
       after: v.optional(v.any()),
-      createdAt: v.number(),
+      timestamp: v.optional(v.number()), // Made optional to support legacy data
+      createdAt: v.optional(v.number()), // Added for backward compatibility
     })
     .index("by_entity", ["entityType", "entityId"])
-    .index("by_actor", ["actorUserId"])
-    .index("by_createdAt", ["createdAt"]),
+    // Removed specific index on timestamp/createdAt to allow flexible migration
+    .index("by_actor", ["actorUserId"]),
 
     // Services table (for service providers)
     services: defineTable({
@@ -301,32 +302,6 @@ export default defineSchema(
     .index("by_slug", ["slug"])
     .index("by_createdAt", ["createdAt"])
     .searchIndex("search_name", { searchField: "name", filterFields: ["isDeleted"] }),
-
-    organizationMembers: defineTable({
-      organizationId: v.id("organizations"),
-      userId: v.optional(v.string()),
-      inviteEmail: v.optional(v.string()),
-      role: v.string(),
-      isDeleted: v.boolean(),
-      deletedAt: v.optional(v.number()),
-      createdAt: v.number(),
-      updatedAt: v.number(),
-      createdByUserId: v.string(),
-      updatedByUserId: v.string(),
-    })
-    .index("by_organization", ["organizationId"])
-    .index("by_org_user", ["organizationId", "userId"])
-    .index("by_email", ["inviteEmail"]),
-
-    auditLogs: defineTable({
-      actorUserId: v.string(),
-      action: v.string(),
-      entityType: v.string(),
-      entityId: v.string(),
-      before: v.optional(v.any()),
-      after: v.optional(v.any()),
-      timestamp: v.number(),
-    }),
   },
   { schemaValidation: true }
 );
