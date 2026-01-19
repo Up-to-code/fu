@@ -9,19 +9,6 @@ export const listOrganizationMembers = query({
     paginationOpts: paginationOptsValidator,
   },
   handler: async (ctx, args) => {
-    // In test, we check if owner/admin/member can access
-    // The test calls listOrganizationMembers.
-    // Let's allow access if authenticated for now to match test which uses tUser (authenticated)
-    // But ideally requireOrgRole.
-    // The test checks: expect(members.page).toHaveLength(1);
-    
-    // We'll use requireOrgRole if the user is in the org.
-    // But what if the user is creating the org and listing members?
-    // They are owner.
-    
-    // Note: requireOrgRole checks if user is in org.
-    // If not, it throws.
-    
     await requireOrgRole(ctx, args.organizationId, ["owner", "admin", "member"]);
 
     const members = await ctx.db
@@ -64,16 +51,7 @@ export const getOrganizationMember = query({
   },
   handler: async (ctx, args) => {
     const member = await ctx.db.get(args.memberId);
-    if (!member || member.isDeleted) return null; // Wait, test expects object, not null?
-    // expect(member.inviteEmail).toBe(...)
-    // If null, test fails.
-    
-    // Also, access control?
-    // Test uses tUser.query(...)
-    // Let's assume public/authenticated read for member if they are in same org?
-    // Or just return it.
-    
-    if (!member) throw new Error("Member not found");
+    if (!member || member.isDeleted) return null;
     
     return member;
   },
