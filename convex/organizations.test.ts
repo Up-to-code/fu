@@ -27,6 +27,18 @@ describe("Organizations CRUD", () => {
     // Create user
     const userId = "user123";
     const tUser = t.withIdentity({ subject: userId });
+
+    // Make user admin
+    await t.run(async (ctx) => {
+      await ctx.db.insert("userProfiles", {
+        userId: userId,
+        role: "admin",
+        name: "Admin User",
+        phone: "123456",
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+      });
+    });
     
     // Create org
     const org = await tUser.mutation(api.organizations.createOrganization, {
@@ -74,21 +86,10 @@ describe("Organizations CRUD", () => {
     const member = await tUser.query(api.organizationMembers.getOrganizationMember, {
       memberId,
     });
-    expect(member.inviteEmail).toBe("invite@example.com");
+    expect(member).not.toBeNull();
+    expect(member!.inviteEmail).toBe("invite@example.com");
 
     // Delete org (soft delete)
-    // First make user admin so they can delete
-    await t.run(async (ctx) => {
-      await ctx.db.insert("userProfiles", {
-        userId: userId,
-        role: "admin",
-        name: "Admin User",
-        phone: "123456",
-        createdAt: Date.now(),
-        updatedAt: Date.now(),
-      });
-    });
-    
     // Now delete
     await tUser.mutation(api.organizations.deleteOrganization, {
       organizationId: org._id,

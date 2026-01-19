@@ -152,10 +152,13 @@ export const updateOrganization = mutation({
     const { userId } = await requireAdmin(ctx);
 
     const org = await ctx.db.get(args.organizationId);
-    if (!org || org.isDeleted) throwAppError("NOT_FOUND", "Organization not found");
+    if (!org || org.isDeleted) {
+      throwAppError("NOT_FOUND", "Organization not found");
+      return; // Should be unreachable but helps TS
+    }
 
     if (args.expectedUpdatedAt !== undefined && org.updatedAt !== args.expectedUpdatedAt) {
-      throwAppError("CONFLICT", "CONFLICT");
+      throwAppError("CONFLICT", "Organization has been updated by another user");
     }
 
     const before = {
@@ -223,7 +226,10 @@ export const deleteOrganization = mutation({
     const { userId } = await requireAdmin(ctx);
 
     const org = await ctx.db.get(args.organizationId);
-    if (!org || org.isDeleted) throwAppError("NOT_FOUND", "Organization not found");
+    if (!org || org.isDeleted) {
+      throwAppError("NOT_FOUND", "Organization not found");
+      return;
+    }
 
     const before = { name: org.name, slug: org.slug, isDeleted: org.isDeleted };
     const now = Date.now();
