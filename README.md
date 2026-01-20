@@ -67,7 +67,7 @@ npx convex codegen
 
 ### Observability (Sentry)
 
-- Issues dashboard: <https://avyren.sentry.io/issues/#:~:text=npx%20%40sentry/wizard%40latest%20%2Di%20nextjs%20%2D%2Dsaas%20%2D%2Dorg%20avyren%20%2D%2Dproject%20javascript%2Dnextjs>
+- Issues dashboard: <https://avyren.sentry.io/projects/javascript-nextjs/issues/>
 
 ### seller-provider environment variables
 

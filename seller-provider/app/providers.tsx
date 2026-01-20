@@ -4,8 +4,16 @@ import { ThemeProvider } from 'next-themes';
 import { ReactNode } from 'react';
 import { ConvexProvider, ConvexReactClient } from 'convex/react';
 import { ConvexBetterAuthProvider } from '@convex-dev/better-auth/react';
+import * as Sentry from "@sentry/nextjs";
 import { authClient } from '@/lib/auth/client';
 import { getPublicEnv } from '@/lib/env';
+
+if (process.env.NEXT_PUBLIC_SENTRY_DSN) {
+  Sentry.init({
+    dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
+    tracesSampleRate: 1.0,
+  });
+}
 
 // Initialize Convex client
 let convex: ConvexReactClient | null = null;
