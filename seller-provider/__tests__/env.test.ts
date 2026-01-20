@@ -6,7 +6,6 @@ describe("env", () => {
     const prev = { ...process.env };
     delete process.env.NEXT_PUBLIC_CONVEX_URL;
     delete process.env.NEXT_PUBLIC_CONVEX_SITE_URL;
-    delete process.env.NEXT_PUBLIC_BETTER_AUTH_BASE_URL;
     try {
       expect(() => getPublicEnv()).toThrow();
     } finally {
@@ -18,7 +17,6 @@ describe("env", () => {
     const prev = { ...process.env };
     process.env.NEXT_PUBLIC_CONVEX_URL = "https://example.convex.cloud";
     process.env.NEXT_PUBLIC_CONVEX_SITE_URL = "https://example.convex.site";
-    process.env.NEXT_PUBLIC_BETTER_AUTH_BASE_URL = "http://localhost:3000";
     try {
       const env = getPublicEnv();
       expect(env.NEXT_PUBLIC_CONVEX_URL).toContain("convex.cloud");
