@@ -6,9 +6,8 @@ import { DashboardCharts } from "@/components/shared/DashboardCharts";
 import { Button } from "@/components/ui/button";
 import { DollarSign, CreditCard, Package, Users, ArrowLeft } from "lucide-react";
 import Link from "next/link";
-import { useDashboardStats, useChartData, getDefaultDateRange } from "./_hooks";
+import { useDashboardStats, useChartData, useSalesByCategory, getDefaultDateRange } from "./_hooks";
 import { useOrders } from "../orders/_hooks";
-import { salesByCategory } from "@/data";
 import { RecentOrdersTable, QuickActions } from "./_components";
 import { useCurrentUser } from "../_hooks/useCurrentUser";
 import { PermissionGuard } from "@/components/shared/PermissionGuard";
@@ -20,11 +19,25 @@ export default function DashboardPage() {
     const [dateRange, setDateRange] = useState<DateRange | undefined>(getDefaultDateRange());
     const stats = useDashboardStats(dateRange);
     const chartData = useChartData(dateRange);
-    const orders = useOrders();
-    const user = useCurrentUser();
+    const orders = useOrders(); // Returns array directly based on current hook implementation
+    const user = useCurrentUser(); // Returns user object or null
+    const salesByCategoryData = useSalesByCategory(dateRange);
+
+    const isLoading = !stats || !chartData || !orders || !user;
+
+    if (isLoading) {
+        return (
+            <div className="flex h-[calc(100vh-80px)] items-center justify-center">
+                <div className="flex flex-col items-center gap-4">
+                    <div className="h-12 w-12 animate-spin rounded-full border-4 border-[#242C5A] border-t-transparent" />
+                    <p className="text-gray-400 font-bold animate-pulse">جاري تحميل البيانات...</p>
+                </div>
+            </div>
+        );
+    }
     
-    // Get recent 5 orders
-    const recentOrders = orders.slice(0, 5).map(order => ({
+    // Map recent orders (take first 5)
+    const recentOrders = orders.slice(0, 5).map((order: any) => ({
         id: order.id,
         customer: order.customer,
         amount: order.total,
@@ -95,7 +108,7 @@ export default function DashboardPage() {
             </div>
 
             {/* Charts */}
-            <DashboardCharts revenueData={formattedChartData} salesData={salesByCategory} />
+            <DashboardCharts revenueData={formattedChartData} salesData={salesByCategoryData} />
 
             {/* Quick Actions & Recent Orders */}
             <div className="grid gap-8 md:grid-cols-7">

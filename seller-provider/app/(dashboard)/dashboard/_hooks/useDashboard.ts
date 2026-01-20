@@ -39,6 +39,18 @@ export function useChartData(dateRange?: DateRange) {
 }
 
 /**
+ * Hook to get sales by category
+ */
+export function useSalesByCategory(dateRange?: DateRange) {
+    const from = dateRange?.from ? dateRange.from.getTime() : undefined;
+    const to = dateRange?.to ? dateRange.to.getTime() : undefined;
+
+    const data = useQuery(api.dashboard.getSalesByCategory, { from, to });
+
+    return data || [];
+}
+
+/**
  * Helper for default date range
  */
 export function getDefaultDateRange(): DateRange {
