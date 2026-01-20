@@ -4,10 +4,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { styleTypes } from "@/data";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useAuth } from "@/lib/auth/hooks";
+import { Info } from "lucide-react";
 
 interface ProductSidebarProps {
     categoryId?: string;
@@ -46,13 +48,15 @@ export function ProductSidebar({
     const categories = (categoriesPage?.page ?? []) as any[];
 
     return (
-        <div className="space-y-6">
+        <TooltipProvider>
+            <div className="space-y-6">
             {/* Status */}
             <div className="bg-white rounded-2xl border border-gray-100 p-6 space-y-4">
-                <h3 className="font-bold text-[#242C5A]">الحالة</h3>
+                <h3 className="font-bold text-primary">الحالة</h3>
                 <div className="flex items-center justify-between">
                     <span className="text-gray-600">نشر المنتج</span>
                     <Switch
+                        id="product-status"
                         checked={status === "active"}
                         onCheckedChange={(checked) => onStatusChange?.(checked ? "active" : "draft")}
                     />
@@ -61,11 +65,11 @@ export function ProductSidebar({
 
             {/* Category & Style */}
             <div className="bg-white rounded-2xl border border-gray-100 p-6 space-y-4">
-                <h3 className="font-bold text-[#242C5A]">التصنيف</h3>
+                <h3 className="font-bold text-primary">التصنيف</h3>
                 <div className="space-y-2">
                     <Label className="text-sm">الفئة</Label>
                     <Select value={categoryId} onValueChange={onCategoryChange}>
-                        <SelectTrigger className="rounded-xl">
+                        <SelectTrigger id="product-categoryId" className="rounded-xl">
                             <SelectValue placeholder="اختر الفئة" />
                         </SelectTrigger>
                         <SelectContent>
@@ -98,11 +102,12 @@ export function ProductSidebar({
 
             {/* Pricing */}
             <div className="bg-white rounded-2xl border border-gray-100 p-6 space-y-4">
-                <h3 className="font-bold text-[#242C5A]">السعر الأساسي</h3>
+                <h3 className="font-bold text-primary">السعر الأساسي</h3>
                 <p className="text-xs text-gray-400">يُستخدم عند عدم وجود متغيرات</p>
                 <div className="space-y-2">
                     <Label className="text-sm">السعر (ر.س)</Label>
                     <Input
+                        id="product-price"
                         type="number"
                         value={price}
                         onChange={(e) => onPriceChange?.(e.target.value)}
@@ -111,8 +116,19 @@ export function ProductSidebar({
                     />
                 </div>
                 <div className="space-y-2">
-                    <Label className="text-sm">سعر المقارنة</Label>
+                    <div className="flex items-center gap-2">
+                        <Label className="text-sm">سعر المقارنة</Label>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <button type="button" className="text-gray-400 hover:text-gray-600" aria-label="مساعدة سعر المقارنة">
+                                    <Info className="h-4 w-4" />
+                                </button>
+                            </TooltipTrigger>
+                            <TooltipContent>يظهر كسعر قبل الخصم (اختياري)</TooltipContent>
+                        </Tooltip>
+                    </div>
                     <Input
+                        id="product-comparePrice"
                         type="number"
                         value={comparePrice}
                         onChange={(e) => onComparePriceChange?.(e.target.value)}
@@ -124,10 +140,21 @@ export function ProductSidebar({
 
             {/* Inventory */}
             <div className="bg-white rounded-2xl border border-gray-100 p-6 space-y-4">
-                <h3 className="font-bold text-[#242C5A]">المخزون</h3>
+                <h3 className="font-bold text-primary">المخزون</h3>
                 <div className="space-y-2">
-                    <Label className="text-sm">SKU الأساسي</Label>
+                    <div className="flex items-center gap-2">
+                        <Label className="text-sm">SKU الأساسي</Label>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <button type="button" className="text-gray-400 hover:text-gray-600" aria-label="مساعدة SKU">
+                                    <Info className="h-4 w-4" />
+                                </button>
+                            </TooltipTrigger>
+                            <TooltipContent>رمز يساعدك في البحث وإدارة المخزون</TooltipContent>
+                        </Tooltip>
+                    </div>
                     <Input
+                        id="product-sku"
                         value={sku}
                         onChange={(e) => onSkuChange?.(e.target.value)}
                         placeholder="PROD-001"
@@ -139,6 +166,7 @@ export function ProductSidebar({
                     <Switch defaultChecked />
                 </div>
             </div>
-        </div>
+            </div>
+        </TooltipProvider>
     );
 }

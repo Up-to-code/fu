@@ -70,20 +70,21 @@ function SortableMediaItem({
             )}
 
             {index === 0 && (
-                <Badge className="absolute top-2 right-2 bg-[#242C5A] text-white text-xs z-10">الرئيسية</Badge>
+                <Badge className="absolute top-2 right-2 bg-primary text-primary-foreground text-xs z-10">الرئيسية</Badge>
             )}
 
             {/* Hover Controls */}
             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2 z-20">
                 <div className="flex gap-2">
                      {/* Drag Handle */}
-                    <Button size="icon" variant="ghost" className="h-8 w-8 text-white hover:bg-white/20 cursor-grab active:cursor-grabbing" {...attributes} {...listeners}>
+                    <Button type="button" size="icon" variant="ghost" className="h-8 w-8 text-white hover:bg-white/20 cursor-grab active:cursor-grabbing" {...attributes} {...listeners}>
                         <GripVertical className="h-4 w-4" />
                     </Button>
                     
                     {/* Set as Main (if not first) */}
                     {index !== 0 && (
                         <Button 
+                            type="button"
                             size="icon" 
                             variant="ghost" 
                             className="h-8 w-8 text-white hover:bg-white/20"
@@ -96,6 +97,7 @@ function SortableMediaItem({
 
                     {/* Delete */}
                     <Button
+                        type="button"
                         size="icon"
                         variant="ghost"
                         className="h-8 w-8 text-white hover:bg-red-500/80"
@@ -182,7 +184,7 @@ export function MediaManager({
         <div className="bg-white rounded-2xl border border-gray-100 p-6">
             <div className="flex items-center justify-between mb-4">
                 <div>
-                    <h2 className="text-lg font-bold text-[#242C5A]">{title}</h2>
+                    <h2 className="text-lg font-bold text-primary">{title}</h2>
                     {subtitle && <p className="text-xs text-gray-400">{subtitle}</p>}
                     <p className="text-xs text-gray-400 mt-1">
                          (اسحب لإعادة الترتيب • العنصر الأول هو الرئيسي)

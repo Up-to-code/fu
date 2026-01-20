@@ -70,11 +70,11 @@ export default function ProductsPage() {
                 {/* Header */}
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                     <div className="space-y-1">
-                        <h1 className="text-3xl font-black text-[#242C5A]">المنتجات</h1>
+                        <h1 className="text-3xl font-black text-primary">المنتجات</h1>
                         <p className="text-gray-500">إدارة منتجات متجرك • {products.length} منتج</p>
                     </div>
                     <Link href="/products/new">
-                        <Button className="bg-[#242C5A] hover:bg-[#1a2144] rounded-xl">
+                        <Button className="rounded-xl">
                             <Plus className="h-4 w-4 ml-2" />
                             إضافة منتج
                         </Button>
@@ -104,7 +104,7 @@ export default function ProductsPage() {
                         {products.map((product) => (
                             <div key={product.id} className="relative group">
                                 <Link href={`/products/${product.id}`}>
-                                    <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden hover:border-[#242C5A]/20 transition-all cursor-pointer">
+                                    <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden hover:border-primary/20 transition-all cursor-pointer">
                                         <div className="relative h-48 bg-gray-100">
                                             <Image
                                                 src={product.image}
@@ -146,7 +146,7 @@ export default function ProductsPage() {
                                                 </DropdownMenu>
                                             </div>
                                             <div className="flex items-center justify-between">
-                                                <span className="font-bold text-lg text-[#242C5A]">{product.price.toLocaleString()} ر.س</span>
+                                                <span className="font-bold text-lg text-primary">{product.price.toLocaleString()} ر.س</span>
                                                 {getStatusBadge(product.status)}
                                             </div>
                                             <div className="flex items-center gap-2 text-sm text-gray-500">

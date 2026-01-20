@@ -5,8 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Plus, X, Trash2 } from "lucide-react";
-
-export type OptionValue = { value: string; media?: { id: string; url: string; type: string }[] };
+export type OptionValue = { value: string };
 export type Option = { id: string; name: string; values: OptionValue[] };
 
 interface ProductOptionsProps {
@@ -30,7 +29,7 @@ export function ProductOptions({ options, onOptionsChange }: ProductOptionsProps
         if (newOptionValue.trim()) {
             onOptionsChange(options.map(opt =>
                 opt.id === optionId
-                    ? { ...opt, values: [...opt.values, { value: newOptionValue.trim(), media: [] }] }
+                    ? { ...opt, values: [...opt.values, { value: newOptionValue.trim() }] }
                     : opt
             ));
             setNewOptionValue("");
@@ -52,13 +51,14 @@ export function ProductOptions({ options, onOptionsChange }: ProductOptionsProps
 
     return (
         <div className="bg-white rounded-2xl border border-gray-100 p-6 space-y-5">
-            <h2 className="text-lg font-bold text-[#242C5A]">الخيارات</h2>
+            <h2 className="text-lg font-bold text-primary">الخيارات</h2>
             <div className="space-y-4">
                 {options.map((option) => (
                     <div key={option.id} className="p-4 rounded-xl bg-gray-50/50 border border-gray-100">
                         <div className="flex items-center justify-between mb-3">
                             <span className="font-bold text-gray-900">{option.name}</span>
                             <Button
+                                type="button"
                                 variant="ghost"
                                 size="icon"
                                 className="h-7 w-7 text-gray-400 hover:text-red-500"
@@ -72,10 +72,11 @@ export function ProductOptions({ options, onOptionsChange }: ProductOptionsProps
                                 <Badge
                                     key={val.value}
                                     variant="secondary"
-                                    className="pl-2 pr-1 py-1 bg-white border border-gray-200 text-gray-700 font-normal rounded-lg"
+                                    className="pl-2 pr-1 py-1 bg-white border border-gray-200 text-gray-700 font-normal rounded-lg flex items-center gap-1"
                                 >
                                     {val.value}
                                     <button
+                                        type="button"
                                         onClick={() => removeOptionValue(option.id, val.value)}
                                         className="ml-1.5 hover:text-red-500"
                                     >
@@ -90,15 +91,20 @@ export function ProductOptions({ options, onOptionsChange }: ProductOptionsProps
                                         className="h-7 w-24 text-sm rounded-lg"
                                         value={newOptionValue}
                                         onChange={(e) => setNewOptionValue(e.target.value)}
-                                        onKeyDown={(e) => e.key === 'Enter' && addOptionValue(option.id)}
+                                        onKeyDown={(e) => {
+                                            if (e.key !== "Enter") return;
+                                            e.preventDefault();
+                                            addOptionValue(option.id);
+                                        }}
                                         autoFocus
                                     />
-                                    <Button size="sm" className="h-7 px-2 rounded-lg" onClick={() => addOptionValue(option.id)}>
+                                    <Button type="button" size="sm" className="h-7 px-2 rounded-lg" onClick={() => addOptionValue(option.id)}>
                                         <Plus className="h-3 w-3" />
                                     </Button>
                                 </div>
                             ) : (
                                 <button
+                                    type="button"
                                     onClick={() => setSelectedOption(option.id)}
                                     className="h-7 px-3 text-sm text-gray-500 border border-dashed border-gray-300 rounded-lg hover:border-[#242C5A]"
                                 >
@@ -115,9 +121,13 @@ export function ProductOptions({ options, onOptionsChange }: ProductOptionsProps
                     className="rounded-xl"
                     value={newOptionName}
                     onChange={(e) => setNewOptionName(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && addOption()}
+                    onKeyDown={(e) => {
+                        if (e.key !== "Enter") return;
+                        e.preventDefault();
+                        addOption();
+                    }}
                 />
-                <Button onClick={addOption} variant="outline" className="rounded-xl shrink-0">
+                <Button type="button" onClick={addOption} variant="outline" className="rounded-xl shrink-0">
                     <Plus className="h-4 w-4 ml-2" />إضافة
                 </Button>
             </div>

@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { type Variant } from "../_components/VariantsList";
 
 // Product type for UI rendering (backed by Convex sellerProducts)
 export type Product = {
@@ -20,6 +21,7 @@ export type Product = {
     videos?: string[];
     sales?: number;
     views?: number;
+    variants?: Variant[];
 };
 
 type ProductFilters = {

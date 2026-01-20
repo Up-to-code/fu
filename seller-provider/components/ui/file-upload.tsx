@@ -7,6 +7,8 @@ import { useUploadThing } from "@/lib/uploadthing";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import Image from "next/image";
+import { useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
 
 interface FileUploadProps {
   onUploadComplete?: (res: { url: string; metadata: FileMetadata }) => void;
@@ -31,6 +33,7 @@ export function FileUpload({ onUploadComplete, onUploadError, onUploadStart, cla
   const [metadata, setMetadata] = useState<Partial<FileMetadata>>({});
   const [progress, setProgress] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
+  const verifyUploadedFile = useMutation(api.security.verifyUploadedFile);
 
   const { startUpload } = useUploadThing("mediaUploader", {
     onClientUploadComplete: (res) => {
@@ -110,15 +113,38 @@ export function FileUpload({ onUploadComplete, onUploadError, onUploadStart, cla
   }, []);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
+    onDrop: (files) => {
+      if (files.length > 0) {
+        const f = files[0];
+        const isImage = f.type === "image/jpeg" || f.type === "image/png";
+        const isVideo = f.type === "video/mp4" || f.type === "video/quicktime";
+        if (!isImage && !isVideo) {
+          toast.error("صيغة الملف غير مدعومة (يسمح بالصور JPG/PNG والفيديو MP4/MOV)");
+          return;
+        }
+        if (isImage && f.size > 5 * 1024 * 1024) {
+          toast.error("حجم الصورة يتجاوز 5MB");
+          return;
+        }
+        if (isVideo && f.size > 100 * 1024 * 1024) {
+          toast.error("حجم الفيديو يتجاوز 100MB");
+          return;
+        }
+      }
+      onDrop(files);
+    },
     onDropRejected,
     accept: {
-      "image/*": [],
-      "video/*": [],
+      "image/jpeg": [],
+      "image/png": [],
+      "application/pdf": [],
+      "video/mp4": [],
+      "video/quicktime": [],
     },
     maxFiles: 1,
     multiple: false,
     disabled: isUploading,
+    maxSize: 100 * 1024 * 1024,
   });
 
   const handleRemove = () => {
@@ -134,6 +160,20 @@ export function FileUpload({ onUploadComplete, onUploadError, onUploadStart, cla
     setIsUploading(true);
     onUploadStart?.();
     await startUpload([file]);
+    try {
+      const buf = await file.arrayBuffer();
+      const digest = await crypto.subtle.digest("SHA-256", buf);
+      const hashArray = Array.from(new Uint8Array(digest));
+      const hashHex = hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
+      const type = file.type.startsWith("image") ? "image" : (file.type.startsWith("video") ? "video" : "file");
+      await verifyUploadedFile({
+        url: preview || "",
+        hash: hashHex,
+        type,
+      } as any);
+    } catch (e) {
+      // noop
+    }
   };
 
   const formatSize = (bytes: number) => {
@@ -170,7 +210,7 @@ export function FileUpload({ onUploadComplete, onUploadError, onUploadStart, cla
               {isDragActive ? "Drop the file here" : "Click or drag to upload"}
             </p>
             <p className="text-xs text-gray-500">
-              Images (up to 4MB) or Videos (up to 16MB)
+              الصور (حتى 5MB) • الفيديو (حتى 100MB)
             </p>
           </div>
         </div>

@@ -2,6 +2,7 @@ import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useProductActions } from "./useProducts";
 import { type Product } from "./useProductStore";
+import { type Variant } from "../_components/VariantsList";
 import { productSchema } from "@/lib/validations";
 import { z } from "zod";
 
@@ -112,7 +113,7 @@ export function useProductForm(productId?: string, initialData?: Partial<Product
         }
     }, [formData]);
     
-    const handleSubmit = useCallback(async (e?: React.FormEvent) => {
+    const handleSubmit = useCallback(async (e?: React.FormEvent, variants: Variant[] = []) => {
         if (e) {
             e.preventDefault();
         }
@@ -128,6 +129,16 @@ export function useProductForm(productId?: string, initialData?: Partial<Product
             const mainImage = formData.image || images[0] || "";
             const videos = formData.videos && formData.videos.length > 0 ? formData.videos : (formData.video ? [formData.video] : []);
             const mainVideo = formData.video || videos[0] || undefined;
+
+            const mappedVariants = variants.map(v => ({
+                combination: v.combination,
+                price: parseFloat(v.price) || 0,
+                stock: parseInt(v.stock) || 0,
+                sku: v.sku || undefined,
+                image: v.media.find(m => m.type === "image")?.url || undefined,
+                images: v.media.filter(m => m.type === "image").map(m => m.url),
+                isActive: true
+            }));
 
             if (productId) {
                 await updateSellerProduct({
@@ -146,6 +157,7 @@ export function useProductForm(productId?: string, initialData?: Partial<Product
                     images,
                     video: mainVideo,
                     videos,
+                    variants: mappedVariants,
                 });
                 router.push(`/products/${productId}`);
             } else {
@@ -164,8 +176,9 @@ export function useProductForm(productId?: string, initialData?: Partial<Product
                     images,
                     video: mainVideo,
                     videos,
+                    variants: mappedVariants,
                 });
-                router.push(`/products/${(res as any).productId}`);
+                router.push(`/products/${(res as any).productId}/edit?tab=customization`);
             }
         } catch (error) {
             console.error("Error saving product:", error);

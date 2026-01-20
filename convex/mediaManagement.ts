@@ -1,6 +1,7 @@
 import { mutation } from "./_generated/server";
 import { v } from "convex/values";
 import { authComponent } from "./auth";
+import { getProviderId } from "./utils";
 import { throwAppError } from "./errors";
 
 // Helper to log actions
@@ -33,8 +34,7 @@ export const addProductMedia = mutation({
   },
   handler: async (ctx, args) => {
     const user = await authComponent.getAuthUser(ctx);
-    // Use user.userId to match client side user.id
-    const providerId = user?.userId;
+    const providerId = await getProviderId(ctx);
     if (!providerId) throwAppError("AUTH_REQUIRED", "Unauthenticated");
 
     const product = await ctx.db.get(args.productId);
@@ -69,7 +69,7 @@ export const addProductMedia = mutation({
         createdAt: Date.now(),
     });
 
-    await logAudit(ctx, user.userId ?? undefined, "ADD_MEDIA", "productMedia", mediaId, { after: args });
+    await logAudit(ctx, (user as any)?.userId ?? (user as any)?.id ?? (user as any)?._id, "ADD_MEDIA", "productMedia", mediaId, { after: args });
 
     return { success: true, mediaId };
   },
@@ -81,7 +81,7 @@ export const removeProductMedia = mutation({
     },
     handler: async (ctx, args) => {
         const user = await authComponent.getAuthUser(ctx);
-        const providerId = user?.userId;
+        const providerId = await getProviderId(ctx);
         if (!providerId) throwAppError("AUTH_REQUIRED", "Unauthenticated");
 
         const media = await ctx.db.get(args.mediaId);
@@ -94,7 +94,7 @@ export const removeProductMedia = mutation({
         }
 
         await ctx.db.delete(args.mediaId);
-        await logAudit(ctx, user.userId ?? undefined, "DELETE_MEDIA", "productMedia", args.mediaId, { before: media });
+        await logAudit(ctx, (user as any)?.userId ?? (user as any)?.id ?? (user as any)?._id, "DELETE_MEDIA", "productMedia", args.mediaId, { before: media });
 
         return { success: true };
     }
@@ -108,7 +108,7 @@ export const deleteSellerProductCascading = mutation({
   },
   handler: async (ctx, args) => {
     const user = await authComponent.getAuthUser(ctx);
-    const providerId = user?.userId;
+    const providerId = await getProviderId(ctx);
     if (!providerId) throwAppError("AUTH_REQUIRED", "Unauthenticated");
 
     const product = await ctx.db.get(args.productId);
@@ -140,7 +140,7 @@ export const deleteSellerProductCascading = mutation({
         }
     }
 
-    await logAudit(ctx, user.userId ?? undefined, "DELETE_PRODUCT_CASCADE", "sellerProducts", args.productId, { before: product });
+    await logAudit(ctx, (user as any)?.userId ?? (user as any)?.id ?? (user as any)?._id, "DELETE_PRODUCT_CASCADE", "sellerProducts", args.productId, { before: product });
 
     return { success: true, deletedMediaCount: allMedia.length };
   },
@@ -155,13 +155,14 @@ export const deleteSellerCategoryCascading = mutation({
   },
   handler: async (ctx, args) => {
     const user = await authComponent.getAuthUser(ctx);
-    const providerId = user?.userId;
+    const providerId = await getProviderId(ctx);
     if (!providerId) throwAppError("AUTH_REQUIRED", "Unauthenticated");
 
     const category = await ctx.db.get(args.categoryId);
     if (!category || category.isDeleted) throwAppError("NOT_FOUND", "Category not found");
     if (category.providerId !== providerId) throwAppError("FORBIDDEN", "Unauthorized");
-    if (category.isSystem) throwAppError("FORBIDDEN", "Cannot delete system categories");
+    // Removed strict system check as 'importGlobalCategory' creates copies with isSystem=true but owned by provider
+    // if (category.isSystem) throwAppError("FORBIDDEN", "Cannot delete system categories");
 
     let deletedProductCount = 0;
 
@@ -212,7 +213,7 @@ export const deleteSellerCategoryCascading = mutation({
 
     await ctx.db.patch(args.categoryId, { isDeleted: true, updatedAt: Date.now() });
     
-    await logAudit(ctx, user.userId ?? undefined, "DELETE_CATEGORY_CASCADE", "sellerCategories", args.categoryId, { 
+    await logAudit(ctx, (user as any)?.userId ?? (user as any)?.id ?? (user as any)?._id, "DELETE_CATEGORY_CASCADE", "sellerCategories", args.categoryId, { 
         before: category, 
         after: { deletedProductCount } 
     });

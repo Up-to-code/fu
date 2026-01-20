@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Search, Package } from "lucide-react";
 import { useCategories, useCategorySearch, useCategoryViewMode, useCategoryActions } from "./_hooks";
+import { useAuth } from "@/lib/auth/hooks";
 import { CategoryCard, CategoryListItem, CategoryFormDialog, ViewModeToggle } from "./_components";
 import { DeleteCategoryDialog } from "./_components/DeleteCategoryDialog";
 import { toast } from "sonner";
@@ -13,6 +14,7 @@ export default function CategoriesPage() {
     const { searchQuery, setSearchQuery } = useCategorySearch();
     const { viewMode, setViewMode } = useCategoryViewMode();
     const { createSellerCategory, deleteSellerCategory } = useCategoryActions();
+    const { user, isAuthenticated } = useAuth();
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [categoryToDelete, setCategoryToDelete] = useState<string | null>(null);
 
@@ -34,7 +36,12 @@ export default function CategoriesPage() {
                         : "تم حذف التصنيف بنجاح"
                 );
             } catch (error: any) {
-                toast.error("حدث خطأ أثناء الحذف", { description: error.message });
+                const code = (error?.data?.code || error?.code || "").toString();
+                if (code === "AUTH_REQUIRED") {
+                    toast.error("يرجى تسجيل الدخول", { description: "انتهت صلاحية الجلسة. قم بتحديث الصفحة وحاول مرة أخرى." });
+                } else {
+                    toast.error("حدث خطأ أثناء الحذف", { description: error.message });
+                }
             }
             setDeleteDialogOpen(false);
             setCategoryToDelete(null);
@@ -125,6 +132,7 @@ export default function CategoriesPage() {
                                         key={category.id}
                                         category={category}
                                         onDelete={handleDeleteClick}
+                                        disabled={!isAuthenticated || !user?.id}
                                     />
                                 ))}
                             </div>

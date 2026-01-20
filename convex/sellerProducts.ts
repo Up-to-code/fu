@@ -1,7 +1,7 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
-import { authComponent } from "./auth";
 import { throwAppError } from "./errors";
+import { computeCombinationKey, getProviderId, normalizeStringRecord } from "./utils";
 
 export const listSellerProducts = query({
   args: {
@@ -36,7 +36,14 @@ export const getSellerProduct = query({
   handler: async (ctx, args) => {
     const product = await ctx.db.get(args.productId);
     if (!product || product.isDeleted) throwAppError("NOT_FOUND", "Product not found");
-    return product;
+    
+    // Fetch variants
+    const variants = await ctx.db
+      .query("sellerProductVariants")
+      .withIndex("by_product", (q) => q.eq("productId", args.productId))
+      .collect();
+
+    return { ...product, variants };
   },
 });
 
@@ -56,10 +63,18 @@ export const createSellerProduct = mutation({
     images: v.array(v.string()),
     video: v.optional(v.string()),
     videos: v.optional(v.array(v.string())),
+    variants: v.optional(v.array(v.object({
+      combination: v.any(),
+      price: v.number(),
+      stock: v.number(),
+      sku: v.optional(v.string()),
+      image: v.optional(v.string()),
+      images: v.optional(v.array(v.string())),
+      isActive: v.boolean(),
+    }))),
   },
   handler: async (ctx, args) => {
-    const user = await authComponent.getAuthUser(ctx);
-    const providerId = user?.userId;
+    const providerId = await getProviderId(ctx);
     if (!providerId) throwAppError("AUTH_REQUIRED", "Unauthenticated");
 
     if (!args.name.trim()) throwAppError("VALIDATION_FAILED", "Product name is required");
@@ -67,6 +82,8 @@ export const createSellerProduct = mutation({
     if (args.comparePrice !== undefined && args.comparePrice < 0) throwAppError("VALIDATION_FAILED", "Invalid compare price");
     if (args.stock < 0) throwAppError("VALIDATION_FAILED", "Invalid stock");
     if (!args.image) throwAppError("VALIDATION_FAILED", "Product image is required");
+    if ((args.images ?? []).length > 5) throwAppError("VALIDATION_FAILED", "Max 5 images allowed");
+    if ((args.videos ?? []).length > 1) throwAppError("VALIDATION_FAILED", "Max 1 video allowed");
 
     if (args.categoryId) {
       const category = await ctx.db.get(args.categoryId);
@@ -98,6 +115,26 @@ export const createSellerProduct = mutation({
       updatedAt: now,
     });
 
+    // Create variants if provided
+    if (args.variants && args.variants.length > 0) {
+      await Promise.all(args.variants.map(variant => 
+        ctx.db.insert("sellerProductVariants", {
+          productId,
+          providerId,
+          combination: normalizeStringRecord(variant.combination),
+          combinationKey: computeCombinationKey(normalizeStringRecord(variant.combination)),
+          price: variant.price,
+          stock: variant.stock,
+          sku: variant.sku,
+          image: variant.image,
+          images: variant.images,
+          isActive: variant.isActive ?? true,
+          createdAt: now,
+          updatedAt: now,
+        })
+      ));
+    }
+
     return { success: true, productId };
   },
 });
@@ -120,10 +157,18 @@ export const updateSellerProduct = mutation({
     images: v.optional(v.array(v.string())),
     video: v.optional(v.string()),
     videos: v.optional(v.array(v.string())),
+    variants: v.optional(v.array(v.object({
+      combination: v.any(),
+      price: v.number(),
+      stock: v.number(),
+      sku: v.optional(v.string()),
+      image: v.optional(v.string()),
+      images: v.optional(v.array(v.string())),
+      isActive: v.boolean(),
+    }))),
   },
   handler: async (ctx, args) => {
-    const user = await authComponent.getAuthUser(ctx);
-    const providerId = user?.userId;
+    const providerId = await getProviderId(ctx);
     if (!providerId) throwAppError("AUTH_REQUIRED", "Unauthenticated");
 
     const product = await ctx.db.get(args.productId);
@@ -137,6 +182,8 @@ export const updateSellerProduct = mutation({
     if (args.price !== undefined && args.price < 0) throwAppError("VALIDATION_FAILED", "Invalid price");
     if (args.comparePrice !== undefined && args.comparePrice < 0) throwAppError("VALIDATION_FAILED", "Invalid compare price");
     if (args.stock !== undefined && args.stock < 0) throwAppError("VALIDATION_FAILED", "Invalid stock");
+    if (args.images !== undefined && args.images.length > 5) throwAppError("VALIDATION_FAILED", "Max 5 images allowed");
+    if (args.videos !== undefined && args.videos.length > 1) throwAppError("VALIDATION_FAILED", "Max 1 video allowed");
 
     if (args.categoryId) {
       const category = await ctx.db.get(args.categoryId);
@@ -161,6 +208,61 @@ export const updateSellerProduct = mutation({
     if (args.videos !== undefined) updates.videos = args.videos;
 
     await ctx.db.patch(args.productId, updates);
+
+    // Update variants if provided
+    if (args.variants) {
+      const now = Date.now();
+      const existingVariants = await ctx.db
+        .query("sellerProductVariants")
+        .withIndex("by_product", (q) => q.eq("productId", args.productId))
+        .collect();
+
+      const existingByKey = new Map(existingVariants.map((v) => [v.combinationKey, v]));
+      const incomingKeys = new Set<string>();
+
+      for (const variant of args.variants) {
+        const combination = normalizeStringRecord(variant.combination);
+        const combinationKey = computeCombinationKey(combination);
+        if (!combinationKey) continue;
+        incomingKeys.add(combinationKey);
+
+        const existing = existingByKey.get(combinationKey);
+        if (existing) {
+          await ctx.db.patch(existing._id, {
+            combination,
+            price: variant.price,
+            stock: variant.stock,
+            sku: variant.sku,
+            image: variant.image,
+            images: variant.images,
+            isActive: variant.isActive ?? true,
+            updatedAt: now,
+          });
+        } else {
+          await ctx.db.insert("sellerProductVariants", {
+            productId: args.productId,
+            providerId,
+            combination,
+            combinationKey,
+            price: variant.price,
+            stock: variant.stock,
+            sku: variant.sku,
+            image: variant.image,
+            images: variant.images,
+            isActive: variant.isActive ?? true,
+            createdAt: now,
+            updatedAt: now,
+          });
+        }
+      }
+
+      for (const existing of existingVariants) {
+        if (!incomingKeys.has(existing.combinationKey) && existing.isActive) {
+          await ctx.db.patch(existing._id, { isActive: false, updatedAt: now });
+        }
+      }
+    }
+
     return { success: true };
   },
 });
@@ -170,8 +272,7 @@ export const deleteSellerProduct = mutation({
     productId: v.id("sellerProducts"),
   },
   handler: async (ctx, args) => {
-    const user = await authComponent.getAuthUser(ctx);
-    const providerId = user?.userId;
+    const providerId = await getProviderId(ctx);
     if (!providerId) throwAppError("AUTH_REQUIRED", "Unauthenticated");
 
     const product = await ctx.db.get(args.productId);

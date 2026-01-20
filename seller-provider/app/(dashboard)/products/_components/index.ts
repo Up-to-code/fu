@@ -5,6 +5,11 @@ export { ProductOptions, type Option, type OptionValue } from './ProductOptions'
 export { VariantsList, type Variant } from './VariantsList';
 export { RichTextEditor } from './RichTextEditor';
 export { ProductSidebar } from './ProductSidebar';
+export { ProductCustomizationPanel } from "./ProductCustomizationPanel";
+export { ProductWizardHeader, type ProductWizardStep } from "./ProductWizardHeader";
+export { QuickAddPresets, type QuickPresetId, type QuickPresetOption } from "./QuickAddPresets";
+export { ProductSection } from "./ProductSection";
+export { ProductFormErrorSummary, type ProductFormErrorItem } from "./ProductFormErrorSummary";
 
 // Variant generation utility
 export function generateVariants(options: { id: string; name: string; values: { value: string }[] }[], existingVariants: { id: string; combination: Record<string, string> }[] = []): { id: string; combination: Record<string, string>; price: string; stock: string; sku: string; media: { id: string; url: string; type: string }[] }[] {

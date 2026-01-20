@@ -1,9 +1,12 @@
 import { FileUpload, type FileMetadata } from "@/components/ui/file-upload";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Image as ImageIcon, Video, X, GripVertical } from "lucide-react";
-import { useState } from "react";
+import { Image as ImageIcon, Video, X, GripVertical, Loader2 } from "lucide-react";
+import { useState, useRef } from "react";
 import { toast } from "sonner";
+import { useUploadThing } from "@/lib/uploadthing";
+import { useMutation } from "convex/react";
+import { api } from "@/convex/_generated/api";
 
 export type Media = { id: string; url: string; type: "image" | "video" | string };
 
@@ -62,7 +65,7 @@ export function MediaUpload({
         <div className="bg-white rounded-2xl border border-gray-100 p-6">
             <div className="flex items-center justify-between mb-4">
                 <div>
-                    <h2 className="text-lg font-bold text-[#242C5A]">{title}</h2>
+                    <h2 className="text-lg font-bold text-primary">{title}</h2>
                     {subtitle && <p className="text-xs text-gray-400">{subtitle}</p>}
                     <p className="text-xs text-gray-400 mt-1">
                          (الحد الأقصى: 5 صور + فيديو واحد)
@@ -85,13 +88,14 @@ export function MediaUpload({
                         )}
                         
                         {index === 0 && gridLayout === "main" && (
-                            <Badge className="absolute top-2 right-2 bg-[#242C5A] text-white text-xs">الرئيسية</Badge>
+                            <Badge className="absolute top-2 right-2 bg-primary text-primary-foreground text-xs">الرئيسية</Badge>
                         )}
                         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                            <Button size="icon" variant="ghost" className="h-8 w-8 text-white hover:bg-white/20">
+                            <Button type="button" size="icon" variant="ghost" className="h-8 w-8 text-white hover:bg-white/20">
                                 <GripVertical className="h-4 w-4" />
                             </Button>
                             <Button
+                                type="button"
                                 size="icon"
                                 variant="ghost"
                                 className="h-8 w-8 text-white hover:bg-red-500/80"
@@ -128,21 +132,123 @@ export function MediaUpload({
 interface CompactMediaUploadProps {
     media: Media[];
     maxItems?: number;
-    onAdd: (type: "image" | "video") => void;
+    onAdd: (media: Media) => void;
     onRemove: (id: string) => void;
     label?: string;
 }
 
 export function CompactMediaUpload({ media, maxItems = 4, onAdd, onRemove, label }: CompactMediaUploadProps) {
+    const [isUploading, setIsUploading] = useState(false);
+    const verifyUploadedFile = useMutation(api.security.verifyUploadedFile);
+    const imageInputRef = useRef<HTMLInputElement>(null);
+    const videoInputRef = useRef<HTMLInputElement>(null);
+
+    const { startUpload } = useUploadThing("mediaUploader", {
+        onClientUploadComplete: (res) => {
+            setIsUploading(false);
+            if (res && res[0]) {
+                const fileType = res[0].type.startsWith("image") ? "image" : "video";
+                const newMedia: Media = {
+                    id: Date.now().toString(),
+                    url: res[0].url,
+                    type: fileType,
+                };
+                onAdd(newMedia);
+                toast.success("Upload completed successfully");
+            }
+        },
+        onUploadError: (error) => {
+            setIsUploading(false);
+            toast.error(`Upload failed: ${error.message}`);
+        },
+    });
+
+    const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>, type: "image" | "video") => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        // Validation
+        if (type === "image") {
+            if (!file.type.startsWith("image/")) {
+                toast.error("Invalid file type. Please upload an image.");
+                return;
+            }
+            if (file.size > 5 * 1024 * 1024) {
+                toast.error("Image size must be less than 5MB");
+                return;
+            }
+        } else {
+            if (!file.type.startsWith("video/")) {
+                toast.error("Invalid file type. Please upload a video.");
+                return;
+            }
+            if (file.size > 100 * 1024 * 1024) {
+                toast.error("Video size must be less than 100MB");
+                return;
+            }
+        }
+
+        setIsUploading(true);
+        try {
+            // Calculate hash for verification
+            const buf = await file.arrayBuffer();
+            const digest = await crypto.subtle.digest("SHA-256", buf);
+            const hashArray = Array.from(new Uint8Array(digest));
+            const hashHex = hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
+            
+            // Start upload
+            const res = await startUpload([file]);
+            
+            // Verify
+            if (res && res[0]) {
+                 await verifyUploadedFile({
+                    url: res[0].url,
+                    hash: hashHex,
+                    type: type,
+                });
+            }
+        } catch (error) {
+            console.error(error);
+            setIsUploading(false);
+        }
+        
+        // Reset input
+        e.target.value = "";
+    };
+
     return (
         <div>
             {label && <p className="text-sm text-gray-600 mb-2">{label}</p>}
+            
+            {/* Hidden inputs */}
+            <input 
+                type="file" 
+                ref={imageInputRef} 
+                className="hidden" 
+                accept="image/jpeg,image/png" 
+                onChange={(e) => handleFileSelect(e, "image")}
+            />
+            <input 
+                type="file" 
+                ref={videoInputRef} 
+                className="hidden" 
+                accept="video/mp4,video/quicktime" 
+                onChange={(e) => handleFileSelect(e, "video")}
+            />
+
             <div className="flex gap-2 flex-wrap">
                 {media.map((m) => (
-                    <div key={m.id} className="relative w-20 h-20 rounded-lg overflow-hidden bg-gray-100 group">
-                        <img src={m.url} alt="" className="w-full h-full object-cover" />
-                        {m.type === "video" && <Video className="absolute inset-0 m-auto h-6 w-6 text-white" />}
+                    <div key={m.id} className="relative w-20 h-20 rounded-lg overflow-hidden bg-gray-100 group border border-gray-200">
+                        {m.type === "video" ? (
+                            <video src={m.url} className="w-full h-full object-cover" />
+                        ) : (
+                            <img src={m.url} alt="" className="w-full h-full object-cover" />
+                        )}
+                        
+                        {m.type === "video" && <Video className="absolute inset-0 m-auto h-6 w-6 text-white drop-shadow-md" />}
+                        
                         <button
+                            type="button"
                             onClick={() => onRemove(m.id)}
                             className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity"
                         >
@@ -150,21 +256,38 @@ export function CompactMediaUpload({ media, maxItems = 4, onAdd, onRemove, label
                         </button>
                     </div>
                 ))}
+                
                 {media.length < maxItems && (
                     <>
                         <button
-                            onClick={() => onAdd("image")}
-                            className="w-20 h-20 rounded-lg border-2 border-dashed border-gray-200 flex flex-col items-center justify-center hover:border-[#242C5A]/40"
+                            type="button"
+                            onClick={() => imageInputRef.current?.click()}
+                            disabled={isUploading}
+                            className="w-20 h-20 rounded-lg border-2 border-dashed border-gray-200 flex flex-col items-center justify-center hover:border-[#242C5A]/40 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                         >
-                            <ImageIcon className="h-5 w-5 text-gray-400" />
-                            <span className="text-[10px] text-gray-400">صورة</span>
+                            {isUploading ? (
+                                <Loader2 className="h-5 w-5 text-gray-400 animate-spin" />
+                            ) : (
+                                <>
+                                    <ImageIcon className="h-5 w-5 text-gray-400" />
+                                    <span className="text-[10px] text-gray-400 mt-1">صورة</span>
+                                </>
+                            )}
                         </button>
                         <button
-                            onClick={() => onAdd("video")}
-                            className="w-20 h-20 rounded-lg border-2 border-dashed border-gray-200 flex flex-col items-center justify-center hover:border-[#242C5A]/40"
+                            type="button"
+                            onClick={() => videoInputRef.current?.click()}
+                            disabled={isUploading}
+                            className="w-20 h-20 rounded-lg border-2 border-dashed border-gray-200 flex flex-col items-center justify-center hover:border-[#242C5A]/40 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                         >
-                            <Video className="h-5 w-5 text-gray-400" />
-                            <span className="text-[10px] text-gray-400">فيديو</span>
+                            {isUploading ? (
+                                <Loader2 className="h-5 w-5 text-gray-400 animate-spin" />
+                            ) : (
+                                <>
+                                    <Video className="h-5 w-5 text-gray-400" />
+                                    <span className="text-[10px] text-gray-400 mt-1">فيديو</span>
+                                </>
+                            )}
                         </button>
                     </>
                 )}
