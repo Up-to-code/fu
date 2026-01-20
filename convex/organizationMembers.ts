@@ -5,6 +5,12 @@ import { requireOrgRole } from "./authz";
 import { throwAppError } from "./errors";
 import type { Doc } from "./_generated/dataModel";
 
+/**
+ * List members of an organization with pagination.
+ *
+ * Requires the caller to be a member of the organization (owner/admin/member),
+ * or a platform admin.
+ */
 export const listOrganizationMembers = query({
   args: {
     organizationId: v.id("organizations"),
@@ -23,6 +29,12 @@ export const listOrganizationMembers = query({
   },
 });
 
+/**
+ * Invite a new member to an organization by email.
+ *
+ * Only organization owners/admins can invite members. The invited member is stored
+ * as an `organizationMembers` record with `inviteEmail` until it is claimed.
+ */
 export const createOrganizationMember = mutation({
   args: {
     organizationId: v.id("organizations"),
@@ -154,6 +166,11 @@ export const deleteOrganizationMember = mutation({
   },
 });
 
+/**
+ * Fetch a single organization member record by ID.
+ *
+ * Returns null if the record does not exist or is deleted.
+ */
 export const getOrganizationMember = query({
   args: {
     memberId: v.id("organizationMembers"),
