@@ -129,3 +129,72 @@ export const getRevenueChartData = query({
     return result;
   },
 });
+
+export const getSalesByCategory = query({
+  args: {
+    from: v.optional(v.number()),
+    to: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    const userId = await requireAuthUserId(ctx);
+    
+    // Fetch all categories for this provider
+    const categories = await ctx.db
+      .query("sellerCategories")
+      .withIndex("by_provider", (q) => q.eq("providerId", userId))
+      .filter((q) => q.eq(q.field("isDeleted"), false))
+      .collect();
+
+    const categoryMap = new Map<string, string>();
+    categories.forEach(c => categoryMap.set(c._id, c.name));
+
+    // Fetch all products for this provider to map productId -> categoryId
+    const products = await ctx.db
+      .query("sellerProducts")
+      .withIndex("by_provider", (q) => q.eq("providerId", userId))
+      .collect();
+    
+    const productCategoryMap = new Map<string, string>();
+    products.forEach(p => {
+      if (p.categoryId) {
+        productCategoryMap.set(p._id, p.categoryId);
+      }
+    });
+
+    // Fetch orders in range
+    const orders = await ctx.db
+      .query("sellerOrders")
+      .withIndex("by_provider", (q) => q.eq("providerId", userId))
+      .collect();
+
+    const from = args.from || 0;
+    const to = args.to || Date.now();
+
+    const filteredOrders = orders.filter(o => o.createdAt >= from && o.createdAt <= to);
+
+    // Aggregate sales by category
+    const categoryStats = new Map<string, { name: string; value: number; count: number }>();
+
+    // Initialize with all categories (so we show 0 for empty ones if desired, or just those with sales)
+    // Let's show only those with sales for cleaner chart, or all?
+    // Requirement says "sales by category". Usually top categories.
+    
+    filteredOrders.forEach(order => {
+      order.items.forEach(item => {
+        const categoryId = productCategoryMap.get(item.productId);
+        const categoryName = categoryId ? categoryMap.get(categoryId) : "غير مصنف"; // "Uncategorized"
+        
+        if (categoryName) {
+          const current = categoryStats.get(categoryName) || { name: categoryName, value: 0, count: 0 };
+          categoryStats.set(categoryName, {
+            name: categoryName,
+            value: current.value + (item.totalPrice || 0),
+            count: current.count + (item.quantity || 0)
+          });
+        }
+      });
+    });
+
+    return Array.from(categoryStats.values()).sort((a, b) => b.value - a.value);
+  },
+});
