@@ -5,15 +5,15 @@
 
 "use client";
 
-import React, { createContext, useContext, ReactNode } from "react";
-import { useAuth, useAuthUser, useAuthActions } from "./hooks";
+import { createContext, useContext, type ReactNode } from "react";
+import { useAuth, useAuthActions, type AuthSession, type AuthUser } from "./hooks";
 
 interface AuthContextValue {
-  session: any;
-  user: any;
+  session: AuthSession | null | undefined;
+  user: AuthUser | undefined;
   isAuthenticated: boolean;
   isLoading: boolean;
-  error: any;
+  error: unknown;
   actions: ReturnType<typeof useAuthActions>;
 }
 

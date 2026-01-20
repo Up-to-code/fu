@@ -1,6 +1,5 @@
 import { query, mutation, action, internalMutation } from "./_generated/server";
 import { v } from "convex/values";
-import { Id } from "./_generated/dataModel";
 import { authComponent } from "./auth";
 import { throwAppError } from "./errors";
 import { getUserProfileByUserId, requireAuthUserId } from "./authz";
@@ -117,7 +116,7 @@ export const getMessagesCount = query({
   args: {
     userId: v.string(),
   },
-  handler: async (ctx, args) => {
+  handler: async (_ctx, _args) => {
     // If you have a messages table with userId field:
     // const messages = await ctx.db
     //   .query("messages")

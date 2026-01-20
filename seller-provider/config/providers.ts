@@ -134,7 +134,7 @@ export function getNavigationRoutes(
         
         // Filter by permissions
         if (route.permission && userPermissions) {
-            if (!userPermissions.includes(route.permission as Permission)) {
+            if (!userPermissions.includes(route.permission)) {
                 return false;
             }
         }

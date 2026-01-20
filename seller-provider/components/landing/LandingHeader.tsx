@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Building2, Menu, LayoutDashboard, Loader2 } from "lucide-react";
+import { Building2, LayoutDashboard, Loader2 } from "lucide-react";
 import { useAuth } from "@/lib/auth/hooks";
 
 export function LandingHeader() {

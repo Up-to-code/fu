@@ -4,11 +4,27 @@ import { ThemeProvider } from 'next-themes';
 import { ReactNode } from 'react';
 import { ConvexProvider, ConvexReactClient } from 'convex/react';
 import { ConvexBetterAuthProvider } from '@convex-dev/better-auth/react';
+import * as Sentry from "@sentry/nextjs";
 import { authClient } from '@/lib/auth/client';
+import { getPublicEnv } from '@/lib/env';
+
+if (process.env.NEXT_PUBLIC_SENTRY_DSN) {
+  Sentry.init({
+    dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
+    tracesSampleRate: 1.0,
+  });
+}
 
 // Initialize Convex client
-const convexUrl = process.env.NEXT_PUBLIC_CONVEX_URL || '';
-const convex = convexUrl ? new ConvexReactClient(convexUrl) : null;
+let convex: ConvexReactClient | null = null;
+let envError: string | null = null;
+try {
+  const env = getPublicEnv();
+  convex = new ConvexReactClient(env.NEXT_PUBLIC_CONVEX_URL);
+} catch (err) {
+  const details = err instanceof Error ? err.message : "Unknown configuration error";
+  envError = `${details} Please configure seller-provider/.env.local.`;
+}
 
 export function Providers({ children }: { children: ReactNode }) {
   // Show error if Convex URL is not configured
@@ -18,7 +34,7 @@ export function Providers({ children }: { children: ReactNode }) {
         <div className="text-center">
           <h1 className="text-red-600 text-xl font-bold mb-2">Configuration Error</h1>
           <p className="text-gray-600">
-            NEXT_PUBLIC_CONVEX_URL is not set. Please create a .env.local file with your Convex URL.
+            {envError || 'Required environment variables are missing.'}
           </p>
         </div>
       </div>

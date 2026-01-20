@@ -3,7 +3,6 @@ import Image from "next/image";
 import { X } from "lucide-react";
 import { getStyleById } from "@/data";
 import type { Category } from "../_hooks";
-import Link from "next/link";
 
 interface CategoryCardProps {
     category: Category;

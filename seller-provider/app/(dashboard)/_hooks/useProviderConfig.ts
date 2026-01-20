@@ -7,7 +7,6 @@ import { useMemo } from "react";
 import { useProvider } from "../_context/ProviderContext";
 import { usePermissions } from "./usePermissions";
 import { getNavigationRoutes, getGroupedNavigationRoutes } from "@/config/providers";
-import type { NavigationRoute } from "@/types/provider";
 
 /**
  * Hook to get filtered navigation routes

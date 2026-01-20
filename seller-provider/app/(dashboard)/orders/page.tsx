@@ -46,10 +46,6 @@ export default function OrdersPage() {
         setFilterOpen(false);
     };
 
-    const selectedStatus = activeStatusFilter
-        ? orderStatuses.find((s) => s.id === activeStatusFilter)
-        : null;
-
     return (
         <div className="space-y-8 max-w-7xl mx-auto" dir="rtl">
             {/* Header */}

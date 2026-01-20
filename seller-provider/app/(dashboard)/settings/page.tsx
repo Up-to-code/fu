@@ -4,8 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Save } from "lucide-react";
 import { useUserSettings } from "./_hooks";
 import { ProfileSection, NotificationsSection } from "./_components";
-import { PermissionGuard } from "@/components/shared/PermissionGuard";
-import { Permission } from "@/lib/permissions";
 import { useState, useEffect } from "react";
 
 const notificationSettings = [

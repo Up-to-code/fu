@@ -5,9 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Building2, Save, Globe, Facebook, Instagram, Twitter, Linkedin } from "lucide-react";
-import { usePermissions } from "@/app/(dashboard)/_hooks/usePermissions";
 import { useCurrentUser } from "@/app/(dashboard)/_hooks/useCurrentUser";
-import { Permission } from "@/lib/permissions";
 import { RichTextEditor } from "@/app/(dashboard)/products/_components/RichTextEditor";
 import { LogoUpload } from "./LogoUpload";
 

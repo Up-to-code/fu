@@ -4,7 +4,6 @@ import { MobileSidebar } from "@/components/layout/DashboardSidebar";
 import { UserNav } from "@/components/layout/UserNav";
 import { NotificationsDropdown } from "@/components/layout/NotificationsDropdown";
 import { Search, HelpCircle } from "lucide-react";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 

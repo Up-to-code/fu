@@ -2,6 +2,7 @@
  * Hook for permission checking throughout the application
  */
 
+import { useCallback, useMemo } from "react";
 import { useCurrentUser } from "./useCurrentUser";
 import {
     Permission,
@@ -21,58 +22,69 @@ export function usePermissions() {
     const user = useCurrentUser();
     const userRole = (user?.role || 'member') as Role;
 
-    return {
-        /**
-         * Check if current user has a specific permission
-         */
-        hasPermission: (permission: Permission): boolean => {
+    const hasPermissionForUser = useCallback(
+        (permission: Permission): boolean => {
             if (!user) return false;
             return hasPermission(userRole, permission);
         },
+        [user, userRole]
+    );
 
-        /**
-         * Check if current user can access a page
-         */
-        canAccessPage: (pagePath: string): boolean => {
+    const canAccessPageForUser = useCallback(
+        (pagePath: string): boolean => {
             if (!user) return false;
             return canAccessPage(userRole, pagePath);
         },
+        [user, userRole]
+    );
 
-        /**
-         * Check if current user can perform an action on a resource
-         */
-        canPerformAction: (resource: string, action: string): boolean => {
+    const canPerformActionForUser = useCallback(
+        (resource: string, action: string): boolean => {
             if (!user) return false;
             return canPerformAction(userRole, resource, action);
         },
+        [user, userRole]
+    );
 
-        /**
-         * Check if current user has any of the provided permissions
-         */
-        hasAnyPermission: (permissions: Permission[]): boolean => {
+    const hasAnyPermissionForUser = useCallback(
+        (permissions: Permission[]): boolean => {
             if (!user) return false;
             return hasAnyPermission(userRole, permissions);
         },
+        [user, userRole]
+    );
 
-        /**
-         * Check if current user has all of the provided permissions
-         */
-        hasAllPermissions: (permissions: Permission[]): boolean => {
+    const hasAllPermissionsForUser = useCallback(
+        (permissions: Permission[]): boolean => {
             if (!user) return false;
             return hasAllPermissions(userRole, permissions);
         },
+        [user, userRole]
+    );
 
-        /**
-         * Get all permissions for current user
-         */
-        getUserPermissions: (): Permission[] => {
-            if (!user) return [];
-            return getUserPermissions(userRole);
-        },
+    const getUserPermissionsForUser = useCallback((): Permission[] => {
+        if (!user) return [];
+        return getUserPermissions(userRole);
+    }, [user, userRole]);
 
-        /**
-         * Get current user's role
-         */
-        userRole,
-    };
+    return useMemo(
+        () => ({
+            hasPermission: hasPermissionForUser,
+            canAccessPage: canAccessPageForUser,
+            canPerformAction: canPerformActionForUser,
+            hasAnyPermission: hasAnyPermissionForUser,
+            hasAllPermissions: hasAllPermissionsForUser,
+            getUserPermissions: getUserPermissionsForUser,
+            userRole,
+        }),
+        [
+            hasPermissionForUser,
+            canAccessPageForUser,
+            canPerformActionForUser,
+            hasAnyPermissionForUser,
+            hasAllPermissionsForUser,
+            getUserPermissionsForUser,
+            userRole,
+        ]
+    );
 }

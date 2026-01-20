@@ -1,7 +1,7 @@
 // File: convex/orders.ts
 // Purpose: Order-related Convex functions
 
-import { mutation, query } from "./_generated/server";
+import { mutation } from "./_generated/server";
 import { v } from "convex/values";
 
 /**
