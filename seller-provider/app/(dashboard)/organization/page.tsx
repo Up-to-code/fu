@@ -2,8 +2,7 @@
 
 import { useState } from "react";
 import { useOrganization, useTeamMembers, useTeamMemberActions } from "./_hooks";
-import { useCurrentUser } from "@/app/(dashboard)/_hooks/useCurrentUser";
-import { OrganizationInfoForm, TeamMembersList, InviteMemberDialog, EditRoleDialog } from "./_components";
+import { OrganizationInfoForm, TeamMembersList, InviteMemberDialog, EditRoleDialog, BulkActionsDialog } from "./_components";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -14,7 +13,6 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { PermissionGuard } from "@/components/shared/PermissionGuard";
 import { Permission, type Role } from "@/lib/permissions";
 import type { TeamMember } from "./_hooks";
 
@@ -179,6 +177,8 @@ export default function OrganizationPage() {
         }
     };
 
+    const selectedMembers = teamMembers.filter((m) => selectedMemberIds.includes(m.id));
+
     return (
         <>
             <div className="space-y-8 max-w-4xl mx-auto" dir="rtl">
@@ -228,6 +228,14 @@ export default function OrganizationPage() {
                     isLoading={isSubmitting}
                 />
             )}
+
+            <BulkActionsDialog
+                open={bulkActionsDialogOpen}
+                onOpenChange={setBulkActionsDialogOpen}
+                selectedMembers={selectedMembers}
+                onSubmit={handleBulkActionSubmit}
+                isLoading={isSubmitting}
+            />
 
             {/* Remove Member Confirmation Dialog */}
             <AlertDialog open={removeDialogOpen} onOpenChange={setRemoveDialogOpen}>

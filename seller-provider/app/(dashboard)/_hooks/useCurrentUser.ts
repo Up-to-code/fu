@@ -7,7 +7,7 @@
 
 import { useAuth } from "@/lib/auth/hooks";
 import { useQuery } from "convex/react";
-import { api } from "../../../../convex/_generated/api";
+import { api } from "@/convex/_generated/api";
 import { USER_ROLES, DASHBOARD_ROLES, type DashboardRole } from "@/lib/auth-types";
 import { useMemo } from "react";
 
@@ -54,7 +54,7 @@ export function useCurrentUser(): CurrentUser | null {
             name: userProfile?.name || user.name || user.email?.split('@')[0] || 'مستخدم',
             email: user.email || '',
             role,
-            organizationId: (userProfile as any)?.organizationId,
+            organizationId: userProfile && "organizationId" in userProfile ? userProfile.organizationId : undefined,
         };
     }, [user, isAuthenticated, userProfile]);
 }

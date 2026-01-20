@@ -4,7 +4,7 @@ This document explains the required environment variables for the Next.js applic
 
 ## Required Environment Variables
 
-Create a `.env.local` file in the `nextjs-1/` directory with the following variables:
+Create a `.env.local` file in the `seller-provider/` directory with the following variables:
 
 ### Convex Configuration
 

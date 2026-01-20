@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { ChevronDown, ChevronUp, Image as ImageIcon, Video, X } from "lucide-react";
+import { ChevronDown, ChevronUp, Image as ImageIcon } from "lucide-react";
 import { CompactMediaUpload, Media } from "./MediaUpload";
 
 export type Variant = {
@@ -26,7 +26,7 @@ interface VariantsListProps {
 
 export function VariantsList({
     variants,
-    optionNames,
+    optionNames: _optionNames,
     onVariantChange,
     onAddMedia,
     onRemoveMedia

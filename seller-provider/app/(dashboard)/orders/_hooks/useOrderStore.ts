@@ -20,7 +20,7 @@ type OrderStore = {
     clearFilters: () => void;
 };
 
-export const useOrderStore = create<OrderStore>((set, get) => ({
+export const useOrderStore = create<OrderStore>((set) => ({
     orders: [],
     searchQuery: "",
     filters: {},

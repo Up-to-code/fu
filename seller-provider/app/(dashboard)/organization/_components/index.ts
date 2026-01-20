@@ -3,5 +3,6 @@ export { TeamMembersList } from "./TeamMembersList";
 export { RoleBadge } from "./RoleBadge";
 export { InviteMemberDialog } from "./InviteMemberDialog";
 export { EditRoleDialog } from "./EditRoleDialog";
+export { BulkActionsDialog } from "./BulkActionsDialog";
 export { MemberPermissions } from "./MemberPermissions";
 export { PermissionCheckboxes } from "./PermissionCheckboxes";

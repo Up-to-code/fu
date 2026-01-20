@@ -2,17 +2,13 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-    BarChart,
-    Bar,
     XAxis,
     YAxis,
-    CartesianGrid,
     Tooltip,
     ResponsiveContainer,
     AreaChart,
     Area
 } from 'recharts';
-import { Badge } from "@/components/ui/badge";
 import { DollarSign, ShoppingBag, Users, TrendingUp } from "lucide-react";
 
 // Mock Data

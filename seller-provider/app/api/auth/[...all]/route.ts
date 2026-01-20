@@ -16,15 +16,15 @@ import { NextRequest } from "next/server";
 // These are async functions that take a Request and return a Response
 export async function GET(request: NextRequest) {
   try {
-    const url = new URL(request.url);
-    console.log("Auth GET request:", url.pathname);
     const response = await handler.GET(request);
-    console.log("Auth GET response status:", response.status);
     return response;
-  } catch (error: any) {
-    console.error("Auth GET handler error:", error);
+  } catch (error: unknown) {
+    if (process.env.NODE_ENV !== "production") {
+      console.error("Auth GET handler error:", error);
+    }
+    const message = error instanceof Error ? error.message : "Unexpected error";
     return new Response(
-      JSON.stringify({ error: "Internal server error", message: error?.message }),
+      JSON.stringify({ error: "Internal server error", message }),
       { status: 500, headers: { "Content-Type": "application/json" } }
     );
   }
@@ -32,15 +32,15 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const url = new URL(request.url);
-    console.log("Auth POST request:", url.pathname);
     const response = await handler.POST(request);
-    console.log("Auth POST response status:", response.status);
     return response;
-  } catch (error: any) {
-    console.error("Auth POST handler error:", error);
+  } catch (error: unknown) {
+    if (process.env.NODE_ENV !== "production") {
+      console.error("Auth POST handler error:", error);
+    }
+    const message = error instanceof Error ? error.message : "Unexpected error";
     return new Response(
-      JSON.stringify({ error: "Internal server error", message: error?.message }),
+      JSON.stringify({ error: "Internal server error", message }),
       { status: 500, headers: { "Content-Type": "application/json" } }
     );
   }

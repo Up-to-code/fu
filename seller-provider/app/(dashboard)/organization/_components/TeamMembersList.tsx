@@ -36,19 +36,8 @@ export function TeamMembersList({ members, onInviteMember, onEditRole, onRemoveM
         }
     };
 
-    const handleSelectMember = (memberId: string, checked: boolean) => {
-        const newSelected = new Set(selectedMembers);
-        if (checked) {
-            newSelected.add(memberId);
-        } else {
-            newSelected.delete(memberId);
-        }
-        setSelectedMembers(newSelected);
-    };
-
     const nonOwnerMembers = members.filter(m => m.role !== 'owner');
     const allSelected = nonOwnerMembers.length > 0 && nonOwnerMembers.every(m => selectedMembers.has(m.id));
-    const someSelected = selectedMembers.size > 0 && selectedMembers.size < nonOwnerMembers.length;
 
     return (
         <div className="bg-white rounded-2xl border border-gray-100 p-8">

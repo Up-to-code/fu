@@ -26,6 +26,7 @@ export const createOrganizationMember = mutation({
     organizationId: v.id("organizations"),
     email: v.string(),
     role: v.string(),
+    customPermissions: v.optional(v.array(v.string())),
   },
   handler: async (ctx, args) => {
     const { userId } = await requireOrgRole(ctx, args.organizationId, ["owner", "admin"]);
@@ -35,6 +36,7 @@ export const createOrganizationMember = mutation({
       organizationId: args.organizationId,
       inviteEmail: args.email,
       role: args.role,
+      customPermissions: args.customPermissions,
       isDeleted: false,
       createdAt: now,
       updatedAt: now,
@@ -42,6 +44,53 @@ export const createOrganizationMember = mutation({
       updatedByUserId: userId,
     });
     return memberId;
+  },
+});
+
+export const updateOrganizationMember = mutation({
+  args: {
+    memberId: v.id("organizationMembers"),
+    role: v.optional(v.string()),
+    customPermissions: v.optional(v.array(v.string())),
+  },
+  handler: async (ctx, args) => {
+    const member = await ctx.db.get(args.memberId);
+    if (!member || member.isDeleted) throw new Error("Member not found");
+
+    const { userId } = await requireOrgRole(ctx, member.organizationId, ["owner", "admin"]);
+    const now = Date.now();
+
+    const updates: any = {
+      updatedAt: now,
+      updatedByUserId: userId,
+    };
+    if (args.role !== undefined) updates.role = args.role;
+    if (args.customPermissions !== undefined) updates.customPermissions = args.customPermissions;
+
+    await ctx.db.patch(args.memberId, updates);
+    return { success: true };
+  },
+});
+
+export const deleteOrganizationMember = mutation({
+  args: {
+    memberId: v.id("organizationMembers"),
+  },
+  handler: async (ctx, args) => {
+    const member = await ctx.db.get(args.memberId);
+    if (!member || member.isDeleted) throw new Error("Member not found");
+
+    const { userId } = await requireOrgRole(ctx, member.organizationId, ["owner", "admin"]);
+    const now = Date.now();
+
+    await ctx.db.patch(args.memberId, {
+      isDeleted: true,
+      deletedAt: now,
+      updatedAt: now,
+      updatedByUserId: userId,
+    });
+
+    return { success: true };
   },
 });
 

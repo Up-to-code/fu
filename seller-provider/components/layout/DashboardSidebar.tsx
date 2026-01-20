@@ -3,28 +3,21 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import {
-    LayoutDashboard,
-    Package,
-    ShoppingCart,
-    Settings,
-    Building2,
-    Menu,
-    Layers,
-    BarChart3,
-    HelpCircle,
-    Bell,
-    LogOut,
-} from "lucide-react";
+import { Menu, Layers, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { usePermissions } from "@/app/(dashboard)/_hooks/usePermissions";
 import { useProviderConfig } from "@/app/(dashboard)/_hooks/useProviderConfig";
 import { Permission } from "@/lib/permissions";
+import type { NavigationRoute } from "@/types/provider";
+import { useCurrentUser } from "@/app/(dashboard)/_hooks/useCurrentUser";
+import { authClient } from "@/lib/auth/client";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
-function SidebarItem({ route, isActive }: { route: any, isActive: boolean }) {
+function SidebarItem({ route, isActive }: { route: NavigationRoute; isActive: boolean }) {
     return (
         <Link
             href={route.href}
@@ -40,11 +33,6 @@ function SidebarItem({ route, isActive }: { route: any, isActive: boolean }) {
         </Link>
     );
 }
-
-import { useCurrentUser } from "@/app/(dashboard)/_hooks/useCurrentUser";
-import { authClient } from "@/lib/auth/client";
-import { useRouter } from "next/navigation";
-import { toast } from "sonner";
 
 export function DashboardSidebar() {
     const pathname = usePathname();
@@ -71,14 +59,17 @@ export function DashboardSidebar() {
     };
     
     // Filter routes based on permissions
-    const filteredMainRoutes = mainRoutes.filter(route => 
-        !route.permission || hasPermission(route.permission as Permission)
+    const filteredMainRoutes = useMemo(
+        () => mainRoutes.filter((route) => !route.permission || hasPermission(route.permission as Permission)),
+        [mainRoutes, hasPermission]
     );
-    const filteredOrganizationRoutes = organizationRoutes.filter(route => 
-        !route.permission || hasPermission(route.permission as Permission)
+    const filteredOrganizationRoutes = useMemo(
+        () => organizationRoutes.filter((route) => !route.permission || hasPermission(route.permission as Permission)),
+        [organizationRoutes, hasPermission]
     );
-    const filteredAccountRoutes = accountRoutes.filter(route => 
-        !route.permission || hasPermission(route.permission as Permission)
+    const filteredAccountRoutes = useMemo(
+        () => accountRoutes.filter((route) => !route.permission || hasPermission(route.permission as Permission)),
+        [accountRoutes, hasPermission]
     );
 
     return (

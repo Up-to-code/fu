@@ -12,7 +12,7 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Check, Trash2 } from "lucide-react";
+import { Check } from "lucide-react";
 import { useNotifications, useNotificationActions } from "./_hooks";
 import { NotificationsList } from "./_components";
 

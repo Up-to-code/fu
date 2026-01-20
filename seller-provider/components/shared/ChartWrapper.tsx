@@ -1,13 +1,13 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { ResponsiveContainer } from "recharts";
+import type { ReactNode } from "react";
 
 interface ChartWrapperProps {
     title: string;
     className?: string;
-    children: React.ReactNode;
+    children: ReactNode;
 }
 
 export function ChartWrapper({
