@@ -10,7 +10,6 @@ import { useMemo, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { usePermissions } from "@/app/(dashboard)/_hooks/usePermissions";
 import { useProviderConfig } from "@/app/(dashboard)/_hooks/useProviderConfig";
-import { Permission } from "@/lib/permissions";
 import type { NavigationRoute } from "@/types/provider";
 import { useCurrentUser } from "@/app/(dashboard)/_hooks/useCurrentUser";
 import { authClient } from "@/lib/auth/client";
