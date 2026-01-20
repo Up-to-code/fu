@@ -1,6 +1,8 @@
 /**
  * Provider Types - What kind of business
  */
+import type { Permission } from "@/lib/permissions";
+
 export type ProviderType = 
     | 'furniture_seller';    // Sells furniture/products
 
@@ -39,7 +41,7 @@ export interface NavigationRoute {
     labelEn?: string;
     icon: React.ComponentType<{ className?: string }>;
     href: string;
-    permission?: string;
+    permission?: Permission;
     providerTypes?: ProviderType[];    // Show only for these types
     entityTypes?: EntityType[];       // Show only for these entity types
     section?: 'main' | 'organization' | 'account';

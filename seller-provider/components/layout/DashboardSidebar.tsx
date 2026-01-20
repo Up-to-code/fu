@@ -60,15 +60,15 @@ export function DashboardSidebar() {
     
     // Filter routes based on permissions
     const filteredMainRoutes = useMemo(
-        () => mainRoutes.filter((route) => !route.permission || hasPermission(route.permission as Permission)),
+        () => mainRoutes.filter((route) => !route.permission || hasPermission(route.permission)),
         [mainRoutes, hasPermission]
     );
     const filteredOrganizationRoutes = useMemo(
-        () => organizationRoutes.filter((route) => !route.permission || hasPermission(route.permission as Permission)),
+        () => organizationRoutes.filter((route) => !route.permission || hasPermission(route.permission)),
         [organizationRoutes, hasPermission]
     );
     const filteredAccountRoutes = useMemo(
-        () => accountRoutes.filter((route) => !route.permission || hasPermission(route.permission as Permission)),
+        () => accountRoutes.filter((route) => !route.permission || hasPermission(route.permission)),
         [accountRoutes, hasPermission]
     );
 

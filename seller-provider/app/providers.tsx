@@ -13,8 +13,9 @@ let envError: string | null = null;
 try {
   const env = getPublicEnv();
   convex = new ConvexReactClient(env.NEXT_PUBLIC_CONVEX_URL);
-} catch {
-  envError = 'Missing NEXT_PUBLIC_CONVEX_URL / NEXT_PUBLIC_CONVEX_SITE_URL. Please configure .env.local.';
+} catch (err) {
+  const details = err instanceof Error ? err.message : "Unknown configuration error";
+  envError = `${details} Please configure seller-provider/.env.local.`;
 }
 
 export function Providers({ children }: { children: ReactNode }) {

@@ -2,6 +2,8 @@ import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 import { paginationOptsValidator } from "convex/server";
 import { requireOrgRole } from "./authz";
+import { throwAppError } from "./errors";
+import type { Doc } from "./_generated/dataModel";
 
 export const listOrganizationMembers = query({
   args: {
@@ -47,48 +49,106 @@ export const createOrganizationMember = mutation({
   },
 });
 
+/**
+ * Update an organization member's role and/or custom permissions.
+ *
+ * Authorization rules:
+ * - Only organization owners/admins can update members.
+ * - Only owners can modify owners or set role="owner".
+ * - Admins cannot promote anyone to owner.
+ * - A caller cannot promote themselves to owner unless they are already an owner.
+ */
 export const updateOrganizationMember = mutation({
   args: {
     memberId: v.id("organizationMembers"),
-    role: v.optional(v.string()),
+    role: v.optional(v.union(v.literal("owner"), v.literal("admin"), v.literal("member"))),
     customPermissions: v.optional(v.array(v.string())),
   },
   handler: async (ctx, args) => {
     const member = await ctx.db.get(args.memberId);
-    if (!member || member.isDeleted) throw new Error("Member not found");
+    if (!member || member.isDeleted) throwAppError("NOT_FOUND", "Member not found");
 
-    const { userId } = await requireOrgRole(ctx, member.organizationId, ["owner", "admin"]);
-    const now = Date.now();
+    const { userId: requesterUserId, member: requesterMember } = await requireOrgRole(ctx, member.organizationId, [
+      "owner",
+      "admin",
+    ]);
+    const requesterRole = requesterMember.role as "owner" | "admin";
 
-    const updates: any = {
-      updatedAt: now,
-      updatedByUserId: userId,
+    if (member.role === "owner" && requesterRole !== "owner") {
+      throwAppError("FORBIDDEN", "Only owners can modify owners");
+    }
+
+    if (args.role === "owner" && requesterRole !== "owner") {
+      throwAppError("FORBIDDEN", "Only owners can assign the owner role");
+    }
+
+    if (member.userId && member.userId === requesterUserId && args.role === "owner" && requesterRole !== "owner") {
+      throwAppError("FORBIDDEN", "You cannot promote yourself to owner");
+    }
+
+    const updates: Partial<Doc<"organizationMembers">> = {
+      updatedAt: Date.now(),
+      updatedByUserId: requesterUserId,
     };
-    if (args.role !== undefined) updates.role = args.role;
-    if (args.customPermissions !== undefined) updates.customPermissions = args.customPermissions;
+    if (args.role !== undefined) {
+      updates.role = args.role;
+    }
+    if (args.customPermissions !== undefined) {
+      updates.customPermissions = args.customPermissions;
+    }
 
     await ctx.db.patch(args.memberId, updates);
     return { success: true };
   },
 });
 
+/**
+ * Soft-delete an organization member.
+ *
+ * Authorization rules:
+ * - Only organization owners/admins can delete members.
+ * - Admins cannot delete owners.
+ * - The last remaining owner cannot be deleted (including self-removal).
+ */
 export const deleteOrganizationMember = mutation({
   args: {
     memberId: v.id("organizationMembers"),
   },
   handler: async (ctx, args) => {
     const member = await ctx.db.get(args.memberId);
-    if (!member || member.isDeleted) throw new Error("Member not found");
+    if (!member || member.isDeleted) throwAppError("NOT_FOUND", "Member not found");
 
-    const { userId } = await requireOrgRole(ctx, member.organizationId, ["owner", "admin"]);
+    const { userId: requesterUserId, member: requesterMember } = await requireOrgRole(ctx, member.organizationId, [
+      "owner",
+      "admin",
+    ]);
+    const requesterRole = requesterMember.role as "owner" | "admin";
+
+    if (member.role === "owner" && requesterRole !== "owner") {
+      throwAppError("FORBIDDEN", "Admins cannot delete owners");
+    }
+
+    if (member.role === "owner") {
+      const owners = await ctx.db
+        .query("organizationMembers")
+        .withIndex("by_organization", (q: any) => q.eq("organizationId", member.organizationId))
+        .filter((q: any) => q.eq(q.field("role"), "owner"))
+        .filter((q: any) => q.neq(q.field("isDeleted"), true))
+        .collect();
+      if (owners.length <= 1) {
+        throwAppError("CONFLICT", "Cannot delete the last owner of the organization");
+      }
+    }
+
     const now = Date.now();
-
-    await ctx.db.patch(args.memberId, {
+    const updates: Partial<Doc<"organizationMembers">> = {
       isDeleted: true,
       deletedAt: now,
       updatedAt: now,
-      updatedByUserId: userId,
-    });
+      updatedByUserId: requesterUserId,
+    };
+
+    await ctx.db.patch(args.memberId, updates);
 
     return { success: true };
   },

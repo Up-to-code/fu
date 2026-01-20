@@ -19,12 +19,11 @@ export async function GET(request: NextRequest) {
     const response = await handler.GET(request);
     return response;
   } catch (error: unknown) {
-    if (process.env.NODE_ENV !== "production") {
-      console.error("Auth GET handler error:", error);
-    }
+    console.error("Auth GET handler error:", error);
+    const isProd = process.env.NODE_ENV === "production";
     const message = error instanceof Error ? error.message : "Unexpected error";
     return new Response(
-      JSON.stringify({ error: "Internal server error", message }),
+      JSON.stringify(isProd ? { error: "Internal server error" } : { error: "Internal server error", message }),
       { status: 500, headers: { "Content-Type": "application/json" } }
     );
   }
@@ -35,12 +34,11 @@ export async function POST(request: NextRequest) {
     const response = await handler.POST(request);
     return response;
   } catch (error: unknown) {
-    if (process.env.NODE_ENV !== "production") {
-      console.error("Auth POST handler error:", error);
-    }
+    console.error("Auth POST handler error:", error);
+    const isProd = process.env.NODE_ENV === "production";
     const message = error instanceof Error ? error.message : "Unexpected error";
     return new Response(
-      JSON.stringify({ error: "Internal server error", message }),
+      JSON.stringify(isProd ? { error: "Internal server error" } : { error: "Internal server error", message }),
       { status: 500, headers: { "Content-Type": "application/json" } }
     );
   }

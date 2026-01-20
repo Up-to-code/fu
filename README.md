@@ -54,8 +54,8 @@ cd ../min-app && npm install
 
 You configure Convex through the CLI and your Convex dashboard:
 
-- Dashboard: https://dashboard.convex.dev
-- Docs: https://docs.convex.dev
+- Dashboard: <https://dashboard.convex.dev>
+- Docs: <https://docs.convex.dev>
 
 Common commands:
 
