@@ -27,12 +27,18 @@ export function CategoryFormDialog({ onAdd }: CategoryFormDialogProps) {
     const [description, setDescription] = useState("");
     const [style, setStyle] = useState("modern");
     const [selectedIcon, setSelectedIcon] = useState("📦");
+    const [nameError, setNameError] = useState<string | null>(null);
 
     const handleSubmit = () => {
-        if (name.trim()) {
+        const trimmedName = name.trim();
+        if (trimmedName.length < 2) {
+            setNameError("اسم التصنيف يجب أن يكون حرفين على الأقل");
+            return;
+        }
+        if (trimmedName) {
             onAdd({
-                name: name.trim(),
-                nameEn: name.trim(),
+                name: trimmedName,
+                nameEn: trimmedName,
                 description: description.trim() || "منتجات متنوعة",
                 products: 0,
                 icon: selectedIcon,
@@ -43,6 +49,7 @@ export function CategoryFormDialog({ onAdd }: CategoryFormDialogProps) {
             setDescription("");
             setStyle("modern");
             setSelectedIcon("📦");
+            setNameError(null);
             setIsOpen(false);
         }
     };
@@ -83,8 +90,12 @@ export function CategoryFormDialog({ onAdd }: CategoryFormDialogProps) {
                             placeholder="مثال: غرف نوم"
                             className="rounded-xl"
                             value={name}
-                            onChange={(e) => setName(e.target.value)}
+                            onChange={(e) => {
+                                setName(e.target.value);
+                                if (nameError) setNameError(null);
+                            }}
                         />
+                        {nameError && <p className="text-sm text-red-600">{nameError}</p>}
                     </div>
                     <div className="space-y-2">
                         <Label>نوع الستايل</Label>
@@ -113,7 +124,7 @@ export function CategoryFormDialog({ onAdd }: CategoryFormDialogProps) {
                     <Button
                         onClick={handleSubmit}
                         className="w-full bg-[#242C5A] hover:bg-[#1a2144] rounded-xl"
-                        disabled={!name.trim()}
+                        disabled={name.trim().length < 2}
                     >
                         <Plus className="h-4 w-4 ml-2" />
                         إضافة

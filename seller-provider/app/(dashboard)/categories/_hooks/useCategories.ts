@@ -1,4 +1,5 @@
-import { useEffect, useMemo } from "react";
+
+import { useEffect, useMemo, useRef } from "react";
 import { useCategoryStore } from "./useCategoryStore";
 import { useAuth } from "@/lib/auth/hooks";
 import { useMutation, useQuery } from "convex/react";
@@ -10,10 +11,12 @@ import { api } from "@/convex/_generated/api";
 export function useCategories() {
     const { user } = useAuth();
     const setCategories = useCategoryStore((state) => state.setCategories);
+    const seedAttemptedRef = useRef(false);
     const categoriesPage = useQuery(
         api.sellerCategories.listSellerCategories,
         user?.id ? { providerId: user.id, includeDeleted: false } : "skip"
     );
+    const seedDefaultCategories = useMutation(api.sellerCategories.seedDefaultSellerCategories);
 
     useEffect(() => {
         if (!categoriesPage?.page) return;
@@ -29,6 +32,15 @@ export function useCategories() {
         }));
         setCategories(mapped);
     }, [categoriesPage, setCategories]);
+
+    useEffect(() => {
+        if (seedAttemptedRef.current) return;
+        if (!user?.id) return;
+        if (!categoriesPage) return;
+        if (categoriesPage.page.length > 0) return;
+        seedAttemptedRef.current = true;
+        void seedDefaultCategories();
+    }, [categoriesPage, seedDefaultCategories, user?.id]);
 
     const filteredCategories = useCategoryStore((state) => state.getFilteredCategories());
     return filteredCategories;

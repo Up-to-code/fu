@@ -4,7 +4,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { categories, styleTypes } from "@/data";
+import { styleTypes } from "@/data";
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
+import { useAuth } from "@/lib/auth/hooks";
 
 interface ProductSidebarProps {
     categoryId?: string;
@@ -35,6 +38,13 @@ export function ProductSidebar({
     onSkuChange,
     onStatusChange,
 }: ProductSidebarProps) {
+    const { user } = useAuth();
+    const categoriesPage = useQuery(
+        api.sellerCategories.listSellerCategories,
+        user?.id ? { providerId: user.id, includeDeleted: false } : "skip"
+    );
+    const categories = (categoriesPage?.page ?? []) as any[];
+
     return (
         <div className="space-y-6">
             {/* Status */}
@@ -60,8 +70,8 @@ export function ProductSidebar({
                         </SelectTrigger>
                         <SelectContent>
                             {categories.map((cat) => (
-                                <SelectItem key={cat.id} value={cat.id}>
-                                    {cat.icon} {cat.name}
+                                <SelectItem key={cat._id as string} value={cat._id as string}>
+                                    {(cat.icon as string) ?? "📦"} {cat.name as string}
                                 </SelectItem>
                             ))}
                         </SelectContent>
