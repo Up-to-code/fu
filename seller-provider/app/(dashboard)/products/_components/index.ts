@@ -1,5 +1,6 @@
 // Shared Product Components
 export { MediaUpload, CompactMediaUpload, type Media } from './MediaUpload';
+export { MediaManager } from './MediaManager';
 export { ProductOptions, type Option, type OptionValue } from './ProductOptions';
 export { VariantsList, type Variant } from './VariantsList';
 export { RichTextEditor } from './RichTextEditor';

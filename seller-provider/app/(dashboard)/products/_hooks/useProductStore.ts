@@ -16,6 +16,8 @@ export type Product = {
     sku?: string;
     image: string;
     images: string[];
+    video?: string;
+    videos?: string[];
     sales?: number;
     views?: number;
 };

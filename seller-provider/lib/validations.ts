@@ -28,7 +28,9 @@ export const productSchema = z.object({
     originalPrice: z.number().positive().optional(),
     stock: z.number().min(0, 'المخزون لا يمكن أن يكون سالباً'),
     sku: z.string().min(1, 'رمز المنتج مطلوب'),
-    images: z.array(z.string()).min(1, 'صورة واحدة على الأقل مطلوبة'),
+    images: z.array(z.string()).min(1, 'صورة واحدة على الأقل مطلوبة').max(5, 'يمكن رفع 5 صور كحد أقصى'),
+    video: z.string().url('رابط الفيديو غير صحيح').optional(),
+    videos: z.array(z.string()).max(1, 'يمكن رفع فيديو واحد كحد أقصى').optional(),
     weight: z.number().positive().optional(),
     dimensions: z.object({
         length: z.number().positive(),

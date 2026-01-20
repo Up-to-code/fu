@@ -1,13 +1,16 @@
+import { FileUpload, type FileMetadata } from "@/components/ui/file-upload";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Image as ImageIcon, Video, X, GripVertical } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
 
 export type Media = { id: string; url: string; type: "image" | "video" | string };
 
 interface MediaUploadProps {
     media: Media[];
     maxItems?: number;
-    onAdd: (type: "image" | "video") => void;
+    onAdd: (media: Media) => void;
     onRemove: (id: string) => void;
     title?: string;
     subtitle?: string;
@@ -16,22 +19,58 @@ interface MediaUploadProps {
 
 export function MediaUpload({
     media,
-    maxItems = 4,
+    maxItems = 6, // 5 images + 1 video
     onAdd,
     onRemove,
     title = "الوسائط",
     subtitle,
     gridLayout = "main"
 }: MediaUploadProps) {
+    const [isUploading, setIsUploading] = useState(false);
+    const videoCount = media.filter(m => m.type === "video").length;
+    const imageCount = media.filter(m => m.type === "image").length;
+
+    const handleUploadStart = () => {
+        setIsUploading(true);
+    };
+
+    const handleUploadComplete = (res: { url: string; metadata: FileMetadata }) => {
+        setIsUploading(false);
+        if (res.metadata.type === "video" && videoCount >= 1) {
+             toast.error("يمكن رفع فيديو واحد كحد أقصى");
+             return;
+        }
+        if (res.metadata.type === "image" && imageCount >= 5) {
+            toast.error("يمكن رفع 5 صور كحد أقصى");
+            return;
+        }
+
+        const newMedia: Media = {
+            id: Date.now().toString(),
+            url: res.url,
+            type: res.metadata.type,
+        };
+        onAdd(newMedia);
+    };
+
+    const handleUploadError = (error: Error) => {
+        setIsUploading(false);
+        console.error("Upload error:", error);
+    };
+
     return (
         <div className="bg-white rounded-2xl border border-gray-100 p-6">
             <div className="flex items-center justify-between mb-4">
                 <div>
                     <h2 className="text-lg font-bold text-[#242C5A]">{title}</h2>
                     {subtitle && <p className="text-xs text-gray-400">{subtitle}</p>}
+                    <p className="text-xs text-gray-400 mt-1">
+                         (الحد الأقصى: 5 صور + فيديو واحد)
+                    </p>
                 </div>
                 <span className="text-sm text-gray-400">{media.length}/{maxItems}</span>
             </div>
+            
             <div className="grid grid-cols-4 gap-3">
                 {media.map((item, index) => (
                     <div
@@ -39,12 +78,12 @@ export function MediaUpload({
                         className={`relative aspect-square rounded-xl overflow-hidden bg-gray-100 group ${gridLayout === "main" && index === 0 ? 'col-span-2 row-span-2' : ''
                             }`}
                     >
-                        <img src={item.url} alt="" className="w-full h-full object-cover" />
-                        {item.type === "video" && (
-                            <div className="absolute inset-0 flex items-center justify-center bg-black/20">
-                                <Video className="h-8 w-8 text-white" />
-                            </div>
+                        {item.type === "video" ? (
+                             <video src={item.url} className="w-full h-full object-cover" controls />
+                        ) : (
+                             <img src={item.url} alt="" className="w-full h-full object-cover" />
                         )}
+                        
                         {index === 0 && gridLayout === "main" && (
                             <Badge className="absolute top-2 right-2 bg-[#242C5A] text-white text-xs">الرئيسية</Badge>
                         )}
@@ -63,23 +102,22 @@ export function MediaUpload({
                         </div>
                     </div>
                 ))}
-                {media.length < maxItems && (
-                    <>
-                        <button
-                            onClick={() => onAdd("image")}
-                            className="aspect-square rounded-xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center gap-1 hover:border-[#242C5A]/30 transition-all"
-                        >
-                            <ImageIcon className="h-5 w-5 text-gray-400" />
-                            <span className="text-xs text-gray-400">صورة</span>
-                        </button>
-                        <button
-                            onClick={() => onAdd("video")}
-                            className="aspect-square rounded-xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center gap-1 hover:border-[#242C5A]/30 transition-all"
-                        >
-                            <Video className="h-5 w-5 text-gray-400" />
-                            <span className="text-xs text-gray-400">فيديو</span>
-                        </button>
-                    </>
+                
+                {media.length < maxItems && !isUploading && (
+                     <div className="col-span-full mt-4">
+                        <FileUpload 
+                            onUploadComplete={handleUploadComplete} 
+                            onUploadError={handleUploadError}
+                            onUploadStart={handleUploadStart}
+                            className="w-full"
+                        />
+                     </div>
+                )}
+                
+                {isUploading && (
+                     <div className="col-span-full mt-4 text-center text-sm text-gray-500">
+                         جاري الرفع...
+                     </div>
                 )}
             </div>
         </div>

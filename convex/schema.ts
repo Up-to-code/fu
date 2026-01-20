@@ -190,6 +190,19 @@ export default defineSchema(
     .index("by_provider_and_status", ["providerId", "status"])
     .index("by_date", ["scheduledDate"]),
 
+    // Global Categories (System defaults)
+    globalCategories: defineTable({
+      name: v.string(),
+      nameEn: v.optional(v.string()),
+      description: v.optional(v.string()),
+      imageUrl: v.optional(v.string()),
+      image: v.optional(v.string()),
+      icon: v.optional(v.string()),
+      style: v.optional(v.string()),
+      isActive: v.boolean(),
+      createdAt: v.number(),
+    }),
+
     // Seller Categories
     sellerCategories: defineTable({
       providerId: v.string(),
@@ -202,10 +215,32 @@ export default defineSchema(
       style: v.optional(v.string()),
       products: v.optional(v.number()),
       parentId: v.optional(v.id("sellerCategories")),
+      globalCategoryId: v.optional(v.id("globalCategories")), // Link to source
+      backgroundColor: v.optional(v.string()), // For PRO categories
+      isSystem: v.optional(v.boolean()), // To distinguish system defaults
       isDeleted: v.boolean(),
       createdAt: v.number(),
       updatedAt: v.number(),
     })
+    .index("by_provider", ["providerId"]),
+
+    // Product Media (New table for advanced media management)
+    productMedia: defineTable({
+      providerId: v.string(),
+      productId: v.optional(v.id("sellerProducts")), // Can be unassigned initially
+      url: v.string(),
+      storageId: v.optional(v.string()), // For backend deletion
+      type: v.union(v.literal("image"), v.literal("video")),
+      name: v.optional(v.string()),
+      size: v.optional(v.number()),
+      width: v.optional(v.number()),
+      height: v.optional(v.number()),
+      duration: v.optional(v.number()),
+      isMain: v.optional(v.boolean()),
+      order: v.optional(v.number()),
+      createdAt: v.number(),
+    })
+    .index("by_product", ["productId"])
     .index("by_provider", ["providerId"]),
 
     // Seller Products
@@ -223,6 +258,8 @@ export default defineSchema(
       sku: v.optional(v.string()),
       image: v.string(),
       images: v.array(v.string()),
+      video: v.optional(v.string()),
+      videos: v.optional(v.array(v.string())),
       sales: v.optional(v.number()),
       views: v.optional(v.number()),
       isDeleted: v.boolean(),

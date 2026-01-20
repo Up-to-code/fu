@@ -38,8 +38,18 @@ export function useCategories() {
         if (!user?.id) return;
         if (!categoriesPage) return;
         if (categoriesPage.page.length > 0) return;
-        seedAttemptedRef.current = true;
-        void seedDefaultCategories();
+        
+        const seed = async () => {
+            try {
+                seedAttemptedRef.current = true;
+                await seedDefaultCategories();
+            } catch (error) {
+                console.error("Seeding failed:", error);
+                seedAttemptedRef.current = false;
+            }
+        };
+        
+        void seed();
     }, [categoriesPage, seedDefaultCategories, user?.id]);
 
     const filteredCategories = useCategoryStore((state) => state.getFilteredCategories());
@@ -101,7 +111,7 @@ export function useCategoryViewMode() {
 export function useCategoryActions() {
     const createSellerCategory = useMutation(api.sellerCategories.createSellerCategory);
     const updateSellerCategory = useMutation(api.sellerCategories.updateSellerCategory);
-    const deleteSellerCategory = useMutation(api.sellerCategories.deleteSellerCategory);
+    const deleteSellerCategory = useMutation(api.mediaManagement.deleteSellerCategoryCascading);
 
     return {
         createSellerCategory,

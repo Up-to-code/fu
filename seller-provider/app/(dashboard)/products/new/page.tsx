@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { ArrowRight, Save } from "lucide-react";
 import Link from "next/link";
 import { useProductForm } from "../_hooks";
-import { ProductSidebar, MediaUpload, RichTextEditor, ProductOptions, VariantsList, generateVariants, type Option, type Variant, type Media } from "../_components";
+import { MediaManager, ProductOptions, ProductSidebar, RichTextEditor, VariantsList, generateVariants, type Media, type Option, type Variant } from "../_components";
 
 export default function NewProductPage() {
     const { formData, updateField, errors, isSubmitting, handleSubmit } = useProductForm();
@@ -15,29 +15,17 @@ export default function NewProductPage() {
     const [variants, setVariants] = useState<Variant[]>([]);
     const [media, setMedia] = useState<Media[]>([]);
 
-    const handleMediaAdd = (type: "image" | "video") => {
-        // In a real app, you would upload the file and get a URL
-        const newMedia: Media = {
-            id: Date.now().toString(),
-            url: `https://images.unsplash.com/photo-1580480055273-228ff5388ef8?w=600&t=${Date.now()}`,
-            type,
-        };
-        const newMediaList = [...media, newMedia];
+    const handleMediaChange = (newMediaList: Media[]) => {
         setMedia(newMediaList);
         
         // Update form data
-        const imageUrls = newMediaList.map(m => m.url);
-        updateField("image", imageUrls[0] || "");
-        updateField("images", imageUrls);
-    };
-
-    const handleMediaRemove = (id: string) => {
-        const newMediaList = media.filter(m => m.id !== id);
-        setMedia(newMediaList);
+        const imageUrls = newMediaList.filter(m => m.type === "image").map(m => m.url);
+        const videoUrls = newMediaList.filter(m => m.type === "video").map(m => m.url);
         
-        const imageUrls = newMediaList.map(m => m.url);
         updateField("image", imageUrls[0] || "");
         updateField("images", imageUrls);
+        updateField("video", videoUrls[0] || "");
+        updateField("videos", videoUrls);
     };
 
     const handleOptionsChange = (newOptions: Option[]) => {
@@ -132,10 +120,9 @@ export default function NewProductPage() {
                     </div>
 
                     {/* Media */}
-                    <MediaUpload
+                    <MediaManager
                         media={media}
-                        onAdd={handleMediaAdd}
-                        onRemove={handleMediaRemove}
+                        onChange={handleMediaChange}
                     />
                     {errors.images && <p className="text-sm text-red-600">{errors.images}</p>}
 

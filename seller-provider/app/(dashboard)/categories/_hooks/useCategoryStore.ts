@@ -1,15 +1,16 @@
 import { create } from "zustand";
 
-export type Category = {
+export interface Category {
     id: string;
     name: string;
     nameEn?: string;
     description?: string;
-    products?: number;
-    icon?: string;
     image?: string;
+    icon?: string;
     style?: string;
-};
+    products?: number;
+    backgroundColor?: string;
+}
 
 type CategoryFilters = {
     style?: string;

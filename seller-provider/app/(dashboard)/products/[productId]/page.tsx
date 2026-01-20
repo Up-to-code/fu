@@ -96,12 +96,12 @@ export default function ProductDetailPage() {
                 <div className="grid gap-8 lg:grid-cols-3">
                     {/* Main Content */}
                     <div className="lg:col-span-2 space-y-6">
-                        {/* Images */}
+                        {/* Images & Videos */}
                         <div className="bg-white rounded-2xl border border-gray-100 p-6">
                             <div className="grid grid-cols-2 gap-4">
                                 {product.images.length > 0 ? (
                                     product.images.map((img, index) => (
-                                        <div key={index} className="relative aspect-square rounded-xl overflow-hidden bg-gray-100">
+                                        <div key={`img-${index}`} className="relative aspect-square rounded-xl overflow-hidden bg-gray-100">
                                             <Image src={img} alt={product.name} fill className="object-cover" />
                                         </div>
                                     ))
@@ -110,6 +110,19 @@ export default function ProductDetailPage() {
                                         <Image src={product.image} alt={product.name} fill className="object-cover" />
                                     </div>
                                 )}
+                                
+                                {/* Videos */}
+                                {product.video && (
+                                    <div className="relative aspect-square rounded-xl overflow-hidden bg-gray-100">
+                                        <video src={product.video} controls className="w-full h-full object-cover" />
+                                        <Badge className="absolute top-2 right-2 bg-black/50 text-white hover:bg-black/70">فيديو رئيسي</Badge>
+                                    </div>
+                                )}
+                                {product.videos?.map((vid, index) => (
+                                    <div key={`vid-${index}`} className="relative aspect-square rounded-xl overflow-hidden bg-gray-100">
+                                        <video src={vid} controls className="w-full h-full object-cover" />
+                                    </div>
+                                ))}
                             </div>
                         </div>
 

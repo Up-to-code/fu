@@ -54,10 +54,12 @@ export const createSellerProduct = mutation({
     sku: v.optional(v.string()),
     image: v.string(),
     images: v.array(v.string()),
+    video: v.optional(v.string()),
+    videos: v.optional(v.array(v.string())),
   },
   handler: async (ctx, args) => {
     const user = await authComponent.getAuthUser(ctx);
-    const providerId = user?._id;
+    const providerId = user?.userId;
     if (!providerId) throwAppError("AUTH_REQUIRED", "Unauthenticated");
 
     if (!args.name.trim()) throwAppError("VALIDATION_FAILED", "Product name is required");
@@ -87,6 +89,8 @@ export const createSellerProduct = mutation({
       sku: args.sku,
       image: args.image,
       images: args.images,
+      video: args.video,
+      videos: args.videos,
       sales: 0,
       views: 0,
       isDeleted: false,
@@ -114,10 +118,12 @@ export const updateSellerProduct = mutation({
     sku: v.optional(v.string()),
     image: v.optional(v.string()),
     images: v.optional(v.array(v.string())),
+    video: v.optional(v.string()),
+    videos: v.optional(v.array(v.string())),
   },
   handler: async (ctx, args) => {
     const user = await authComponent.getAuthUser(ctx);
-    const providerId = user?._id;
+    const providerId = user?.userId;
     if (!providerId) throwAppError("AUTH_REQUIRED", "Unauthenticated");
 
     const product = await ctx.db.get(args.productId);
@@ -151,6 +157,8 @@ export const updateSellerProduct = mutation({
     if (args.sku !== undefined) updates.sku = args.sku;
     if (args.image !== undefined) updates.image = args.image;
     if (args.images !== undefined) updates.images = args.images;
+    if (args.video !== undefined) updates.video = args.video;
+    if (args.videos !== undefined) updates.videos = args.videos;
 
     await ctx.db.patch(args.productId, updates);
     return { success: true };
@@ -163,7 +171,7 @@ export const deleteSellerProduct = mutation({
   },
   handler: async (ctx, args) => {
     const user = await authComponent.getAuthUser(ctx);
-    const providerId = user?._id;
+    const providerId = user?.userId;
     if (!providerId) throwAppError("AUTH_REQUIRED", "Unauthenticated");
 
     const product = await ctx.db.get(args.productId);

@@ -41,6 +41,8 @@ export function useProducts() {
             sku: p.sku,
             image: p.image,
             images: p.images,
+            video: p.video,
+            videos: p.videos,
             sales: p.sales,
             views: p.views,
         }));

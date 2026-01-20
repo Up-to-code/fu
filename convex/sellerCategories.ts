@@ -39,7 +39,7 @@ export const createSellerCategory = mutation({
   },
   handler: async (ctx, args) => {
     const user = await authComponent.getAuthUser(ctx);
-    const providerId = user?._id;
+    const providerId = user?.userId;
     if (!providerId) throwAppError("AUTH_REQUIRED", "Unauthenticated");
 
     if (!args.name.trim() || args.name.trim().length < 2) {
@@ -75,109 +75,52 @@ export const createSellerCategory = mutation({
 
 export const seedDefaultSellerCategories = mutation({
   args: {},
-  handler: async (ctx) => {
+  handler: async () => {
+    // Deprecated: Use importGlobalCategory or createSellerCategory instead
+    return { seeded: false, categoryIds: [] as string[] };
+  },
+});
+
+export const importGlobalCategory = mutation({
+  args: {
+    globalCategoryId: v.id("globalCategories"),
+  },
+  handler: async (ctx, args) => {
     const user = await authComponent.getAuthUser(ctx);
-    const providerId = user?._id;
+    const providerId = user?.userId;
     if (!providerId) throwAppError("AUTH_REQUIRED", "Unauthenticated");
 
-    const existing = await ctx.db
-      .query("sellerCategories")
-      .withIndex("by_provider", (q) => q.eq("providerId", providerId))
-      .filter((q) => q.eq(q.field("isDeleted"), false))
-      .first();
+    const globalCategory = await ctx.db.get(args.globalCategoryId);
+    if (!globalCategory) throwAppError("NOT_FOUND", "Global category not found");
 
-    if (existing) {
-      return { seeded: false, categoryIds: [] as string[] };
-    }
+    // Check if already imported
+    const existing = await ctx.db
+        .query("sellerCategories")
+        .withIndex("by_provider", (q) => q.eq("providerId", providerId))
+        .filter((q) => q.eq(q.field("globalCategoryId"), args.globalCategoryId))
+        .filter((q) => q.eq(q.field("isDeleted"), false))
+        .first();
+
+    if (existing) return { success: false, message: "Category already imported", categoryId: existing._id };
 
     const now = Date.now();
-    const defaults = [
-      {
-        name: "غرف نوم",
-        nameEn: "Bedrooms",
-        description: "أسرّة، خزائن ملابس، كومودينو، تسريحات",
-        icon: "🛏️",
-        image: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=400",
-        style: "modern",
-      },
-      {
-        name: "غرف معيشة",
-        nameEn: "Living Rooms",
-        description: "كنب، طاولات قهوة، وحدات تلفزيون، سجاد",
-        icon: "🛋️",
-        image: "https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?w=400",
-        style: "classic",
-      },
-      {
-        name: "غرف طعام",
-        nameEn: "Dining Rooms",
-        description: "طاولات طعام، كراسي، بوفيهات، خزائن عرض",
-        icon: "🍽️",
-        image: "https://images.unsplash.com/photo-1617806118233-18e1de247200?w=400",
-        style: "luxury",
-      },
-      {
-        name: "مكتبي",
-        nameEn: "Office",
-        description: "مكاتب عمل، كراسي مكتب، أرفف، خزائن ملفات",
-        icon: "💼",
-        image: "https://images.unsplash.com/photo-1580480055273-228ff5388ef8?w=400",
-        style: "minimal",
-      },
-      {
-        name: "إكسسوارات",
-        nameEn: "Accessories",
-        description: "مرايا، لوحات فنية، مزهريات، ديكورات",
-        icon: "🎨",
-        image: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400",
-        style: "modern",
-      },
-      {
-        name: "إضاءة",
-        nameEn: "Lighting",
-        description: "ثريات، أباجورات، إضاءة أرضية، إضاءة حائط",
-        icon: "💡",
-        image: "https://images.unsplash.com/photo-1513506003901-1e6a229e2d15?w=400",
-        style: "rustic",
-      },
-      {
-        name: "غرف أطفال",
-        nameEn: "Kids Rooms",
-        description: "أسرّة أطفال، مكاتب دراسة، خزائن، ألعاب",
-        icon: "🧸",
-        image: "https://images.unsplash.com/photo-1617806118233-18e1de247200?w=400",
-        style: "scandinavian",
-      },
-      {
-        name: "حدائق وخارجية",
-        nameEn: "Outdoor",
-        description: "جلسات خارجية، طاولات حديقة، مظلات",
-        icon: "🌳",
-        image: "https://images.unsplash.com/photo-1600210492493-0946911123ea?w=400",
-        style: "rustic",
-      },
-    ];
+    const categoryId = await ctx.db.insert("sellerCategories", {
+      providerId,
+      name: globalCategory.name,
+      nameEn: globalCategory.nameEn,
+      description: globalCategory.description,
+      image: globalCategory.image,
+      icon: globalCategory.icon,
+      style: globalCategory.style,
+      products: 0,
+      globalCategoryId: args.globalCategoryId,
+      isSystem: true,
+      isDeleted: false,
+      createdAt: now,
+      updatedAt: now,
+    });
 
-    const categoryIds: string[] = [];
-    for (const c of defaults) {
-      const id = await ctx.db.insert("sellerCategories", {
-        providerId,
-        name: c.name,
-        nameEn: c.nameEn,
-        description: c.description,
-        image: c.image,
-        icon: c.icon,
-        style: c.style,
-        products: 0,
-        parentId: undefined,
-        isDeleted: false,
-        createdAt: now,
-        updatedAt: now,
-      });
-      categoryIds.push(id);
-    }
-
-    return { seeded: true, categoryIds };
+    return { success: true, categoryId };
   },
 });
 
@@ -197,7 +140,7 @@ export const updateSellerCategory = mutation({
   },
   handler: async (ctx, args) => {
     const user = await authComponent.getAuthUser(ctx);
-    const providerId = user?._id;
+    const providerId = user?.userId;
     if (!providerId) throwAppError("AUTH_REQUIRED", "Unauthenticated");
 
     const category = await ctx.db.get(args.categoryId);
@@ -236,7 +179,7 @@ export const deleteSellerCategory = mutation({
   },
   handler: async (ctx, args) => {
     const user = await authComponent.getAuthUser(ctx);
-    const providerId = user?._id;
+    const providerId = user?.userId;
     if (!providerId) throwAppError("AUTH_REQUIRED", "Unauthenticated");
 
     const category = await ctx.db.get(args.categoryId);
