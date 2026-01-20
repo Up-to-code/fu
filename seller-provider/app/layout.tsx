@@ -129,7 +129,10 @@ export default function RootLayout({
         <meta name="geo.position" content="24.7136;46.6753" />
         <meta name="ICBM" content="24.7136, 46.6753" />
       </head>
-      <body className={`font-sans antialiased bg-background text-foreground min-h-screen`}>
+      <body
+        className={`font-sans antialiased bg-background text-foreground min-h-screen`}
+        suppressHydrationWarning={true}
+      >
         <Providers>{children}</Providers>
         <Toaster
           position="top-center"
