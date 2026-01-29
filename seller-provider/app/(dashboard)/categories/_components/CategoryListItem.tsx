@@ -7,16 +7,23 @@ import type { Category } from "../_hooks";
 interface CategoryListItemProps {
     category: Category;
     onDelete: (id: string) => void;
+    disabled?: boolean;
 }
 
-export function CategoryListItem({ category, onDelete }: CategoryListItemProps) {
+export function CategoryListItem({ category, onDelete, disabled = false }: CategoryListItemProps) {
     const styleInfo = getStyleById(category.style || "modern");
     
     return (
         <div className="flex items-center justify-between p-4 hover:bg-gray-50/50 transition-colors group">
             <div className="flex items-center gap-4">
                 <div className="relative h-14 w-14 rounded-xl overflow-hidden bg-gray-100">
-                    <Image src={category.image || "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=400"} alt={category.name} fill className="object-cover" />
+                    {category.image ? (
+                        <Image src={category.image} alt={category.name} fill className="object-cover" />
+                    ) : (
+                        <div className="absolute inset-0 flex items-center justify-center text-xl text-gray-400">
+                            {category.icon || "📦"}
+                        </div>
+                    )}
                 </div>
                 <div>
                     <div className="flex items-center gap-2 flex-wrap">
@@ -31,8 +38,9 @@ export function CategoryListItem({ category, onDelete }: CategoryListItemProps) 
             <Button
                 variant="ghost"
                 size="icon"
-                className="h-9 w-9 rounded-full text-gray-400 hover:text-red-500 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-all"
+                className="h-9 w-9 rounded-full text-gray-400 hover:text-red-500 hover:bg-red-50 opacity-0 group-hover:opacity-100 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 onClick={() => onDelete(category.id)}
+                disabled={disabled}
             >
                 <X className="h-4 w-4" />
             </Button>

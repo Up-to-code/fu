@@ -15,13 +15,21 @@ export function CategoryCard({ category, onDelete }: CategoryCardProps) {
     return (
         <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden hover:border-[#242C5A]/20 transition-all group relative">
             <div className="relative h-36 bg-gray-100">
-                <Image
-                    src={category.image || "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=400"}
-                    alt={category.name}
-                    fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-300"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                {category.image ? (
+                    <>
+                        <Image
+                            src={category.image}
+                            alt={category.name}
+                            fill
+                            className="object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                    </>
+                ) : (
+                    <div className="absolute inset-0 flex items-center justify-center text-4xl bg-gray-100">
+                        {category.icon || "📦"}
+                    </div>
+                )}
                 <div className="absolute bottom-3 right-4 text-3xl">{category.icon || "📦"}</div>
                 <span className={`absolute top-3 right-3 text-xs px-2.5 py-1 rounded-full font-bold ${styleInfo.color}`}>
                     {styleInfo.name}

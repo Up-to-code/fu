@@ -16,6 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Plus } from "lucide-react";
 import { styleTypes, emojiIcons } from "@/data";
 import type { Category } from "../_hooks";
+import { FileUpload } from "@/components/ui/file-upload";
 
 interface CategoryFormDialogProps {
     onAdd: (category: Omit<Category, "id">) => void;
@@ -27,22 +28,36 @@ export function CategoryFormDialog({ onAdd }: CategoryFormDialogProps) {
     const [description, setDescription] = useState("");
     const [style, setStyle] = useState("modern");
     const [selectedIcon, setSelectedIcon] = useState("📦");
+    const [nameError, setNameError] = useState<string | null>(null);
+    const [backgroundMode, setBackgroundMode] = useState<"color" | "image">("color");
+    const [backgroundColor, setBackgroundColor] = useState("#242C5A");
+    const [backgroundImage, setBackgroundImage] = useState<string | null>(null);
 
     const handleSubmit = () => {
-        if (name.trim()) {
+        const trimmedName = name.trim();
+        if (trimmedName.length < 2) {
+            setNameError("اسم التصنيف يجب أن يكون حرفين على الأقل");
+            return;
+        }
+        if (trimmedName) {
             onAdd({
-                name: name.trim(),
-                nameEn: name.trim(),
+                name: trimmedName,
+                nameEn: trimmedName,
                 description: description.trim() || "منتجات متنوعة",
                 products: 0,
                 icon: selectedIcon,
-                image: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=400",
+                image: backgroundImage || "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=400",
                 style: style,
+                backgroundColor: backgroundMode === "color" ? backgroundColor : undefined,
             });
             setName("");
             setDescription("");
             setStyle("modern");
             setSelectedIcon("📦");
+            setNameError(null);
+            setBackgroundMode("color");
+            setBackgroundColor("#242C5A");
+            setBackgroundImage(null);
             setIsOpen(false);
         }
     };
@@ -55,9 +70,9 @@ export function CategoryFormDialog({ onAdd }: CategoryFormDialogProps) {
                     إضافة تصنيف
                 </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-md rounded-2xl" dir="rtl">
+            <DialogContent className="sm:max-w-md rounded-2xl max-h-[90vh] overflow-y-auto" dir="rtl">
                 <DialogHeader>
-                    <DialogTitle className="text-xl font-black text-[#242C5A]">إضافة تصنيف جديد</DialogTitle>
+                    <DialogTitle className="text-xl font-black text-[#242C5A]">إضافة تصنيف جديد (PRO)</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-4 py-4">
                     <div className="space-y-2">
@@ -77,14 +92,76 @@ export function CategoryFormDialog({ onAdd }: CategoryFormDialogProps) {
                             ))}
                         </div>
                     </div>
+                    
+                    {/* Background Selection */}
+                    <div className="space-y-2">
+                        <Label>خلفية التصنيف</Label>
+                        <div className="flex gap-2 mb-2">
+                             <Button 
+                                variant={backgroundMode === "color" ? "default" : "outline"} 
+                                onClick={() => setBackgroundMode("color")}
+                                size="sm"
+                                className="flex-1"
+                             >
+                                لون
+                             </Button>
+                             <Button 
+                                variant={backgroundMode === "image" ? "default" : "outline"} 
+                                onClick={() => setBackgroundMode("image")}
+                                size="sm"
+                                className="flex-1"
+                             >
+                                صورة
+                             </Button>
+                        </div>
+
+                        {backgroundMode === "color" ? (
+                             <div className="flex items-center gap-2">
+                                 <input 
+                                    type="color" 
+                                    value={backgroundColor} 
+                                    onChange={(e) => setBackgroundColor(e.target.value)}
+                                    className="h-10 w-20 rounded cursor-pointer"
+                                 />
+                                 <span className="text-sm text-gray-500">{backgroundColor}</span>
+                             </div>
+                        ) : (
+                             <div className="space-y-2">
+                                 {backgroundImage ? (
+                                     <div className="relative aspect-video rounded-lg overflow-hidden border">
+                                         <img src={backgroundImage} alt="Background" className="w-full h-full object-cover" />
+                                         <Button 
+                                            size="sm" 
+                                            variant="destructive" 
+                                            className="absolute top-2 right-2"
+                                            onClick={() => setBackgroundImage(null)}
+                                         >
+                                            إزالة
+                                         </Button>
+                                     </div>
+                                 ) : (
+                                     <FileUpload 
+                                        onUploadComplete={(res) => setBackgroundImage(res.url)}
+                                        onUploadError={(e) => console.error(e)}
+                                        className="w-full"
+                                     />
+                                 )}
+                             </div>
+                        )}
+                    </div>
+
                     <div className="space-y-2">
                         <Label>اسم التصنيف</Label>
                         <Input
                             placeholder="مثال: غرف نوم"
                             className="rounded-xl"
                             value={name}
-                            onChange={(e) => setName(e.target.value)}
+                            onChange={(e) => {
+                                setName(e.target.value);
+                                if (nameError) setNameError(null);
+                            }}
                         />
+                        {nameError && <p className="text-sm text-red-600">{nameError}</p>}
                     </div>
                     <div className="space-y-2">
                         <Label>نوع الستايل</Label>
@@ -113,7 +190,7 @@ export function CategoryFormDialog({ onAdd }: CategoryFormDialogProps) {
                     <Button
                         onClick={handleSubmit}
                         className="w-full bg-[#242C5A] hover:bg-[#1a2144] rounded-xl"
-                        disabled={!name.trim()}
+                        disabled={name.trim().length < 2}
                     >
                         <Plus className="h-4 w-4 ml-2" />
                         إضافة

@@ -190,6 +190,19 @@ export default defineSchema(
     .index("by_provider_and_status", ["providerId", "status"])
     .index("by_date", ["scheduledDate"]),
 
+    // Global Categories (System defaults)
+    globalCategories: defineTable({
+      name: v.string(),
+      nameEn: v.optional(v.string()),
+      description: v.optional(v.string()),
+      imageUrl: v.optional(v.string()),
+      image: v.optional(v.string()),
+      icon: v.optional(v.string()),
+      style: v.optional(v.string()),
+      isActive: v.boolean(),
+      createdAt: v.number(),
+    }),
+
     // Seller Categories
     sellerCategories: defineTable({
       providerId: v.string(),
@@ -202,10 +215,37 @@ export default defineSchema(
       style: v.optional(v.string()),
       products: v.optional(v.number()),
       parentId: v.optional(v.id("sellerCategories")),
+      globalCategoryId: v.optional(v.id("globalCategories")), // Link to source
+      backgroundColor: v.optional(v.string()), // For PRO categories
+      isSystem: v.optional(v.boolean()), // To distinguish system defaults
       isDeleted: v.boolean(),
       createdAt: v.number(),
       updatedAt: v.number(),
     })
+    .index("by_provider", ["providerId"]),
+
+    // Product Media (New table for advanced media management)
+    productMedia: defineTable({
+      providerId: v.string(),
+      productId: v.optional(v.id("sellerProducts")), // Can be unassigned initially
+      variantId: v.optional(v.id("sellerProductVariants")),
+      optionKey: v.optional(v.string()),
+      optionValue: v.optional(v.string()),
+      url: v.string(),
+      storageId: v.optional(v.string()), // For backend deletion
+      type: v.union(v.literal("image"), v.literal("video")),
+      name: v.optional(v.string()),
+      size: v.optional(v.number()),
+      width: v.optional(v.number()),
+      height: v.optional(v.number()),
+      duration: v.optional(v.number()),
+      isMain: v.optional(v.boolean()),
+      order: v.optional(v.number()),
+      isVerified: v.optional(v.boolean()),
+      createdAt: v.number(),
+    })
+    .index("by_product", ["productId"])
+    .index("by_variant", ["variantId"])
     .index("by_provider", ["providerId"]),
 
     // Seller Products
@@ -223,6 +263,8 @@ export default defineSchema(
       sku: v.optional(v.string()),
       image: v.string(),
       images: v.array(v.string()),
+      video: v.optional(v.string()),
+      videos: v.optional(v.array(v.string())),
       sales: v.optional(v.number()),
       views: v.optional(v.number()),
       isDeleted: v.boolean(),
@@ -231,6 +273,143 @@ export default defineSchema(
     })
     .index("by_provider", ["providerId"])
     .index("by_provider_and_deleted", ["providerId", "isDeleted"]),
+
+    sellerProductOptionGroups: defineTable({
+      productId: v.id("sellerProducts"),
+      providerId: v.string(),
+      key: v.string(),
+      name: v.string(),
+      type: v.union(
+        v.literal("size"),
+        v.literal("color"),
+        v.literal("material"),
+        v.literal("custom")
+      ),
+      position: v.number(),
+      isRequired: v.boolean(),
+      isActive: v.boolean(),
+      createdAt: v.number(),
+      updatedAt: v.number(),
+    })
+    .index("by_product", ["productId"])
+    .index("by_provider", ["providerId"])
+    .index("by_product_and_key", ["productId", "key"]),
+
+    sellerProductOptionValues: defineTable({
+      productId: v.id("sellerProducts"),
+      providerId: v.string(),
+      groupId: v.id("sellerProductOptionGroups"),
+      valueKey: v.string(),
+      label: v.string(),
+      position: v.number(),
+      isActive: v.boolean(),
+      hex: v.optional(v.string()),
+      rgb: v.optional(v.string()),
+      dimensions: v.optional(v.object({
+        width: v.optional(v.number()),
+        height: v.optional(v.number()),
+        depth: v.optional(v.number()),
+        unit: v.optional(v.string()),
+      })),
+      textureName: v.optional(v.string()),
+      meta: v.optional(v.any()),
+      primaryImageUrl: v.optional(v.string()),
+      createdAt: v.number(),
+      updatedAt: v.number(),
+    })
+    .index("by_product", ["productId"])
+    .index("by_provider", ["providerId"])
+    .index("by_group", ["groupId"])
+    .index("by_product_group_valueKey", ["productId", "groupId", "valueKey"]),
+
+    sellerProductOptionAttributes: defineTable({
+      productId: v.id("sellerProducts"),
+      providerId: v.string(),
+      groupKey: v.string(),
+      valueKey: v.string(),
+      attributes: v.any(),
+      updatedAt: v.number(),
+    })
+    .index("by_product", ["productId"])
+    .index("by_provider", ["providerId"])
+    .index("by_product_group_valueKey", ["productId", "groupKey", "valueKey"]),
+
+    sellerProductPriceRules: defineTable({
+      productId: v.id("sellerProducts"),
+      providerId: v.string(),
+      ruleType: v.union(
+        v.literal("valueAdjustment"),
+        v.literal("valueMultiplier"),
+        v.literal("pairOverride"),
+        v.literal("comboOverride")
+      ),
+      appliesTo: v.any(),
+      amount: v.optional(v.number()),
+      multiplier: v.optional(v.number()),
+      currency: v.optional(v.string()),
+      priority: v.number(),
+      isActive: v.boolean(),
+      createdAt: v.number(),
+      updatedAt: v.number(),
+    })
+    .index("by_product", ["productId"])
+    .index("by_provider", ["providerId"])
+    .index("by_product_and_ruleType", ["productId", "ruleType"]),
+
+    sellerCustomizationTemplates: defineTable({
+      providerId: v.string(),
+      name: v.string(),
+      appliesTo: v.optional(v.any()),
+      definition: v.any(),
+      createdAt: v.number(),
+      updatedAt: v.number(),
+    })
+    .index("by_provider", ["providerId"]),
+
+    sellerCustomizationCache: defineTable({
+      productId: v.id("sellerProducts"),
+      providerId: v.string(),
+      combinationKey: v.string(),
+      version: v.string(),
+      result: v.any(),
+      createdAt: v.number(),
+      updatedAt: v.number(),
+    })
+    .index("by_product", ["productId"])
+    .index("by_provider", ["providerId"])
+    .index("by_product_and_combinationKey", ["productId", "combinationKey"]),
+
+    sellerCustomizationResolveEvents: defineTable({
+      providerId: v.string(),
+      productId: v.id("sellerProducts"),
+      combinationKey: v.string(),
+      durationMs: v.number(),
+      cacheHit: v.boolean(),
+      createdAt: v.number(),
+    })
+    .index("by_provider", ["providerId"])
+    .index("by_product", ["productId"]),
+
+    // Seller Product Variants
+    sellerProductVariants: defineTable({
+      productId: v.id("sellerProducts"),
+      providerId: v.string(),
+      combination: v.any(), // Record<string, string>
+      combinationKey: v.string(),
+      parentVariantId: v.optional(v.id("sellerProductVariants")),
+      isDefault: v.optional(v.boolean()),
+      price: v.number(),
+      stock: v.number(),
+      sku: v.optional(v.string()),
+      image: v.optional(v.string()),
+      images: v.optional(v.array(v.string())),
+      isActive: v.boolean(),
+      createdAt: v.number(),
+      updatedAt: v.number(),
+    })
+    .index("by_product", ["productId"])
+    .index("by_provider", ["providerId"])
+    .index("by_product_and_combinationKey", ["productId", "combinationKey"]),
 
     // Seller Orders
     sellerOrders: defineTable({
@@ -241,6 +420,9 @@ export default defineSchema(
       phone: v.string(),
       items: v.array(v.object({
         productId: v.string(),
+        variantId: v.optional(v.string()),
+        selectedOptions: v.optional(v.any()),
+        customizationSnapshot: v.optional(v.any()),
         productName: v.string(),
         productImage: v.string(),
         quantity: v.number(),

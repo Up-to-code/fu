@@ -1,7 +1,6 @@
 // Re-export all data from one place
 export * from './blog';
 export * from './styles';
-export * from './categories';
 export * from './products';
 export * from './orders';
 

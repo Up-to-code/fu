@@ -20,7 +20,7 @@ interface VariantsListProps {
     variants: Variant[];
     optionNames: string[];
     onVariantChange: (variantId: string, field: keyof Variant, value: string | Media[]) => void;
-    onAddMedia: (variantId: string, type: "image" | "video") => void;
+    onAddMedia: (variantId: string, media: Media) => void;
     onRemoveMedia: (variantId: string, mediaId: string) => void;
 }
 
@@ -29,7 +29,7 @@ export function VariantsList({
     optionNames: _optionNames,
     onVariantChange,
     onAddMedia,
-    onRemoveMedia
+    onRemoveMedia,
 }: VariantsListProps) {
     const [expandedVariant, setExpandedVariant] = useState<string | null>(null);
 
@@ -40,7 +40,7 @@ export function VariantsList({
     return (
         <div className="bg-white rounded-2xl border border-gray-100 p-6 space-y-4">
             <div className="flex items-center justify-between">
-                <h2 className="text-lg font-bold text-[#242C5A]">المتغيرات ({variants.length})</h2>
+                <h2 className="text-lg font-bold text-primary">المتغيرات ({variants.length})</h2>
                 <p className="text-xs text-gray-400">صور وأسعار لكل تركيبة</p>
             </div>
             <div className="space-y-3">
@@ -62,8 +62,15 @@ export function VariantsList({
                                 <div>
                                     <div className="flex items-center gap-2">
                                         {Object.entries(variant.combination).map(([key, val]) => (
-                                            <Badge key={key} variant="outline" className="text-xs">{val}</Badge>
+                                            <Badge key={key} variant="outline" className="text-xs">
+                                                <span className="text-gray-400 ml-1">{key}:</span>
+                                                {val}
+                                            </Badge>
                                         ))}
+                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-gray-100 text-gray-600">
+                                            <ImageIcon className="h-3 w-3" />
+                                            {variant.media.length}
+                                        </span>
                                     </div>
                                     <div className="flex items-center gap-4 mt-1 text-sm text-gray-500">
                                         <span>{variant.price || '0'} ر.س</span>

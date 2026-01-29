@@ -1,3 +1,4 @@
+
 import { useEffect, useMemo } from "react";
 import { useCategoryStore } from "./useCategoryStore";
 import { useAuth } from "@/lib/auth/hooks";
@@ -10,10 +11,12 @@ import { api } from "@/convex/_generated/api";
 export function useCategories() {
     const { user } = useAuth();
     const setCategories = useCategoryStore((state) => state.setCategories);
+    // Removed seeding logic
     const categoriesPage = useQuery(
         api.sellerCategories.listSellerCategories,
         user?.id ? { providerId: user.id, includeDeleted: false } : "skip"
     );
+    // Removed seeding mutation
 
     useEffect(() => {
         if (!categoriesPage?.page) return;
@@ -29,6 +32,8 @@ export function useCategories() {
         }));
         setCategories(mapped);
     }, [categoriesPage, setCategories]);
+
+    // Removed seller default seeding; categories should be user-created or imported explicitly
 
     const filteredCategories = useCategoryStore((state) => state.getFilteredCategories());
     return filteredCategories;
@@ -89,7 +94,7 @@ export function useCategoryViewMode() {
 export function useCategoryActions() {
     const createSellerCategory = useMutation(api.sellerCategories.createSellerCategory);
     const updateSellerCategory = useMutation(api.sellerCategories.updateSellerCategory);
-    const deleteSellerCategory = useMutation(api.sellerCategories.deleteSellerCategory);
+    const deleteSellerCategory = useMutation(api.mediaManagement.deleteSellerCategoryCascading);
 
     return {
         createSellerCategory,

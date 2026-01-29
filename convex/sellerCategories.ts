@@ -39,7 +39,7 @@ export const createSellerCategory = mutation({
   },
   handler: async (ctx, args) => {
     const user = await authComponent.getAuthUser(ctx);
-    const providerId = user?._id;
+    const providerId = user?.userId;
     if (!providerId) throwAppError("AUTH_REQUIRED", "Unauthenticated");
 
     if (!args.name.trim() || args.name.trim().length < 2) {
@@ -73,6 +73,57 @@ export const createSellerCategory = mutation({
   },
 });
 
+export const seedDefaultSellerCategories = mutation({
+  args: {},
+  handler: async () => {
+    // Deprecated: Use importGlobalCategory or createSellerCategory instead
+    return { seeded: false, categoryIds: [] as string[] };
+  },
+});
+
+export const importGlobalCategory = mutation({
+  args: {
+    globalCategoryId: v.id("globalCategories"),
+  },
+  handler: async (ctx, args) => {
+    const user = await authComponent.getAuthUser(ctx);
+    const providerId = user?.userId;
+    if (!providerId) throwAppError("AUTH_REQUIRED", "Unauthenticated");
+
+    const globalCategory = await ctx.db.get(args.globalCategoryId);
+    if (!globalCategory) throwAppError("NOT_FOUND", "Global category not found");
+
+    // Check if already imported
+    const existing = await ctx.db
+        .query("sellerCategories")
+        .withIndex("by_provider", (q) => q.eq("providerId", providerId))
+        .filter((q) => q.eq(q.field("globalCategoryId"), args.globalCategoryId))
+        .filter((q) => q.eq(q.field("isDeleted"), false))
+        .first();
+
+    if (existing) return { success: false, message: "Category already imported", categoryId: existing._id };
+
+    const now = Date.now();
+    const categoryId = await ctx.db.insert("sellerCategories", {
+      providerId,
+      name: globalCategory.name,
+      nameEn: globalCategory.nameEn,
+      description: globalCategory.description,
+      image: globalCategory.image,
+      icon: globalCategory.icon,
+      style: globalCategory.style,
+      products: 0,
+      globalCategoryId: args.globalCategoryId,
+      isSystem: true,
+      isDeleted: false,
+      createdAt: now,
+      updatedAt: now,
+    });
+
+    return { success: true, categoryId };
+  },
+});
+
 export const updateSellerCategory = mutation({
   args: {
     categoryId: v.id("sellerCategories"),
@@ -89,7 +140,7 @@ export const updateSellerCategory = mutation({
   },
   handler: async (ctx, args) => {
     const user = await authComponent.getAuthUser(ctx);
-    const providerId = user?._id;
+    const providerId = user?.userId;
     if (!providerId) throwAppError("AUTH_REQUIRED", "Unauthenticated");
 
     const category = await ctx.db.get(args.categoryId);
@@ -128,7 +179,7 @@ export const deleteSellerCategory = mutation({
   },
   handler: async (ctx, args) => {
     const user = await authComponent.getAuthUser(ctx);
-    const providerId = user?._id;
+    const providerId = user?.userId;
     if (!providerId) throwAppError("AUTH_REQUIRED", "Unauthenticated");
 
     const category = await ctx.db.get(args.categoryId);

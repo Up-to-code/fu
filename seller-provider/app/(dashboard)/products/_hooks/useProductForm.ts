@@ -2,6 +2,7 @@ import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useProductActions } from "./useProducts";
 import { type Product } from "./useProductStore";
+import { type Variant } from "../_components/VariantsList";
 import { productSchema } from "@/lib/validations";
 import { z } from "zod";
 
@@ -18,6 +19,8 @@ type ProductFormData = {
     status: "active" | "draft";
     image: string;
     images: string[];
+    video?: string;
+    videos?: string[];
 };
 
 const defaultFormData: ProductFormData = {
@@ -33,6 +36,8 @@ const defaultFormData: ProductFormData = {
     status: "active",
     image: "",
     images: [],
+    video: "",
+    videos: [],
 };
 
 export function useProductForm(productId?: string, initialData?: Partial<Product>) {
@@ -53,6 +58,8 @@ export function useProductForm(productId?: string, initialData?: Partial<Product
                 status: (initialData.status === "active" || initialData.status === "draft" ? initialData.status : "active") as "active" | "draft",
                 image: initialData.image || initialData.images?.[0] || "",
                 images: initialData.images || [],
+                video: initialData.video || initialData.videos?.[0] || "",
+                videos: initialData.videos || [],
             };
         }
         return defaultFormData;
@@ -85,6 +92,8 @@ export function useProductForm(productId?: string, initialData?: Partial<Product
                 stock: parseInt(formData.stock) || 0,
                 sku: formData.sku,
                 images: formData.image ? [formData.image, ...formData.images.filter(img => img !== formData.image)] : formData.images,
+                video: formData.video || undefined,
+                videos: formData.video ? [formData.video] : [],
             };
             
             productSchema.parse(validationData);
@@ -104,7 +113,7 @@ export function useProductForm(productId?: string, initialData?: Partial<Product
         }
     }, [formData]);
     
-    const handleSubmit = useCallback(async (e?: React.FormEvent) => {
+    const handleSubmit = useCallback(async (e?: React.FormEvent, variants: Variant[] = []) => {
         if (e) {
             e.preventDefault();
         }
@@ -118,6 +127,18 @@ export function useProductForm(productId?: string, initialData?: Partial<Product
         try {
             const images = formData.images.length > 0 ? formData.images : (formData.image ? [formData.image] : []);
             const mainImage = formData.image || images[0] || "";
+            const videos = formData.videos && formData.videos.length > 0 ? formData.videos : (formData.video ? [formData.video] : []);
+            const mainVideo = formData.video || videos[0] || undefined;
+
+            const mappedVariants = variants.map(v => ({
+                combination: v.combination,
+                price: parseFloat(v.price) || 0,
+                stock: parseInt(v.stock) || 0,
+                sku: v.sku || undefined,
+                image: v.media.find(m => m.type === "image")?.url || undefined,
+                images: v.media.filter(m => m.type === "image").map(m => m.url),
+                isActive: true
+            }));
 
             if (productId) {
                 await updateSellerProduct({
@@ -134,6 +155,9 @@ export function useProductForm(productId?: string, initialData?: Partial<Product
                     status: formData.status,
                     image: mainImage,
                     images,
+                    video: mainVideo,
+                    videos,
+                    variants: mappedVariants,
                 });
                 router.push(`/products/${productId}`);
             } else {
@@ -150,8 +174,11 @@ export function useProductForm(productId?: string, initialData?: Partial<Product
                     status: formData.status,
                     image: mainImage,
                     images,
+                    video: mainVideo,
+                    videos,
+                    variants: mappedVariants,
                 });
-                router.push(`/products/${(res as any).productId}`);
+                router.push(`/products/${(res as any).productId}/edit?tab=customization`);
             }
         } catch (error) {
             console.error("Error saving product:", error);

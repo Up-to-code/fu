@@ -3,18 +3,10 @@
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Search, Package } from "lucide-react";
-import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { useCategories, useCategorySearch, useCategoryViewMode, useCategoryActions } from "./_hooks";
+import { useAuth } from "@/lib/auth/hooks";
 import { CategoryCard, CategoryListItem, CategoryFormDialog, ViewModeToggle } from "./_components";
+import { DeleteCategoryDialog } from "./_components/DeleteCategoryDialog";
 import { toast } from "sonner";
 
 export default function CategoriesPage() {
@@ -22,6 +14,7 @@ export default function CategoriesPage() {
     const { searchQuery, setSearchQuery } = useCategorySearch();
     const { viewMode, setViewMode } = useCategoryViewMode();
     const { createSellerCategory, deleteSellerCategory } = useCategoryActions();
+    const { user, isAuthenticated } = useAuth();
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
     const [categoryToDelete, setCategoryToDelete] = useState<string | null>(null);
 
@@ -30,9 +23,26 @@ export default function CategoriesPage() {
         setDeleteDialogOpen(true);
     };
 
-    const handleDeleteConfirm = async () => {
+    const handleDeleteConfirm = async (deleteProducts: boolean) => {
         if (categoryToDelete) {
-            await deleteSellerCategory({ categoryId: categoryToDelete as any });
+            try {
+                const res = await deleteSellerCategory({ 
+                    categoryId: categoryToDelete as any,
+                    deleteProducts
+                });
+                toast.success(
+                    deleteProducts 
+                        ? `تم حذف التصنيف و ${res.deletedProductCount} منتج` 
+                        : "تم حذف التصنيف بنجاح"
+                );
+            } catch (error: any) {
+                const code = (error?.data?.code || error?.code || "").toString();
+                if (code === "AUTH_REQUIRED") {
+                    toast.error("يرجى تسجيل الدخول", { description: "انتهت صلاحية الجلسة. قم بتحديث الصفحة وحاول مرة أخرى." });
+                } else {
+                    toast.error("حدث خطأ أثناء الحذف", { description: error.message });
+                }
+            }
             setDeleteDialogOpen(false);
             setCategoryToDelete(null);
         }
@@ -53,6 +63,9 @@ export default function CategoriesPage() {
             toast.error("فشل إضافة التصنيف", { description: e?.message });
         }
     };
+    
+    const categoryToDeleteName = categories.find(c => c.id === categoryToDelete)?.name || "";
+    const categoryToDeleteCount = categories.find(c => c.id === categoryToDelete)?.products || 0;
 
     return (
         <>
@@ -119,6 +132,7 @@ export default function CategoriesPage() {
                                         key={category.id}
                                         category={category}
                                         onDelete={handleDeleteClick}
+                                        disabled={!isAuthenticated || !user?.id}
                                     />
                                 ))}
                             </div>
@@ -128,25 +142,13 @@ export default function CategoriesPage() {
             </div>
 
             {/* Delete Confirmation Dialog */}
-            <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-                <AlertDialogContent>
-                    <AlertDialogHeader>
-                        <AlertDialogTitle>حذف التصنيف</AlertDialogTitle>
-                        <AlertDialogDescription>
-                            هل أنت متأكد من حذف هذا التصنيف؟ لا يمكن التراجع عن هذا الإجراء.
-                        </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                        <AlertDialogCancel>إلغاء</AlertDialogCancel>
-                        <AlertDialogAction
-                            onClick={handleDeleteConfirm}
-                            className="bg-red-600 hover:bg-red-700"
-                        >
-                            حذف
-                        </AlertDialogAction>
-                    </AlertDialogFooter>
-                </AlertDialogContent>
-            </AlertDialog>
+            <DeleteCategoryDialog 
+                open={deleteDialogOpen}
+                onOpenChange={setDeleteDialogOpen}
+                onConfirm={handleDeleteConfirm}
+                categoryName={categoryToDeleteName}
+                productCount={categoryToDeleteCount}
+            />
         </>
     );
 }

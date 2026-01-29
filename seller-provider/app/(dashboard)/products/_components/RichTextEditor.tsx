@@ -25,17 +25,17 @@ export function RichTextEditor({
             {label && <Label>{label}</Label>}
             <div className="border border-gray-200 rounded-xl overflow-hidden">
                 <div className="flex items-center gap-1 p-2 border-b border-gray-100 bg-gray-50/50">
-                    <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg">
+                    <Button type="button" variant="ghost" size="icon" className="h-8 w-8 rounded-lg">
                         <Bold className="h-4 w-4" />
                     </Button>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg">
+                    <Button type="button" variant="ghost" size="icon" className="h-8 w-8 rounded-lg">
                         <Italic className="h-4 w-4" />
                     </Button>
                     <div className="w-px h-5 bg-gray-200 mx-1" />
-                    <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg">
+                    <Button type="button" variant="ghost" size="icon" className="h-8 w-8 rounded-lg">
                         <List className="h-4 w-4" />
                     </Button>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg">
+                    <Button type="button" variant="ghost" size="icon" className="h-8 w-8 rounded-lg">
                         <Link2 className="h-4 w-4" />
                     </Button>
                 </div>

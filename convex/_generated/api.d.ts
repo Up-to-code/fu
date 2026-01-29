@@ -15,17 +15,23 @@ import type * as bookings from "../bookings.js";
 import type * as crons from "../crons.js";
 import type * as dashboard from "../dashboard.js";
 import type * as errors from "../errors.js";
+import type * as globalCategories from "../globalCategories.js";
 import type * as http from "../http.js";
+import type * as mediaManagement from "../mediaManagement.js";
 import type * as myFunctions from "../myFunctions.js";
 import type * as orders from "../orders.js";
 import type * as organizationMembers from "../organizationMembers.js";
 import type * as organizations from "../organizations.js";
 import type * as providers from "../providers.js";
+import type * as security from "../security.js";
 import type * as sellerCategories from "../sellerCategories.js";
+import type * as sellerCustomization from "../sellerCustomization.js";
 import type * as sellerOrders from "../sellerOrders.js";
 import type * as sellerProducts from "../sellerProducts.js";
 import type * as services from "../services.js";
 import type * as users from "../users.js";
+import type * as utils from "../utils.js";
+import type * as variants from "../variants.js";
 
 import type {
   ApiFromModules,
@@ -41,17 +47,23 @@ declare const fullApi: ApiFromModules<{
   crons: typeof crons;
   dashboard: typeof dashboard;
   errors: typeof errors;
+  globalCategories: typeof globalCategories;
   http: typeof http;
+  mediaManagement: typeof mediaManagement;
   myFunctions: typeof myFunctions;
   orders: typeof orders;
   organizationMembers: typeof organizationMembers;
   organizations: typeof organizations;
   providers: typeof providers;
+  security: typeof security;
   sellerCategories: typeof sellerCategories;
+  sellerCustomization: typeof sellerCustomization;
   sellerOrders: typeof sellerOrders;
   sellerProducts: typeof sellerProducts;
   services: typeof services;
   users: typeof users;
+  utils: typeof utils;
+  variants: typeof variants;
 }>;
 
 /**

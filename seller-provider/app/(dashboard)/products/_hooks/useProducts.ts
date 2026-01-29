@@ -41,6 +41,8 @@ export function useProducts() {
             sku: p.sku,
             image: p.image,
             images: p.images,
+            video: p.video,
+            videos: p.videos,
             sales: p.sales,
             views: p.views,
         }));
@@ -51,12 +53,56 @@ export function useProducts() {
     return filteredProducts;
 }
 
+import { Id } from "@/convex/_generated/dataModel";
+
 /**
  * Hook to get a single product by ID
  */
 export function useProduct(id: string) {
     const getProductById = useProductStore((state) => state.getProductById);
-    return useMemo(() => getProductById(id), [getProductById, id]);
+    const storeProduct = useMemo(() => getProductById(id), [getProductById, id]);
+    
+    // Fallback: fetch directly from Convex if not in store
+    const dbProduct = useQuery(api.sellerProducts.getSellerProduct, { 
+        productId: id as Id<"sellerProducts"> 
+    });
+
+    const finalProduct = useMemo(() => {
+        if (storeProduct) return storeProduct;
+        if (!dbProduct) return undefined;
+
+        // Map Convex object to Product type
+        return {
+            id: dbProduct._id,
+            name: dbProduct.name,
+            nameEn: dbProduct.nameEn,
+            description: dbProduct.description,
+            price: dbProduct.price,
+            comparePrice: dbProduct.comparePrice,
+            stock: dbProduct.stock,
+            status: dbProduct.status,
+            categoryId: dbProduct.categoryId,
+            style: dbProduct.style,
+            sku: dbProduct.sku,
+            image: dbProduct.image,
+            images: dbProduct.images,
+            video: dbProduct.video,
+            videos: dbProduct.videos,
+            sales: dbProduct.sales,
+            views: dbProduct.views,
+            variants: (dbProduct as any).variants?.map((v: any) => ({
+                id: v._id,
+                combination: v.combination,
+                price: v.price.toString(),
+                stock: v.stock.toString(),
+                sku: v.sku,
+                media: v.images?.map((url: string) => ({ id: url, url, type: "image" })) || 
+                       (v.image ? [{ id: v.image, url: v.image, type: "image" }] : [])
+            })) || [],
+        };
+    }, [storeProduct, dbProduct]);
+
+    return finalProduct;
 }
 
 /**
